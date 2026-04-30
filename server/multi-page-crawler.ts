@@ -107,14 +107,26 @@ const PRIORITY_PATTERNS: { pattern: RegExp; pageType: string; priority: number }
   { pattern: /\/(blog|news|notice|공지|블로그|뉴스|소식)/i, pageType: "블로그", priority: 3 },
 ];
 
-const MAX_SUB_PAGES = 4;
+const MAX_SUB_PAGES = 8;
 const CRAWL_TIMEOUT = 4000;
+
+// ── #1 필수 페이지 직접 탐색: 병원 사이트에 반드시 존재해야 할 URL 패턴 ──
+const MUST_HAVE_PATHS = [
+  "/doctor", "/team", "/about", "/contact", "/price",
+  "/staff", "/physicians", "/location", "/directions",
+  "/의료진", "/소개", "/오시는길", "/진료비", "/비용",
+];
+
+// ── #8 User-Agent 표준화: Googlebot Mobile User-Agent 고정 ──
+const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+const STANDARD_ACCEPT_LANGUAGE_KR = "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7";
+const STANDARD_ACCEPT_LANGUAGE_TH = "th-TH,th;q=0.9,en-US;q=0.8,en;q=0.7";
 
 // ── 유틸 ──
 function getAcceptLanguage(country: string): string {
   switch (country) {
-    case "th": return "th-TH,th;q=0.9,en-US;q=0.8,en;q=0.7";
-    default: return "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7";
+    case "th": return STANDARD_ACCEPT_LANGUAGE_TH;
+    default: return STANDARD_ACCEPT_LANGUAGE_KR;
   }
 }
 
@@ -125,7 +137,7 @@ async function fetchPage(url: string, timeout = CRAWL_TIMEOUT, country = "kr"): 
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+        "User-Agent": STANDARD_USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": getAcceptLanguage(country),
         "Accept-Encoding": "gzip, deflate",
@@ -490,8 +502,15 @@ export async function crawlSubPages(
   // 2. sitemap.xml에서 URL 추출
   const sitemapUrls = await parseSitemap(baseUrl, country);
 
-  // 3. 전체 URL 합치기 (중복 제거)
-  const allUrlSet = new Set([...internalLinks, ...sitemapUrls]);
+  // 2.5. (#1) 필수 페이지 직접 탐색 — 링크/sitemap에 없어도 직접 시도
+  const mustHaveUrls: string[] = [];
+  for (const path of MUST_HAVE_PATHS) {
+    const candidateUrl = `${baseUrl}${path}`;
+    mustHaveUrls.push(candidateUrl);
+  }
+
+  // 3. 전체 URL 합치기 (중복 제거) — 필수 페이지 포함
+  const allUrlSet = new Set([...internalLinks, ...sitemapUrls, ...mustHaveUrls]);
   const allUrls = Array.from(allUrlSet);
 
   // 4. 중요 페이지 자동 선별

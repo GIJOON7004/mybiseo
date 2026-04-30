@@ -18,6 +18,8 @@ import { generateThaiLocalSearchItems, generateThaiSocialItems, generateThaiMedi
 import { resolveSpecialty, applySpecialtyWeights, type SpecialtyType } from "./specialty-weights";
 import { crawlSubPages, type AggregatedData } from "./multi-page-crawler";
 import { fetchPageSpeedMetrics, getCWVRating, type PageSpeedMetrics } from "./pagespeed-client";
+import { displayScore } from "./utils/score-rounding";
+import { enrichWithStandardIds } from "./utils/item-id-registry";
 
 // ── 타입 정의 ──
 export type SeoCheckStatus = "pass" | "fail" | "warning";
@@ -1371,9 +1373,11 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     maxScoreTotal = categories.reduce((s, c) => s + c.maxScore, 0);
   }
 
-  const percent = maxScoreTotal > 0 ? Math.round((totalScore / maxScoreTotal) * 100) : 0;
+  // #19 소수점 반올림 규칙 통일: 최종 표시에만 반올림 적용
+  const percent = maxScoreTotal > 0 ? displayScore((totalScore / maxScoreTotal) * 100) : 0;
 
-  const allItems = items;
+  // #14 검사 항목 ID 체계 표준화: 카테고리코드-순번 형식 부여
+  const allItems = enrichWithStandardIds(items);
   // Extract site name: prefer og:site_name, fallback to title tag
   // 에러 title인 경우 og:site_name → h1 → 도메인명 순으로 fallback
   const ogSiteNameVal = $('meta[property="og:site_name"]').attr("content")?.trim() || "";

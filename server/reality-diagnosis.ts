@@ -17,6 +17,8 @@
 import { invokeLLM } from "./_core/llm";
 import { callDataApi } from "./_core/dataApi";
 import { resolveSpecialty, type SpecialtyType } from "./specialty-weights";
+import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-summary-template";
+import { displayPercent } from "./utils/score-rounding";
 
 // ── 타입 정의 ──
 export interface KeywordExposure {
@@ -943,9 +945,9 @@ export async function generateRealityDiagnosis(
 [SimilarWeb 실측 트래픽 데이터]
 - 월간 방문수: ${trafficData.monthlyVisits ? trafficData.monthlyVisits.toLocaleString() + "회" : "데이터 없음 (매우 적은 트래픽)"}
 - 글로벌 랭킹: ${trafficData.globalRank ? "#" + trafficData.globalRank.toLocaleString() : "순위권 밖"}
-- 이탈률: ${trafficData.bounceRate ? (trafficData.bounceRate * 100).toFixed(1) + "%" : "데이터 없음"}
-- 오가닉 유입 비율: ${trafficData.organicSearchShare ? (trafficData.organicSearchShare * 100).toFixed(1) + "%" : "데이터 없음"}
-- 직접 방문 비율: ${trafficData.directShare ? (trafficData.directShare * 100).toFixed(1) + "%" : "데이터 없음"}`
+- 이탈률: ${trafficData.bounceRate ? displayPercent(trafficData.bounceRate * 100) + "%" : "데이터 없음"}
+- 오가닉 유입 비율: ${trafficData.organicSearchShare ? displayPercent(trafficData.organicSearchShare * 100) + "%" : "데이터 없음"}
+- 직접 방문 비율: ${trafficData.directShare ? displayPercent(trafficData.directShare * 100) + "%" : "데이터 없음"}`
     : `
 [SimilarWeb 트래픽 데이터: 조회 불가]
 해당 도메인의 트래픽이 SimilarWeb 최소 추적 기준(월 5,000회) 미만입니다.`;
@@ -994,17 +996,32 @@ export async function generateRealityDiagnosis(
       return hl;
     })(),
     executiveSummary: (() => {
-      let summary = core.executiveSummary || FALLBACK_CORE.executiveSummary;
-      // LLM이 executiveSummary에 넣은 매출 수치를 코드 계산값으로 동기화
+      // #22 executiveSummary 템플릿화: LLM 실패 시 코드 기반 생성, 성공 시 수치 동기화
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
+      const m = core.metrics || FALLBACK_CORE.metrics;
+      const { formatted: revLoss } = mp.estimatedMonthly > 0
+        ? calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty)
+        : { formatted: "산출 불가" };
+      const summaryCtx: SummaryContext = {
+        hospitalName: siteName || domain,
+        specialty: specialty || "일반",
+        seoScore: seoScore,
+        seoGrade: seoGrade,
+        missedPatientsMonthly: mp.estimatedMonthly,
+        revenueLossFormatted: revLoss,
+        naverExposureRate: m.naverExposureRate,
+        googleExposureRate: m.googleExposureRate,
+        aiReadiness: m.aiReadiness,
+        keyIssuesCount: (core.keyFindings || []).length,
+        topIssue: (core.keyFindings || [])[0],
+      };
+      let summary = ensureExecutiveSummary(core.executiveSummary, summaryCtx);
+      // 수치 동기화
       if (mp.estimatedMonthly > 0) {
-        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
-        // "월 약 X,XXX만원", "월 X,XXX만원", "X,XXX만원", "X억Y만원" 등의 패턴을 코드 계산값으로 교체
-        summary = summary.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, formatted);
-        summary = summary.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
-        summary = summary.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
+        summary = summary.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, revLoss);
+        summary = summary.replace(/약\s*[\d,]+만원(\s*상당)?/g, revLoss);
+        summary = summary.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, revLoss);
       }
-      // "잠재 환자" → "웹사이트 유입 누락 환자" 라벨 동기화
       summary = summary.replace(/잠재\s*환자/g, '웹사이트 유입 누락 환자');
       summary = summary.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
       summary = summary.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
