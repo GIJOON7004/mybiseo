@@ -40,77 +40,47 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  /* Clean minimal palette */
+  --color-brand: oklch(0.72 0.14 200);
+  --font-sans: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+  --font-display: 'Sora', 'Noto Sans KR', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 }
 
 :root {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-600);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --radius: 0.65rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
+  --radius: 0.75rem;
+  --background: oklch(0.1 0.015 260);
+  --foreground: oklch(0.95 0.005 260);
+  --card: oklch(0.14 0.015 260);
+  --card-foreground: oklch(0.95 0.005 260);
+  --popover: oklch(0.14 0.015 260);
+  --popover-foreground: oklch(0.95 0.005 260);
+  --primary: oklch(0.72 0.14 200);
+  --primary-foreground: oklch(0.1 0.015 260);
+  --secondary: oklch(0.16 0.015 260);
+  --secondary-foreground: oklch(0.8 0.005 260);
+  --muted: oklch(0.18 0.015 260);
+  --muted-foreground: oklch(0.55 0.01 260);
+  --accent: oklch(0.72 0.14 200);
+  --accent-foreground: oklch(0.1 0.015 260);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
-}
-
-.dark {
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-blue-50);
-  --sidebar-primary: var(--color-blue-500);
-  --sidebar-primary-foreground: var(--color-blue-50);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  --chart-1: var(--color-blue-300);
-  --chart-2: var(--color-blue-500);
-  --chart-3: var(--color-blue-600);
-  --chart-4: var(--color-blue-700);
-  --chart-5: var(--color-blue-800);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
+  --border: oklch(0.22 0.015 260);
+  --input: oklch(0.18 0.015 260);
+  --ring: oklch(0.72 0.14 200);
+  --chart-1: oklch(0.72 0.14 200);
+  --chart-2: oklch(0.65 0.12 170);
+  --chart-3: oklch(0.6 0.1 200);
+  --chart-4: oklch(0.55 0.08 230);
+  --chart-5: oklch(0.5 0.06 260);
+  --sidebar: oklch(0.12 0.015 260);
+  --sidebar-foreground: oklch(0.95 0.005 260);
+  --sidebar-primary: oklch(0.72 0.14 200);
+  --sidebar-primary-foreground: oklch(0.1 0.015 260);
+  --sidebar-accent: oklch(0.18 0.015 260);
+  --sidebar-accent-foreground: oklch(0.95 0.005 260);
+  --sidebar-border: oklch(0.22 0.015 260);
+  --sidebar-ring: oklch(0.72 0.14 200);
 }
 
 @layer base {
@@ -118,7 +88,9 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Noto Sans KR', system-ui, -apple-system, sans-serif;
+    letter-spacing: -0.01em;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -134,25 +106,12 @@
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
-    padding-right: 1rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
   }
 
   .flex {
@@ -162,16 +121,241 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
-      padding-right: 1.5rem;
+      padding-left: 2rem;
+      padding-right: 2rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
-      padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      padding-left: 3rem;
+      padding-right: 3rem;
+      max-width: 1120px;
     }
+  }
+
+  .font-display {
+    font-family: 'Sora', 'Noto Sans KR', system-ui, sans-serif;
+  }
+}
+
+/* Marquee animations for review rows */
+/* Hide scrollbar for marquee rows */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 카카오톡 플로팅 버튼 말풍선 애니메이션 */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* ===== Performance-optimized CSS animations (framer-motion replacement) ===== */
+@keyframes nav-slideDown {
+  from { transform: translateY(-80px); }
+  to { transform: translateY(0); }
+}
+@keyframes mobile-menu-fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes chatFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes chatBtnIn {
+  from { transform: scale(0); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+@keyframes chatWindowIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Performance: CSS animation utilities (replaces framer-motion) */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideDown {
+  from { opacity: 0; max-height: 0; }
+  to { opacity: 1; max-height: 2000px; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out both;
+}
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out both;
+}
+
+
+/* ─── 모바일 반응형 개선 ─── */
+@media (max-width: 640px) {
+  /* 모바일에서 테이블 가로 스크롤 */
+  .admin-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* 모바일 터치 타겟 최소 44px */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* 모바일에서 카드 간격 줄이기 */
+  .space-y-6 {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+  }
+}
+
+/* 스크롤바 스타일 (모바일 가로 스크롤용) */
+.admin-table-wrap::-webkit-scrollbar {
+  height: 4px;
+}
+.admin-table-wrap::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-table-wrap::-webkit-scrollbar-thumb {
+  background: oklch(0.5 0 0 / 0.2);
+  border-radius: 2px;
+}
+
+
+/* ─── 모바일 성능 최적화 ─── */
+
+/* GPU 가속: 스피너에만 will-change 적용 (최소화) */
+.animate-spin {
+  will-change: transform;
+}
+
+/* 스크롤 성능 */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+/* smooth scroll은 데스크톱에서만 — 모바일에서는 성능 저하 */
+@media (min-width: 768px) {
+  html { scroll-behavior: smooth; }
+}
+
+/* 모바일 터치 반응 속도 개선 */
+a, button, [role="button"], input, select, textarea, label {
+  touch-action: manipulation;
+}
+
+/* 모바일 버튼/링크 최소 터치 타깃 */
+@media (max-width: 640px) {
+  button, a, [role="button"], .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* iOS Safari input 포커스 시 자동 확대(zoom) 방지 */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  input::placeholder, textarea::placeholder {
+    font-size: 16px !important;
+  }
+
+  /* 모바일 폰트 크기 최적화 — 가독성 향상 */
+  body {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* 모바일에서 불필요한 hover 효과 제거 — 성능 향상 */
+  @media (hover: none) {
+    .hover\:scale-105:hover {
+      transform: none !important;
+    }
+  }
+
+  /* 모바일 카드 패딩 최적화 */
+  .card {
+    padding: 1rem;
+  }
+
+  /* 모바일에서 큰 제목 크기 제한 */
+  h1 { font-size: clamp(1.5rem, 6vw, 2.5rem); }
+  h2 { font-size: clamp(1.25rem, 5vw, 2rem); }
+  h3 { font-size: clamp(1.1rem, 4vw, 1.5rem); }
+}
+
+/* 이미지 최적화: 기본 lazy loading + 부드러운 로딩 */
+img {
+  content-visibility: auto;
+}
+
+/* 큰 섹션 렌더링 최적화 — 뷰포트 밖 섹션 렌더링 지연 */
+section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+
+/* 모바일 슬라이더 터치 영역 확대 */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: oklch(0.75 0.18 195);
+  cursor: pointer;
+  border: 3px solid oklch(0.95 0 0);
+  box-shadow: 0 2px 6px oklch(0 0 0 / 0.2);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: oklch(0.75 0.18 195);
+  cursor: pointer;
+  border: 3px solid oklch(0.95 0 0);
+  box-shadow: 0 2px 6px oklch(0 0 0 / 0.2);
+}
+
+/* 모바일에서 텍스트 선택 방지 (버튼/카드) */
+@media (max-width: 640px) {
+  button, [role="button"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* 모바일 슬라이더 thumb 더 크게 */
+  input[type="range"]::-webkit-slider-thumb {
+    width: 32px;
+    height: 32px;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
   }
 }

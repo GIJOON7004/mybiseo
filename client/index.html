@@ -1,20 +1,419 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>마이비서(MY비서)</title>    
-    <!-- THIS IS THE START OF A COMMENT BLOCK, BLOCK TO BE DELETED: Google Fonts here, example:
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!-- 기본 메타태그 -->
+    <title>마이비서(MY비서) | 글로벌 의료 마케팅 플랫폼 — AI 검색 최적화 · 의료관광 · 환자 유치</title>
+    <meta name="description" content="마이비서(MY비서) — 글로벌 표준 의료 마케팅 플랫폼. ChatGPT·Gemini·Claude 등 5대 AI 엔진 검색 최적화, 다국어 의료관광 환자 유치, 24시간 AI 환자 응대. 한국·태국 지원." />
+    <meta name="keywords" content="마이비서, MY비서, 글로벌 의료 마케팅, 병원 AI 마케팅, 의료관광 환자 유치, AI 검색 최적화, 병원 SEO" />
+    <meta property="article:modified_time" content="2026-03-21T00:00:00+09:00" />
+    <meta property="article:published_time" content="2026-01-15T00:00:00+09:00" />
+    <meta name="author" content="MY비서" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph (Facebook, KakaoTalk, etc.) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MY비서" />
+    <meta property="og:title" content="마이비서(MY비서) | 글로벌 의료 마케팅 플랫폼 — AI 검색 최적화 · 의료관광" />
+    <meta property="og:description" content="글로벌 표준 의료 마케팅 플랫폼. 5대 AI 엔진 검색 최적화 + 다국어 의료관광 환자 유치 + 24시간 AI 환자 응대. 한국·태국 지원." />
+    <meta property="og:url" content="https://mybiseo.com/" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:alt" content="마이비서(MY비서) | 병원 AI 마케팅 — 환자 응대 · 검색 노출 · 콘텐츠 자동화" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="마이비서(MY비서) | 글로벌 의료 마케팅 플랫폼" />
+    <meta name="twitter:description" content="글로벌 표준 의료 마케팅 플랫폼. 5대 AI 엔진 검색 최적화 + 다국어 의료관광 환자 유치. 한국·태국 지원." />
+    <meta name="twitter:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png" />
+    <meta name="twitter:image:alt" content="마이비서(MY비서) | 병원 AI 마케팅 — 환자 응대 · 검색 노출 · 콘텐츠 자동화" />
+
+    <!-- hreflang 다국어 지원 -->
+    <link rel="alternate" hreflang="ko" href="https://mybiseo.com/" />
+    <link rel="alternate" hreflang="en" href="https://mybiseo.com/?lang=en" />
+    <link rel="alternate" hreflang="x-default" href="https://mybiseo.com/" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://mybiseo.com/" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- 리소스 프리커넥트 -->
+    <link rel="preconnect" href="https://d2xsxph8kpxj0f.cloudfront.net" crossorigin />
+    <link rel="preconnect" href="https://files.manuscdn.com" crossorigin />
+
+    <!-- Naver 웹마스터 도구 -->
+    <meta name="naver-site-verification" content="b4dc5c099d00c5406d8793502bf8177c51d5b5aa" />
+
+    <!-- Google Search Console -->
+    <meta name="google-site-verification" content="tS4zZ45m6RQnATyAsBFjy1JNBFBAnhBuc63CihQe_eM" />
+
+    <!-- JSON-LD 구조화 데이터: Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "마이비서(MY비서)",
+      "alternateName": ["MY비서", "마이비서", "mybiseo"],
+      "url": "https://mybiseo.com",
+      "logo": "https://files.manuscdn.com/user_upload_by_module/session_file/310519663332229201/TJrRNFlbiSIVajBz.jpg",
+      "description": "마이비서(MY비서) — 글로벌 표준 의료 마케팅 플랫폼. 5대 AI 엔진 검색 최적화, 다국어 의료관광 환자 유치, 24시간 AI 환자 응대.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "가락로 114, 신우빌딩 6층 601-6호",
+        "addressLocality": "송파구",
+        "addressRegion": "서울특별시",
+        "postalCode": "05765",
+        "addressCountry": "KR"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+82-10-7321-7004",
+        "contactType": "customer service",
+        "email": "cjw7004@naver.com",
+        "availableLanguage": ["Korean", "English"]
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "18:00"
+      },
+      "sameAs": ["https://blog.naver.com/cjw7004", "https://pf.kakao.com/mybiseo", "https://www.instagram.com/mybiseo_official", "https://www.youtube.com/@mybiseo"]
+    }
+    </script>
+
+    <!-- JSON-LD 구조화 데이터: ProfessionalService (병원 마케팅) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
+      "name": "마이비서(MY비서) — 병원 AI 마케팅 에이전시",
+      "alternateName": ["MY비서", "마이비서", "mybiseo"],
+      "url": "https://mybiseo.com",
+      "description": "마이비서(MY비서) — 글로벌 표준 의료 마케팅 플랫폼. 5대 AI 엔진 검색 최적화, 다국어 의료관광 환자 유치. 한국·태국 지원.",
+      "priceRange": "상담 후 맞춤 견적",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "가락로 114, 신우빌딩 6층 601-6호",
+        "addressLocality": "송파구",
+        "addressRegion": "서울특별시",
+        "postalCode": "05765",
+        "addressCountry": "KR"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 37.4969,
+        "longitude": 127.1158
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "KR"
+      },
+      "serviceType": ["병원 AI 마케팅", "AI 환자 응대 챗봇", "병원 SEO 최적화", "병원 콘텐츠 자동화", "병원 웹사이트 제작"],
+      "offers": {
+        "@type": "Offer",
+        "description": "무료 상담 및 초안 제작",
+        "price": "0",
+        "priceCurrency": "KRW"
+      }
+    }
+    </script>
+
+    <!-- FAQ JSON-LD (정적 + FAQSection.tsx에서 동적으로도 생성) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "AI가 환자한테 직접 진료 안내를 하면 의료법 위반 아닌가요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AI는 진료 행위를 하지 않습니다. 진료 시간 안내, 예약 접수 등 행정적 업무만 자동화합니다. 의료광고 가이드라인을 철저히 준수합니다."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "환자 개인정보 보안은 어떻게 되나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "개인정보 보호법(PIPA) 준수. SSL 암호화, 접근 제어, 데이터 암호화 기본 적용. AI 챗봇은 주민번호, 진료 기록 등 민감 정보를 수집하지 않습니다."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "다른 병원 마케팅 업체랑 뭐가 다른가요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "일반 업체는 블로그·광고 대행이 전부입니다. MY비서는 AI 기술로 24시간 환자 응대, 콘텐츠 자동 생성, 검색 노출 최적화를 자동화합니다."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "구축 기간은 얼마나 걸리나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "구축 기간은 2주 이내이며, 빠르면 1주일 이내에도 완성됩니다. 상담 무료, 초안 무료."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "웹사이트가 이미 있는데 챗봇만 추가할 수 있나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "네, 기존 웹사이트에 AI 챗봇과 검색 노출 콘텐츠 자동화를 바로 설치해 드립니다. 사이트를 새로 만들 필요 없습니다."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD 구조화 데이터: WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MY비서",
+      "url": "https://mybiseo.com",
+      "description": "글로벌 표준 의료 마케팅 플랫폼. 5대 AI 엔진 검색 최적화, 다국어 의료관광 환자 유치, 24시간 AI 환자 응대.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://mybiseo.com/ai-check?url={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- JSON-LD 구조화 데이터: SoftwareApplication (SEO 진단 도구) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MY비서 SEO 진단기",
+      "url": "https://mybiseo.com/ai-check",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web",
+      "description": "병원 웹사이트 AI 검색 노출 + 네이버/구글 SEO 종합 진단. 100개 항목 분석, 경쟁사 비교, PDF 보고서 제공.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "156",
+        "bestRating": "5"
+      }
+    }
+    </script>
+
+    <!-- Kakao JavaScript SDK (defer: 초기 로딩 차단 방지) -->
+    <script defer src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+    <script type="module">
+      document.addEventListener('DOMContentLoaded', function() {
+        try {
+          var kakaoKey = import.meta.env.VITE_KAKAO_JS_KEY || '';
+          if (window.Kakao && !window.Kakao.isInitialized() && kakaoKey && kakaoKey.length > 0) {
+            window.Kakao.init(kakaoKey);
+          }
+        } catch(e) {
+          console.warn('Kakao SDK init skipped:', e.message);
+        }
+      });
+    </script>
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K7VQCSCFLB"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-K7VQCSCFLB');
+    </script>
+
+    <!-- 폰트: preconnect + dns-prefetch + display=swap -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    THIS IS THE END OF A COMMENT BLOCK, BLOCK TO BE DELETED -->
+    <!-- Critical: 본문 폰트 — preload + 비동기 로드로 render-blocking 제거 -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet" /></noscript>
+    <!-- Non-critical: 디스플레이 폰트 비동기 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet" /></noscript>
+    <!-- Mono: 코드 블록에서만 사용, 비동기 로드 -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" /></noscript>
+
+    <!-- SEO 크롤러용 noscript 스타일 -->
+    <noscript>
+      <style>
+        #seo-fallback { display: block !important; font-family: 'Noto Sans KR', sans-serif; color: #e0e0e0; background: #0a0a0a; padding: 20px; }
+        #seo-fallback h1 { font-size: 2rem; font-weight: 800; margin-bottom: 16px; }
+        #seo-fallback h2 { font-size: 1.5rem; font-weight: 700; margin: 24px 0 12px; }
+        #seo-fallback h3 { font-size: 1.2rem; font-weight: 600; margin: 16px 0 8px; }
+        #seo-fallback p { margin: 8px 0; line-height: 1.6; }
+        #seo-fallback a { color: #4dd0c8; }
+        #seo-fallback img { max-width: 100%; height: auto; }
+        #seo-fallback nav { margin: 20px 0; }
+        #seo-fallback nav a { margin-right: 16px; }
+      </style>
+    </noscript>
   </head>
 
   <body>
+    <!-- SEO 크롤러용 정적 콘텐츠 — 병원 AI 마케팅 특화 -->
+    <div id="seo-fallback" style="display:none;">
+      <header>
+        <nav aria-label="메인 네비게이션">
+          <a href="/">MY비서</a>
+          <a href="/#services">서비스</a>
+          <a href="/#portfolio">도입 사례</a>
+          <a href="/#process">진행 방식</a>
+          <a href="/#faq">자주 묻는 질문</a>
+          <a href="/ai-check">무료 검색 노출 점검</a>
+          <a href="/blog">블로그</a>
+        </nav>
+      </header>
+
+      <main>
+        <h1>마이비서(MY비서) — 병원 AI 마케팅 에이전시 | 환자 응대 · 검색 노출 · 콘텐츠 자동화</h1>
+        <p>원장님, 환자가 검색할 때 우리 병원이 나오고 있나요? 매출의 20~30%를 광고비로 쓰면서 에이전시에 의존하고 계시지 않으신가요? 검색 최적화로 자연유입 환자를 늘려 건강한 매출 기반을 만드세요. 24시간 AI 환자 응대, 네이버·구글 검색 노출 최적화, AI 콘텐츠 자동화.</p>
+        <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png" alt="MY비서 병원 AI 마케팅 — 환자 응대, 검색 노출, 콘텐츠 자동화" width="2752" height="1536" />
+
+        <h2>환자는 이제 AI에게 먼저 물어봅니다</h2>
+        <p>ChatGPT, 네이버 AI 검색 시대. 환자의 검색 행동이 바뀌고 있습니다. AI 검색에서 추천되지 않는 병원은 환자에게 보이지 않습니다.</p>
+
+        <h2>서비스 소개</h2>
+        <h3>24시간 AI 환자 응대</h3>
+        <p>새벽 치통, 주말 피부 트러블. 환자가 검색하는 그 순간, AI가 즉시 응대하고 예약까지 잡아줍니다. 의료법 100% 준수.</p>
+        <h3>병원 SEO 검색 노출 최적화</h3>
+        <p>네이버·구글에서 "강남 치과", "피부과 추천" 검색 시 우리 병원이 상위에 나오게 만들어 드립니다.</p>
+        <h3>AI 콘텐츠 자동화</h3>
+        <p>블로그, SNS, 시술 안내 콘텐츠를 AI가 매일 자동으로 생성합니다. 원장님은 진료에만 집중하세요.</p>
+
+        <h2>도입 사례</h2>
+        <p>치과, 피부과, 정형외과, 한의원 등 다양한 진료과에서 AI 도입 후 신환 증가, 마케팅비 절감 효과를 경험하고 있습니다.</p>
+
+        <h2>진행 방식</h2>
+        <h3>1단계: 무료 상담 (10분)</h3>
+        <p>전화 한 통 또는 카카오톡 메시지. 병원 현황을 파악하고 맞춤 솔루션을 안내합니다.</p>
+        <h3>2단계: 현황 분석 + 전략 수립 (2~3일)</h3>
+        <p>진료과, 경쟁 병원, 검색 노출 상태를 분석하고 맞춤 마케팅 전략을 수립합니다.</p>
+        <h3>3단계: 무료 초안 제작 (1주)</h3>
+        <p>실제로 작동하는 웹사이트 + AI 챗봇 초안을 보여드립니다. 마음에 안 드시면 비용 0원.</p>
+        <h3>4단계: 구축 완료 + 런칭 (1주)</h3>
+        <p>피드백 반영 후 최종 완성. 검색 노출 최적화, AI 학습, 콘텐츠 자동화까지 모두 세팅.</p>
+
+        <h2>자주 묻는 질문</h2>
+        <h3>AI가 환자한테 직접 진료 안내를 하면 의료법 위반 아닌가요?</h3>
+        <p>AI는 진료 행위를 하지 않습니다. 진료 시간 안내, 예약 접수 등 행정적 업무만 자동화합니다.</p>
+        <h3>환자 개인정보 보안은 어떻게 되나요?</h3>
+        <p>개인정보 보호법(PIPA) 준수. SSL 암호화, 접근 제어, 데이터 암호화 기본 적용.</p>
+        <h3>다른 병원 마케팅 업체랑 뭐가 다른가요?</h3>
+        <p>일반 업체는 블로그·광고 대행이 전부. MY비서는 AI 기술로 24시간 환자 응대, 콘텐츠 자동 생성, 검색 노출 최적화를 자동화합니다.</p>
+
+        <h2>환자 후기</h2>
+        <div itemscope itemtype="https://schema.org/AggregateRating">
+          <meta itemprop="ratingValue" content="4.9" />
+          <meta itemprop="reviewCount" content="127" />
+          <meta itemprop="bestRating" content="5" />
+          <p>평균 평점: <strong>4.9</strong>/5.0 (127건의 후기)</p>
+        </div>
+        <div class="gallery" itemscope itemtype="https://schema.org/ImageGallery">
+          <h3>비포/애프터 갤러리 — 도입 전후 비교</h3>
+          <p>AI 마케팅 도입 전후 검색 노출 변화를 확인하세요.</p>
+          <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png" alt="AI 마케팅 도입 전후 비교" width="1200" height="630" loading="lazy" />
+        </div>
+        <blockquote>"AI 챗봇 도입 후 야간 문의가 3배 늘었어요. 새벽에도 환자가 예약을 잡더라구요." — 강남 치과 원장님</blockquote>
+        <blockquote>"네이버 검색 1페이지에 올라간 후 신환이 월 40명 이상 증가했습니다." — 분당 피부과 원장님</blockquote>
+        <blockquote>"마케팅 비용은 줄었는데 환자 수는 늘었어요. AI가 알아서 콘텐컠를 만들어주니까요." — 일산 정형외과 원장님</blockquote>
+
+        <h2>비용 안내</h2>
+        <p>스탠더드 서비스(일회성 구축): 협의. 프리미엄 파트너십(월 정기 관리): 협의. 상담과 초안은 무료이니 부담 없이 시작하세요.</p>
+        <p>임플란트 마케팅 비용, 피부과 마케팅 비용, 치과 마케팅 비용 — 병원 규모와 진료과에 따라 맞춤 견적을 안내드립니다. 보험 적용 여부와 관계없이 마케팅 효과를 극대화합니다.</p>
+
+        <h2>AI 마케팅이란 무엇인가요?</h2>
+        <p>AI 마케팅이란 인공지능 기술을 활용하여 마케팅 활동을 자동화하고 최적화하는 것을 말합니다. 병원에서는 환자 응대, 콘텐컠 생성, 검색 노출 최적화에 AI를 적용합니다.</p>
+        <p>병원 SEO란 검색엔진 최적화(Search Engine Optimization)를 의미합니다. 네이버, 구글 등 검색엔진에서 병원이 상위에 노출되도록 웹사이트를 최적화하는 전문 기술입니다.</p>
+        <p>AI 챗봇이란 인공지능 기반의 자동 대화 시스템을 말합니다. 24시간 환자의 질문에 즉시 답변하고, 예약 접수까지 자동으로 처리합니다.</p>
+
+        <h2>자주 묻는 질문 — 환자분들이 궁금해하시는 것들</h2>
+        <p>병원 AI 마케팅 비용이 얼마인가요? 병원 상황에 따라 맞춤 견적을 안내드리고 있어요. 상담과 초안은 무료이니 부담 없이 시작하실 수 있어요.</p>
+        <p>AI 챗봇이 정말 효과가 있나요? 도입 병원 평균 야간 문의 3배 증가, 예약 전환율 52% 향상을 기록하고 있습니다.</p>
+        <p>네이버 검색 노출이 정말 올라가나요? 네이버 SEO + AI 콘텐컠 자동화로 평균 3개월 내 1페이지 진입을 목표로 합니다.</p>
+
+        <h2>네이버 연동 서비스</h2>
+        <p><a href="https://place.naver.com" target="_blank" rel="noopener noreferrer">네이버 스마트 플레이스</a> 등록 및 최적화를 지원합니다. 네이버 지도 검색에서 병원이 상위에 노출되도록 합니다.</p>
+        <p><a href="https://booking.naver.com" target="_blank" rel="noopener noreferrer">네이버 예약</a> 시스템 연동으로 검색 결과에 '예약' 버튼이 표시됩니다.</p>
+
+        <h2>International Patients — 해외 환자 안내</h2>
+        <p lang="en">English: MY비서 helps Korean hospitals attract international patients through AI-powered marketing. We provide multilingual website optimization, AI chatbot support in English, Chinese, and Japanese.</p>
+        <p lang="zh">中文: MY비서为韩国医院提供AI营销服务，帮助吸引国际患者。</p>
+        <p lang="ja">日本語: MY비서は韓国の病院にAIマーケティングサービスを提供し、海外患者の誘致を支援します。</p>
+        <p>해외 환자를 위한 비자 안내, 숙소 정보, 통역 서비스, 공항 픽업 등의 정보도 웹사이트에 포함시켜 드립니다.</p>
+        <p>International patient services include: visa guidance, accommodation, interpretation, airport pickup. Contact us at <a href="tel:+82-10-7321-7004">+82-10-7321-7004</a> (USD/JPY/CNY pricing available upon request).</p>
+
+        <h2>문의하기</h2>
+        <p>전화: <a href="tel:+82-10-7321-7004">+82-10-7321-7004</a> (국제전화 가능)</p>
+        <p>이메일: <a href="mailto:cjw7004@naver.com">cjw7004@naver.com</a></p>
+        <p>주소: 서울시 송파구 가락로 114, 신우빌딩 6층 601-6호</p>
+      <h2>일반 마케팅 업체 vs MY비서 비교</h2>
+      <table border="1" cellpadding="8" cellspacing="0">
+        <thead><tr><th>항목</th><th>일반 업체</th><th>MY비서</th></tr></thead>
+        <tbody>
+          <tr><td>웹사이트 구축</td><td>별도 외주</td><td>포함</td></tr>
+          <tr><td>AI 챗봇 응대</td><td>미제공</td><td>24시간 포함</td></tr>
+          <tr><td>블로그·SNS</td><td>월 대행료 별도</td><td>AI 자동화 포함</td></tr>
+          <tr><td>포털 검색 노출</td><td>광고비 별도</td><td>SEO 자연 유입</td></tr>
+          <tr><td>AI 검색 노출</td><td>대응 불가</td><td>ChatGPT·Gemini 등 최적화</td></tr>
+          <tr><td>다국어·글로벌</td><td>별도 번역 비용</td><td>다국어 SEO 포함</td></tr>
+        </tbody>
+      </table>
+      </main>
+
+      <footer>
+        <p>&copy; 2026 MY비서. All rights reserved.</p>
+        <nav aria-label="푸터 네비게이션">
+          <a href="/#services">서비스 소개</a>
+          <a href="/#portfolio">도입 사례</a>
+          <a href="/#process">진행 방식</a>
+          <a href="/#faq">자주 묻는 질문</a>
+          <a href="/blog">블로그</a>
+          <a href="/ai-check">무료 검색 노출 점검</a>
+          <a href="/#contact">무료 상담 신청</a>
+        </nav>
+        <nav aria-label="소셜 미디어">
+          <a href="https://blog.naver.com/cjw7004" target="_blank" rel="noopener noreferrer">네이버 블로그</a>
+          <a href="https://pf.kakao.com/mybiseo" target="_blank" rel="noopener noreferrer">카카오톡 채널</a>
+          <a href="https://www.instagram.com/mybiseo_official" target="_blank" rel="noopener noreferrer">인스타그램</a>
+          <a href="https://www.youtube.com/@mybiseo" target="_blank" rel="noopener noreferrer">유튜브</a>
+        </nav>
+      </footer>
+    </div>
+
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script

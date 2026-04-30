@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE IF NOT EXISTS `ad_brand_profiles` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`user_id` varchar(100) NOT NULL,\n\t`hospital_url` varchar(500) NOT NULL,\n\t`hospital_name` varchar(200),\n\t`logo_url` text,\n\t`primary_color` varchar(20),\n\t`secondary_color` varchar(20),\n\t`accent_color` varchar(20),\n\t`font_style` varchar(100),\n\t`tone_of_voice` varchar(100),\n\t`target_audience` text,\n\t`brand_keywords` text,\n\t`specialties` text,\n\t`brand_summary` text,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\t`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `ad_brand_profiles_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute CREATE TABLE IF NOT EXISTS `ad_brand_profiles` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`user_id` varchar(100) NOT NULL,\n\t`hospital_url` varchar(500) NOT NULL,\n\t`hospital_name` varchar(200),\n\t`logo_url` text,\n\t`primary_color` varchar(20),\n\t`secondary_color` varchar(20),\n\t`accent_color` varchar(20),\n\t`font_style` varchar(100),\n\t`tone_of_voice` varchar(100),\n\t`target_audience` text,\n\t`brand_keywords` text,\n\t`specialties` text,\n\t`brand_summary` text,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\t`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `ad_brand_profiles_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 2371
+}

@@ -7,4 +7,15 @@ export const ENV = {
   isProduction: process.env.NODE_ENV === "production",
   forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  // SMTP (Naver) for email notifications
+  naverSmtpUser: process.env.NOTIFIER_SMTP_USER ?? "",
+  naverSmtpPass: process.env.NOTIFIER_SMTP_PASS ?? "",
+  // Solapi for SMS notifications
+  solapiApiKey: process.env.SOLAPI_API_KEY ?? "",
+  solapiApiSecret: process.env.SOLAPI_API_SECRET ?? "",
+  // Notification targets
+  notifyEmail: process.env.NOTIFY_EMAIL ?? "",
+  notifyPhone: process.env.NOTIFY_PHONE ?? "",
+  // Kakao JS Key
+  kakaoJsKey: process.env.KAKAO_JS_KEY ?? "",
 };
