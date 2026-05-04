@@ -21,6 +21,9 @@ import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-s
 import { displayPercent } from "./utils/score-rounding";
 import { normalizeCompetitors } from "./utils/competitor-schema";
 import { classifySpecialty } from "./utils/specialty-classifier";
+import { validateJsonResponse, recordLLMCall, getCachedLLMResponse, cacheLLMResponse, clearLLMCache } from "./utils/llm-validator";
+import { estimateAIVisibility } from "./utils/search-rank-checker";
+import { calculateMarketingValue } from "./utils/specialty-revenue-data";
 
 // ── 타입 정의 ──
 export interface KeywordExposure {
@@ -309,6 +312,7 @@ ${trafficContext}
 // 스트림 1: 핵심 진단 (Executive Summary + Keywords + Competitors)
 // ═══════════════════════════════════════════════════
 async function generateCoreDiagnosis(context: string): Promise<any> {
+  const startTime = Date.now();
   const prompt = `${context}
 
 위 병원에 대해 핵심 진단 데이터를 생성하세요.
@@ -466,14 +470,21 @@ closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요
         },
       },
     },
-  });
-  return JSON.parse(result.choices[0]?.message?.content as string || "{}");
+    });
+  // #25 LLM 응답 검증 + #27 통계 기록
+  const coreContent = result.choices[0]?.message?.content as string || "{}";
+  const coreValidation = validateJsonResponse(coreContent, ["headline", "executiveSummary", "keyFindings", "riskScore"]);
+  if (!coreValidation.valid) {
+    console.warn("[RealityDiagnosis] Core LLM 응답 검증 경고:", coreValidation.errors);
+  }
+  recordLLMCall(Date.now() - startTime, coreContent.length, false, !coreValidation.valid);
+  return JSON.parse(coreContent);
 }
-
-// ═══════════════════════════════════════════════════
-// 스트림 2: GEO + AI 인용 진단
+// ═════════════════════════════════════════════════
+// 스트림 2: GEO + AI 인용 진단단
 // ═══════════════════════════════════════════════════
 async function generateGeoAiDiagnosis(context: string): Promise<any> {
+  const startTime = Date.now();
   const prompt = `${context}
 
 위 병원에 대해 GEO(Generative Engine Optimization) 3축 진단과 AI 인용 관련 진단을 수행하세요.
@@ -589,13 +600,20 @@ answerCapsule: 답변 캡슐 품질 진단.
       },
     },
   });
-  return JSON.parse(result.choices[0]?.message?.content as string || "{}");
+  // #25/#27 GEO/AI 응답 검증 + 통계
+  const geoContent = result.choices[0]?.message?.content as string || "{}";
+  const geoValidation = validateJsonResponse(geoContent, ["geoTriAxis", "aiCitationThreshold"]);
+  if (!geoValidation.valid) {
+    console.warn("[RealityDiagnosis] GEO/AI LLM 응답 검증 경고:", geoValidation.errors);
+  }
+  recordLLMCall(Date.now() - startTime, geoContent.length, false, !geoValidation.valid);
+  return JSON.parse(geoContent);
 }
-
-// ═══════════════════════════════════════════════════
-// 스트림 3: 채널 + 시뮬레이터 진단
+// ═════════════════════════════════════════════════
+// 스트림 3: 채널 + 시뮬레이터 진단 진단
 // ═══════════════════════════════════════════════════
 async function generateChannelDiagnosis(context: string): Promise<any> {
+  const startTime = Date.now();
   const prompt = `${context}
 
 위 병원에 대해 다채널 신뢰 진단, AI 추천 시뮬레이션, 네이버 Cue 대응 진단을 수행하세요.
@@ -704,15 +722,21 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
       },
     },
   });
-  return JSON.parse(result.choices[0]?.message?.content as string || "{}");
+    // #25/#27 Channel 응답 검증 + 통계
+  const channelContent = result.choices[0]?.message?.content as string || "{}";
+  const channelValidation = validateJsonResponse(channelContent, ["crossChannelTrust", "aiSimulator"]);
+  if (!channelValidation.valid) {
+    console.warn("[RealityDiagnosis] Channel LLM 응답 검증 경고:", channelValidation.errors);
+  }
+  recordLLMCall(Date.now() - startTime, channelContent.length, false, !channelValidation.valid);
+  return JSON.parse(channelContent);
 }
-
-// ═══════════════════════════════════════════════════
-// 스트림 4: 전략 가이드 + 서비스 소개
+// ═════════════════════════════════════════════════
+// 스트림 4: 전략 가이드 + 서비스 소개개
 // ═══════════════════════════════════════════════════
 async function generateStrategyGuide(context: string): Promise<any> {
+  const startTime = Date.now();
   const prompt = `${context}
-
 위 병원에 대해 웹사이트 변환 가이드, 콘텐츠 전략, 마케팅 방향, mybiseo 서비스 소개를 작성하세요.
 
 [JSON 출력 형식]
@@ -847,25 +871,28 @@ mybiseoServices: mybiseo 서비스 소개.
       },
     },
   });
-  return JSON.parse(result.choices[0]?.message?.content as string || "{}");
+   // #25/#27 Strategy 응답 검증 + 통계
+  const strategyContent = result.choices[0]?.message?.content as string || "{}";
+  const strategyValidation = validateJsonResponse(strategyContent, ["websiteTransformGuide", "contentStrategy"]);
+  if (!strategyValidation.valid) {
+    console.warn("[RealityDiagnosis] Strategy LLM 응답 검증 경고:", strategyValidation.errors);
+  }
+  recordLLMCall(Date.now() - startTime, strategyContent.length, false, !strategyValidation.valid);
+  return JSON.parse(strategyContent);
 }
-
 // ── 진료과목별 매출 손실 결정론적 계산 (LLM 의존 제거) ──
-const SPECIALTY_REVENUE_PARAMS: Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }> = {
-  "성형외과": { conversionRate: 0.05, avgRevenuePerPatient: 400 },  // 5%, 400만원
-  "피부과":   { conversionRate: 0.08, avgRevenuePerPatient: 50 },   // 8%, 50만원
-  "치과":     { conversionRate: 0.06, avgRevenuePerPatient: 200 },  // 6%, 200만원
-  "안과":     { conversionRate: 0.05, avgRevenuePerPatient: 300 },  // 5%, 300만원
-  "한의원":   { conversionRate: 0.05, avgRevenuePerPatient: 80 },   // 5%, 80만원
-  "정형외과": { conversionRate: 0.05, avgRevenuePerPatient: 100 },  // 5%, 100만원
-  "이비인후과": { conversionRate: 0.05, avgRevenuePerPatient: 80 }, // 5%, 80만원
-  "비뇨기과": { conversionRate: 0.05, avgRevenuePerPatient: 150 },  // 5%, 150만원
-  "내과":     { conversionRate: 0.05, avgRevenuePerPatient: 50 },   // 5%, 50만원
-  "소아과":   { conversionRate: 0.05, avgRevenuePerPatient: 50 },   // 5%, 50만원
-  "산부인과": { conversionRate: 0.05, avgRevenuePerPatient: 200 },  // 5%, 200만원
-  "종합병원": { conversionRate: 0.04, avgRevenuePerPatient: 150 },  // 4%, 150만원
-  "기타":     { conversionRate: 0.05, avgRevenuePerPatient: 100 },  // 5%, 100만원
-};
+// #30 객단가 데이터 기반 업데이트: SPECIALTY_REVENUE_PROFILES에서 실제 데이터 참조
+import { SPECIALTY_REVENUE_PROFILES } from "./utils/specialty-revenue-data";
+const SPECIALTY_REVENUE_PARAMS: Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }> = (() => {
+  const params: Record<string, { conversionRate: number; avgRevenuePerPatient: number }> = {};
+  for (const [key, profile] of Object.entries(SPECIALTY_REVENUE_PROFILES)) {
+    // conversionRate: 온라인 유입 → 실제 내원 전환율 (targetROI 기반 추정)
+    const conversionRate = Math.min(0.10, Math.max(0.03, profile.targetROI / 100));
+    // avgRevenuePerPatient: 신환 1명당 평균 매출 (만원)
+    params[key] = { conversionRate, avgRevenuePerPatient: profile.avgNewPatientRevenue };
+  }
+  return params as Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }>;
+})();
 
 const REVENUE_FLOOR = 3000; // 최소 3,000만원
 const REVENUE_CAP = 10000;  // 최대 1억원 (10,000만원)
@@ -992,9 +1019,23 @@ export async function generateRealityDiagnosis(
   if (channelResult.status === "rejected") console.error("[RealityDiagnosis] Channel diagnosis failed:", channelResult.reason);
   if (strategyResult.status === "rejected") console.error("[RealityDiagnosis] Strategy guide failed:", strategyResult.reason);
 
-  const elapsed = Date.now() - startTime;
-  console.log(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status}`);
+  // #33/#34 AI 가시성 점수 코드 기반 계산 (진단 플로우 통합)
+  const aiVisibility = estimateAIVisibility({
+    hasStructuredData: (categoryScores["검색 고급 설정"] || 0) > 60,
+    hasFAQSchema: (categoryScores["검색 고급 설정"] || 0) > 70,
+    hasHowToSchema: false,
+    contentLength: 2000, // 기본값 (SEO 점수에서 추정)
+    hasAuthorInfo: (categoryScores["콘텐츠 구조"] || 0) > 70,
+    hasMedicalCredentials: effectiveSpecialty !== "기타",
+    hasReferences: (categoryScores["콘텐츠 구조"] || 0) > 80,
+    domainAge: undefined,
+  });
 
+  // #30 객단가 데이터 기반 마케팅 가치 계산
+  const marketingValue = calculateMarketingValue(effectiveSpecialty as any);
+
+  const elapsed = Date.now() - startTime;
+  console.log(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status} | AI가시성:${aiVisibility.score} 마케팅가치:${marketingValue.seoInvestmentScore}`);
   return {
     hospitalName: siteName || domain,
     specialty: specialty || "일반",
