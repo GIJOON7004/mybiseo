@@ -19,6 +19,8 @@ import { callDataApi } from "./_core/dataApi";
 import { resolveSpecialty, type SpecialtyType } from "./specialty-weights";
 import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-summary-template";
 import { displayPercent } from "./utils/score-rounding";
+import { normalizeCompetitors } from "./utils/competitor-schema";
+import { classifySpecialty } from "./utils/specialty-classifier";
 
 // ── 타입 정의 ──
 export interface KeywordExposure {
@@ -938,6 +940,18 @@ export async function generateRealityDiagnosis(
 ): Promise<RealityDiagnosis> {
   const startTime = Date.now();
 
+  // #28/#29/#32 다중 신호 진료과 분류 + 복합 진료과 + 신뢰도 점수
+  const classificationResult = classifySpecialty({
+    userInput: specialty,
+    url: domain,
+    title: siteName || "",
+  });
+  // 신뢰도가 높으면 분류 결과 사용, 낮으면 사용자 입력 유지 (#31)
+  // confidence는 0-100 스케일이므로 50 이상일 때 분류 결과 사용
+  const effectiveSpecialty = classificationResult.confidence >= 50 
+    ? classificationResult.primary 
+    : specialty || classificationResult.primary;
+
   // SimilarWeb 데이터와 LLM 호출을 병렬로 시작
   const trafficPromise = fetchTrafficData(domain);
 
@@ -1046,7 +1060,16 @@ export async function generateRealityDiagnosis(
     })(),
     keywords: core.keywords || FALLBACK_CORE.keywords,
     trafficInsight: trafficData,
-    competitors: core.competitors || FALLBACK_CORE.competitors,
+    competitors: (() => {
+      const rawCompetitors = core.competitors || FALLBACK_CORE.competitors;
+      const normalized = normalizeCompetitors(rawCompetitors);
+      // CompetitorAnalysis → CompetitorSnapshot 변환
+      return normalized.map(c => ({
+        name: c.anonymousId,
+        advantage: c.strengths.map(s => s.description).join(", ") || "정보 부족",
+        estimatedVisibility: c.estimatedVisibility,
+      }));
+    })(),
     missedPatients: (() => {
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       // 코드 기반 결정론적 매출 손실 계산 (LLM 추정 대체)

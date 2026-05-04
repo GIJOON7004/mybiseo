@@ -16,11 +16,16 @@ import * as cheerio from "cheerio";
 import { generateAdditionalItems } from "./seo-analyzer-v4-items";
 import { generateThaiLocalSearchItems, generateThaiSocialItems, generateThaiMedicalTourismItems } from "./seo-analyzer-th-items";
 import { resolveSpecialty, applySpecialtyWeights, type SpecialtyType } from "./specialty-weights";
+import { getCalibrationMap } from "./utils/specialty-weight-calibration";
 import { crawlSubPages, type AggregatedData } from "./multi-page-crawler";
 import { fetchPageSpeedMetrics, getCWVRating, type PageSpeedMetrics } from "./pagespeed-client";
 import { displayScore } from "./utils/score-rounding";
 import { enrichWithStandardIds } from "./utils/item-id-registry";
 import { validateMinItems, CATEGORY_MAX_SCORES, TOTAL_MAX_SCORE } from "./utils/check-item-registry";
+import { detectDynamicContent } from "./utils/dynamic-content-detector";
+import { analyzeMultipleKeywords } from "./utils/keyword-exposure-checker";
+import { sampleImages, extractImagesFromHtml } from "./utils/image-sampling";
+import { calculateCalibrationFactor } from "./utils/specialty-weight-calibration";
 
 // ── (#8) 표준 User-Agent ──
 const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
@@ -598,16 +603,13 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   });
 
   // 2-3. 이미지 Alt 태그 (6점) — 기준 강화: 100%만 pass
-  const images = $("img");
-  const totalImages = images.length;
-  // (#6) 이미지 최적화 샘플링 고정: 50개 이상이면 상위 50개만 검사 (재현성 보장)
-  const SAMPLE_SIZE = 50;
-  const sampleCount = Math.min(totalImages, SAMPLE_SIZE);
+  // (#16) 이미지 최적화 샘플링 고정: 크기순 정렬 후 상위 N개만 분석
+  const extractedImages = extractImagesFromHtml(html);
+  const { sampled: sampledImages, totalCount: totalImages } = sampleImages(extractedImages);
+  const sampleCount = sampledImages.length;
   let imagesWithAlt = 0;
-  for (let i = 0; i < sampleCount; i++) {
-    const el = images[i];
-    const alt = $(el).attr("alt")?.trim();
-    if (alt && alt.length > 0) imagesWithAlt++;
+  for (const img of sampledImages) {
+    if (img.alt && img.alt.trim().length > 0) imagesWithAlt++;
   }
   const altRatio = sampleCount > 0 ? imagesWithAlt / sampleCount : 1;
   items.push({
@@ -1362,6 +1364,43 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     impact: "AI 검색엔진은 134-167단어(한국어 80-120어절) 길이의 자기완결형 문단을 가장 많이 인용합니다. 너무 짧으면 정보가 부족하고, 너무 길면 AI가 핵심을 추출하기 어렵습니다.",
   });
 
+  // ── (#23) 키워드 노출 코드 기반 분석 ──
+  const metaKws = metaKeywords ? metaKeywords.split(",").map(k => k.trim()).filter(Boolean).slice(0, 5) : [];
+  if (metaKws.length > 0) {
+    const kwResults = analyzeMultipleKeywords({ keywords: metaKws, html, title: effectiveTitle, metaDescription: metaDesc, metaKeywords, bodyText, url });
+    const avgScore = kwResults.reduce((s, r) => s + r.exposureScore, 0) / kwResults.length;
+    const excellentCount = kwResults.filter(r => r.status === "excellent" || r.status === "good").length;
+    items.push({
+      id: "ai-keyword-exposure",
+      category: "AI 검색 노출",
+      name: "핵심 키워드 노출 분석",
+      status: avgScore >= 60 ? "pass" : avgScore >= 30 ? "warning" : "fail",
+      score: avgScore >= 60 ? 5 : avgScore >= 30 ? 3 : 0,
+      maxScore: 5,
+      detail: `메타 키워드 ${metaKws.length}개 중 ${excellentCount}개 양호 노출 (평균 노출 점수: ${Math.round(avgScore)}/100)`,
+      recommendation: avgScore >= 60 
+        ? "핵심 키워드가 페이지 전반에 잘 분포되어 있습니다." 
+        : `키워드 노출이 부족합니다. ${kwResults.filter(r => r.status === "missing" || r.status === "weak").map(r => `"${r.keyword}"`).join(", ")} 키워드를 타이틀, H1, 본문에 자연스럽게 포함하세요.`,
+      impact: "키워드가 페이지 주요 위치(타이틀, H1, 맨 앞 본문)에 있을수록 검색엔진과 AI가 해당 주제의 권위 페이지로 판단합니다.",
+    });
+  }
+
+  // ── (#20) 동적 콘텐츠 감지 ──
+  const dynamicResult = detectDynamicContent(html, bodyText);
+  items.push({
+    id: "ai-dynamic-content",
+    category: "AI 검색 노출",
+    name: "동적 콘텐츠 SEO 위험도",
+    status: dynamicResult.seoRisk === "low" ? "pass" : dynamicResult.seoRisk === "medium" ? "warning" : "fail",
+    score: dynamicResult.seoRisk === "low" ? 4 : dynamicResult.seoRisk === "medium" ? 2 : 0,
+    maxScore: 4,
+    detail: `동적 콘텐츠 비율: ${dynamicResult.dynamicRatio}%, 감지 패턴: ${dynamicResult.patterns.length}개${dynamicResult.patterns.length > 0 ? ` (${dynamicResult.patterns.map(p => p.type).join(", ")})` : ""}`,
+    recommendation: dynamicResult.seoRisk === "low" 
+      ? "정적 HTML 기반으로 검색엔진이 콘텐츠를 정상적으로 읽을 수 있습니다." 
+      : "동적 콘텐츠 비율이 높습니다. SSR(서버사이드 렌더링) 또는 프리렌더링을 적용하여 검색엔진과 AI가 콘텐츠를 읽을 수 있도록 하세요.",
+    impact: "검색엔진과 AI는 주로 정적 HTML을 읽습니다. JavaScript로만 렌더링되는 콘텐츠는 인덱싱되지 않거나 AI 인용에서 누락될 수 있습니다.",
+  });
+
   // ── v4 추가 항목 통합 (53개 항목 추가) ──
   // 이미 위에서 선언된 변수들을 재활용하여 context 구성
   const v4OgTitle = $('meta[property="og:title"]').attr("content") || "";
@@ -1453,7 +1492,13 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   let maxScoreTotal: number;
 
   if (specialty && resolvedSpecialty !== "기타") {
-    const weighted = applySpecialtyWeights(categories, resolvedSpecialty);
+    // #18 데이터 기반 보정: 카테고리별 실제 점수 분포를 반영한 보정 가중치 적용
+    const calibrationMap = getCalibrationMap(resolvedSpecialty);
+    const calibratedCategories = categories.map(c => ({
+      ...c,
+      weight: calibrationMap[c.name] ?? 1.0,
+    }));
+    const weighted = applySpecialtyWeights(calibratedCategories, resolvedSpecialty);
     finalCategories = weighted.weightedCategories;
     totalScore = weighted.totalScore;
     maxScoreTotal = weighted.maxScore;
