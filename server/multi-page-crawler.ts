@@ -110,6 +110,22 @@ const PRIORITY_PATTERNS: { pattern: RegExp; pageType: string; priority: number }
 const MAX_SUB_PAGES = 8;
 const CRAWL_TIMEOUT = 4000;
 
+// (#4) 서브페이지 타임아웃 개별 관리
+const PAGE_TYPE_TIMEOUTS: Record<string, number> = {
+  "의료진 소개": 6000,    // 이미지 많음
+  "진료 안내": 6000,     // 콘텐츠 많음
+  "전후 사진": 8000,     // 대용량 이미지
+  "리뷰/후기": 5000,    // 동적 로딩 가능성
+  "예약": 5000,          // 외부 스크립트 로딩
+  "가격/비용": 4000,
+  "오시는 길": 4000,
+  "기타": 4000,
+};
+
+function getTimeoutForPageType(pageType: string): number {
+  return PAGE_TYPE_TIMEOUTS[pageType] || CRAWL_TIMEOUT;
+}
+
 // ── #1 필수 페이지 직접 탐색: 병원 사이트에 반드시 존재해야 할 URL 패턴 ──
 const MUST_HAVE_PATHS = [
   "/doctor", "/team", "/about", "/contact", "/price",
@@ -531,7 +547,7 @@ export async function crawlSubPages(
     const batch = priorityPages.slice(i, i + CONCURRENCY);
     const results = await Promise.allSettled(
       batch.map(async ({ url, pageType }) => {
-        const html = await fetchPage(url, CRAWL_TIMEOUT, country);
+        const html = await fetchPage(url, getTimeoutForPageType(pageType), country);
         if (!html) return null;
         return analyzeSubPage(url, html, pageType);
       })

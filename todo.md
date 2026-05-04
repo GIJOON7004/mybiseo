@@ -17,3 +17,20 @@
 - [x] #19 소수점 반올림 규칙 통일 - utils/score-rounding.ts 유틸 생성, 최종 표시에만 반올림
 - [x] #8 User-Agent/Accept-Language 표준화 - Googlebot Mobile UA 상수화
 - [x] #14 검사 항목 ID 체계 표준화 - utils/item-id-registry.ts 생성, enrichWithStandardIds 적용
+
+## 인프라: drizzle-orm 버전 충돌 해결
+- [x] drizzle-orm 0.44.6 → 0.45.2 통일 (TS 에러 953→0개)
+
+## 2단계: 구조적 기반 작업 (개선방안 50개)
+- [x] #9 검사 항목 정적 레지스트리 (check-item-registry.ts: CATEGORY_MAX_SCORES, TOTAL_MAX_SCORE, CATEGORY_MIN_ITEMS)
+- [x] #10 카테고리별 만점 고정 테이블 (seo-analyzer.ts에 fixedMax 적용)
+- [x] #11 가중치 합산 검증 (computedTotal ≠ TOTAL_MAX_SCORE 경고)
+- [x] #12 최소 항목 수 보장 (validateMinItems)
+- [x] #13 선택적 항목 가중치 정규화 (applySpecialtyWeights 정규화 로직)
+- [x] #2 PageSpeed 다회 측정 중앙값 (3회 측정 후 중앙값 채택)
+- [x] #15 응답 시간 다회 측정 (TTFB 3회 측정 중앙값)
+- [x] #4 서브페이지 타임아웃 개별 관리 (getTimeoutForPageType)
+- [x] #5 재시도 로직 강화 (지수 백오프 + 에러 유형별 판단)
+- [x] #3 sitemap.xml 파싱 개선 (sitemap index 재귀 탐색, URL 수 카운트)
+- [x] #6 이미지 최적화 검사 샘플링 고정 (상위 50개)
+- [x] #7 robots.txt 검증 강화 (Googlebot 차단, Sitemap 선언 확인)

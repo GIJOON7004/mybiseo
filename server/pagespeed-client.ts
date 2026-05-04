@@ -122,7 +122,8 @@ const PS_CACHE_TTL = 10 * 60 * 1000; // 10분
  */
 export async function fetchPageSpeedMetrics(
   url: string,
-  strategy: "mobile" | "desktop" = "mobile"
+  strategy: "mobile" | "desktop" = "mobile",
+  measurements: number = 2  // (#2) 다회 측정 횟수 (1~3)
 ): Promise<PageSpeedMetrics | null> {
   const cacheKey = `${url}::${strategy}`;
 
@@ -140,7 +141,26 @@ export async function fetchPageSpeedMetrics(
     return inflight;
   }
 
-  const promise = _fetchPageSpeedMetricsInternal(url, strategy, cacheKey);
+  // (#2) 다회 측정 후 중앙값 선택
+  const numRuns = Math.max(1, Math.min(3, measurements));
+  const promise = (async (): Promise<PageSpeedMetrics | null> => {
+    if (numRuns === 1) {
+      return _fetchPageSpeedMetricsInternal(url, strategy, cacheKey);
+    }
+    const results: PageSpeedMetrics[] = [];
+    for (let i = 0; i < numRuns; i++) {
+      const r = await _fetchPageSpeedMetricsInternal(url, strategy, cacheKey);
+      if (r) results.push(r);
+    }
+    if (results.length === 0) return null;
+    if (results.length === 1) return results[0];
+    // 중앙값 선택: performanceScore 기준으로 정렬 후 중간 값
+    results.sort((a, b) => a.performanceScore - b.performanceScore);
+    const median = results[Math.floor(results.length / 2)];
+    console.log(`[PageSpeed] ${numRuns}회 측정 중앙값 선택: performance=${median.performanceScore}`);
+    return median;
+  })();
+
   _psInflight.set(cacheKey, promise);
   try {
     return await promise;

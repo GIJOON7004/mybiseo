@@ -364,6 +364,7 @@ actionItems: 9개 (각 단계별 3개씩). 각각:
 closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요약 2)주요 강점 3)핵심 개선 과제 4)실행 우선순위 5)종합 전망. 각 단락 사이에 빈 줄(\\n\\n)로 구분. 마크다운 서식 사용하지 않기.`;
 
   const result = await invokeLLM({
+    temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },
@@ -512,6 +513,7 @@ answerCapsule: 답변 캡슐 품질 진단.
   recommendations: 3개 개선 권장사항`;
 
   const result = await invokeLLM({
+    temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },
@@ -628,6 +630,7 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
   verdict: 종합 판정 (1-2문장)`;
 
   const result = await invokeLLM({
+    temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },
@@ -753,6 +756,7 @@ mybiseoServices: mybiseo 서비스 소개.
   ctaMessage: CTA 메시지 (1문장).`;
 
   const result = await invokeLLM({
+    temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: prompt },

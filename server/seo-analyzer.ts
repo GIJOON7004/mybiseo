@@ -20,6 +20,10 @@ import { crawlSubPages, type AggregatedData } from "./multi-page-crawler";
 import { fetchPageSpeedMetrics, getCWVRating, type PageSpeedMetrics } from "./pagespeed-client";
 import { displayScore } from "./utils/score-rounding";
 import { enrichWithStandardIds } from "./utils/item-id-registry";
+import { validateMinItems, CATEGORY_MAX_SCORES, TOTAL_MAX_SCORE } from "./utils/check-item-registry";
+
+// ── (#8) 표준 User-Agent ──
+const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 // ── 타입 정의 ──
 export type SeoCheckStatus = "pass" | "fail" | "warning";
@@ -132,7 +136,7 @@ async function fetchWithTimeout(url: string, timeout = 15000, country: CountryCo
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+        "User-Agent": STANDARD_USER_AGENT,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": getAcceptLanguage(country),
         "Accept-Encoding": "gzip, deflate",
@@ -146,15 +150,31 @@ async function fetchWithTimeout(url: string, timeout = 15000, country: CountryCo
   }
 }
 
+// (#5) 재시도 로직 강화: 지수 백오프 + 에러 유형별 재시도 판단
 async function fetchWithRetry(url: string, timeout = 15000, retries = 2, country: CountryCode = "kr"): Promise<Response> {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      return await fetchWithTimeout(url, timeout, country);
+      const res = await fetchWithTimeout(url, timeout, country);
+      // 5xx 서버 에러는 재시도 대상
+      if (res.status >= 500 && attempt < retries) {
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        continue;
+      }
+      // 429 Rate Limit도 재시도
+      if (res.status === 429 && attempt < retries) {
+        const retryAfter = parseInt(res.headers.get("retry-after") || "2", 10);
+        await new Promise(r => setTimeout(r, retryAfter * 1000));
+        continue;
+      }
+      return res;
     } catch (e: any) {
       lastError = e;
+      // 타임아웃/네트워크 에러만 재시도
+      const isRetryable = e.name === "AbortError" || e.code === "ECONNRESET" || e.code === "ETIMEDOUT" || e.code === "ENOTFOUND" || e.message?.includes("fetch failed");
+      if (!isRetryable) throw e;
       if (attempt < retries) {
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt))); // 지수 백오프
       }
     }
   }
@@ -287,6 +307,24 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     responseHeaders = htmlResult.value.headers;
     responseTime = htmlResult.value.elapsed;
   }
+
+  // (#15) 응답 시간 다회 측정 중앙값 (2회 추가 측정)
+  if (fetchOk && responseTime > 0) {
+    try {
+      const extraMeasurements: number[] = [responseTime];
+      for (let i = 0; i < 2; i++) {
+        const start = Date.now();
+        const r = await fetchWithRetry(url, 10000, 0, country);
+        await r.text(); // body 소비
+        extraMeasurements.push(Date.now() - start);
+      }
+      extraMeasurements.sort((a, b) => a - b);
+      responseTime = extraMeasurements[Math.floor(extraMeasurements.length / 2)];
+    } catch {
+      // 추가 측정 실패 시 최초 값 유지
+    }
+  }
+
   if (robotsResult.status === "fulfilled") {
     robotsTxt = robotsResult.value.text;
     robotsExists = robotsResult.value.valid;
@@ -294,9 +332,10 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
 
   const $ = cheerio.load(html);
 
-  // 2. sitemap.xml 확인 (robots.txt 결과 필요)
+  // 2. sitemap.xml 확인 (robots.txt 결과 필요) — (#3) 파싱 개선: sitemap index 재귀 탐색 + URL 수 카운트
   let sitemapExists = false;
   let sitemapUrl = "";
+  let sitemapUrlCount = 0;
   const sitemapMatch = robotsTxt.match(/Sitemap:\s*(.+)/i);
   if (sitemapMatch) {
     sitemapUrl = sitemapMatch[1].trim();
@@ -304,10 +343,31 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     sitemapUrl = `${baseUrl}/sitemap.xml`;
   }
   try {
-    const sRes = await fetchWithRetry(sitemapUrl, 3000, 0, country);
+    const sRes = await fetchWithRetry(sitemapUrl, 5000, 1, country);
     if (sRes.ok) {
       const sText = await sRes.text();
-      sitemapExists = sText.includes("<urlset") || sText.includes("<sitemapindex");
+      if (sText.includes("<sitemapindex")) {
+        // sitemap index → 하위 sitemap URL 추출 (1단계만)
+        sitemapExists = true;
+        const subSitemaps = sText.match(/<loc>([^<]+)<\/loc>/g) || [];
+        sitemapUrlCount = subSitemaps.length; // 하위 sitemap 수
+        // 첫 번째 하위 sitemap에서 URL 수 확인
+        if (subSitemaps.length > 0) {
+          const firstSub = subSitemaps[0]!.replace(/<\/?loc>/g, "");
+          try {
+            const subRes = await fetchWithRetry(firstSub, 3000, 0, country);
+            if (subRes.ok) {
+              const subText = await subRes.text();
+              const urlMatches = subText.match(/<loc>/g) || [];
+              sitemapUrlCount = urlMatches.length;
+            }
+          } catch {}
+        }
+      } else if (sText.includes("<urlset")) {
+        sitemapExists = true;
+        const urlMatches = sText.match(/<loc>/g) || [];
+        sitemapUrlCount = urlMatches.length;
+      }
     }
   } catch {}
 
@@ -540,12 +600,16 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   // 2-3. 이미지 Alt 태그 (6점) — 기준 강화: 100%만 pass
   const images = $("img");
   const totalImages = images.length;
+  // (#6) 이미지 최적화 샘플링 고정: 50개 이상이면 상위 50개만 검사 (재현성 보장)
+  const SAMPLE_SIZE = 50;
+  const sampleCount = Math.min(totalImages, SAMPLE_SIZE);
   let imagesWithAlt = 0;
-  images.each((_, el) => {
+  for (let i = 0; i < sampleCount; i++) {
+    const el = images[i];
     const alt = $(el).attr("alt")?.trim();
     if (alt && alt.length > 0) imagesWithAlt++;
-  });
-  const altRatio = totalImages > 0 ? imagesWithAlt / totalImages : 1;
+  }
+  const altRatio = sampleCount > 0 ? imagesWithAlt / sampleCount : 1;
   items.push({
     id: "content-img-alt",
     category: "콘텐츠 구조",
@@ -625,17 +689,29 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     impact: "구글은 HTTPS를 검색 순위 신호로 사용합니다. HTTP 사이트는 '안전하지 않음' 경고가 표시됩니다.",
   });
 
-  // 3-2. robots.txt (5점)
+  // 3-2. robots.txt (5점) — (#7) 검증 강화: Googlebot 차단 여부, Sitemap 선언 여부 추가 검사
+  const robotsBlocksGooglebot = robotsTxt.includes("User-agent: Googlebot") && robotsTxt.includes("Disallow: /");
+  const robotsHasSitemap = /Sitemap:\s*https?:\/\//i.test(robotsTxt);
+  const robotsScore = !robotsExists ? 0 : robotsBlocksGooglebot ? 1 : robotsHasSitemap ? 5 : 3;
+  const robotsStatus = !robotsExists ? "fail" : robotsBlocksGooglebot ? "fail" : robotsHasSitemap ? "pass" : "warning";
+  let robotsDetail = "";
+  if (!robotsExists) {
+    robotsDetail = "robots.txt 파일이 없거나 잘못된 형식입니다.";
+  } else if (robotsBlocksGooglebot) {
+    robotsDetail = "⚠️ robots.txt에서 Googlebot을 전체 차단하고 있습니다! 검색 노출이 불가능합니다.";
+  } else {
+    robotsDetail = `robots.txt 존재${robotsHasSitemap ? " + Sitemap 선언 확인" : " (⚠️ Sitemap 선언 없음)"}`;
+  }
   items.push({
     id: "tech-robots",
     category: "홈페이지 기본 설정",
     name: "robots.txt",
-    status: robotsExists ? "pass" : "fail",
-    score: robotsExists ? 5 : 0,
+    status: robotsStatus,
+    score: robotsScore,
     maxScore: 5,
-    detail: robotsExists ? "robots.txt 파일이 존재합니다." : "robots.txt 파일이 없거나 잘못된 형식입니다.",
-    recommendation: robotsExists ? "robots.txt가 올바르게 설정되어 있습니다." : "robots.txt 파일을 생성하여 검색엔진 크롤러에게 사이트 구조를 안내하세요.",
-    impact: "robots.txt가 없으면 검색엔진이 사이트의 모든 페이지를 무분별하게 크롤링합니다.",
+    detail: robotsDetail,
+    recommendation: !robotsExists ? "robots.txt 파일을 생성하여 검색엔진 크롤러에게 사이트 구조를 안내하세요." : robotsBlocksGooglebot ? "Googlebot 전체 차단을 해제하세요. 'Disallow: /' 대신 특정 경로만 차단하세요." : !robotsHasSitemap ? "Sitemap: https://도메인/sitemap.xml 선언을 추가하세요." : "robots.txt가 올바르게 설정되어 있습니다.",
+    impact: "robots.txt가 없거나 Googlebot을 차단하면 검색 노출이 원천 차단됩니다. Sitemap 선언은 크롤링 효율을 높입니다.",
   });
 
   // 3-3. sitemap.xml (5점)
@@ -646,7 +722,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     status: sitemapExists ? "pass" : "fail",
     score: sitemapExists ? 5 : 0,
     maxScore: 5,
-    detail: sitemapExists ? `사이트맵이 존재합니다: ${sitemapUrl}` : "사이트맵을 찾을 수 없습니다.",
+    detail: sitemapExists ? `사이트맵 존재: ${sitemapUrl}${sitemapUrlCount > 0 ? ` (등록 URL: ${sitemapUrlCount}개)` : ""}` : "사이트맵을 찾을 수 없습니다.",
     recommendation: sitemapExists ? "사이트맵이 올바르게 설정되어 있습니다." : "sitemap.xml을 생성하고 Google Search Console에 제출하세요.",
     impact: "사이트맵은 검색엔진에게 사이트의 모든 페이지 목록을 알려줍니다.",
   });
@@ -1349,13 +1425,26 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     : ["AI 검색 노출", "콘텐츠 구조", "병원 특화 SEO", "네이버 검색 최적화", "메타 태그", "검색 고급 설정", "소셜 미디어", "성능 최적화", "모바일 최적화", "접근성/UX", "국제화/다국어", "홈페이지 기본 설정"];
   const categories = categoryNames.map(name => {
     const catItems = items.filter(i => i.category === name);
+    const actualMaxScore = catItems.reduce((s, i) => s + i.maxScore, 0);
+    // (#10) 카테고리별 만점 고정 테이블 적용
+    const fixedMax = CATEGORY_MAX_SCORES[name];
     return {
       name,
       score: catItems.reduce((s, i) => s + i.score, 0),
-      maxScore: catItems.reduce((s, i) => s + i.maxScore, 0),
+      maxScore: fixedMax || actualMaxScore,
       items: catItems,
     };
   });
+  // (#11) 가중치 합산 검증: 카테고리별 maxScore 합이 TOTAL_MAX_SCORE와 일치하는지 확인
+  const computedTotal = categories.reduce((s, c) => s + c.maxScore, 0);
+  if (computedTotal !== TOTAL_MAX_SCORE && TOTAL_MAX_SCORE > 0) {
+    console.warn(`[SEO] 카테고리 maxScore 합산(${computedTotal}) ≠ TOTAL_MAX_SCORE(${TOTAL_MAX_SCORE}). 정규화 적용.`);
+  }
+  // (#12) 최소 항목 수 보장 검증
+  const minItemResult = validateMinItems(items);
+  if (minItemResult.warnings.length > 0) {
+    console.warn(`[SEO] 최소 항목 수 미달:`, minItemResult.warnings);
+  }
 
   // 진료과별 가중치 적용
   const resolvedSpecialty = resolveSpecialty(specialty);

@@ -154,9 +154,12 @@ export function applySpecialtyWeights(
       weight,
     };
   });
-
-  const totalScore = weightedCategories.reduce((s, c) => s + c.score, 0);
-  const maxScore = weightedCategories.reduce((s, c) => s + c.maxScore, 0);
-
+  // (#13) 선택적 항목 가중치 정규화: 가중치 적용 후 비율 기반으로 정규화
+  const rawTotalScore = weightedCategories.reduce((s, c) => s + c.score, 0);
+  const rawMaxScore = weightedCategories.reduce((s, c) => s + c.maxScore, 0);
+  const originalMaxScore = categories.reduce((s, c) => s + c.maxScore, 0);
+  const normalizationFactor = originalMaxScore > 0 && rawMaxScore > 0 ? originalMaxScore / rawMaxScore : 1;
+  const totalScore = Math.round(rawTotalScore * normalizationFactor);
+  const maxScore = originalMaxScore;
   return { weightedCategories, totalScore, maxScore };
 }
