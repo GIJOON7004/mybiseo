@@ -324,7 +324,10 @@ ${trafficContext}
 4. 경쟁사를 직접 언급하지 않고 시장 환경의 관점에서 서술.
 5. 개선 방안은 구체적이고 실행 가능하게 작성하고, 개선 시 기대 효과를 수치로 제시.
 6. 각 항목마다 "왜 이것이 중요한지"를 비전문가도 이해할 수 있게 1문장으로 설명.
-7. 기존 마케팅 대행사가 커버하지 못하는 AI 최적화 영역을 자연스럽게 부각.`;
+7. 기존 마케팅 대행사가 커버하지 못하는 AI 최적화 영역을 자연스럽게 부각.
+8. 진료 분야 일관성: 보고서 전체에서 병원의 진료 분야를 일관되게 유지하세요. 메타 키워드와 콘텐츠 전략이 병원의 주력 진료과와 일치해야 합니다.
+9. 출력 금지 표현: "(왜 중요한가: ...)", "(참고: ...)", "(노트: ...)" 같은 메타 코멘트/사고 과정 표현을 절대 출력하지 마세요. 최종 보고서에 인쇄되는 텍스트입니다.
+10. HTML 태그 금지: </td>, <br>, <p> 등 HTML 태그를 절대 포함하지 마세요.`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -373,10 +376,10 @@ missedPatients:
   reasoning: 산출 근거. 반드시 "월간 총 검색량 N회 × 평균 유입률 0.8%(=0.008)" 형식으로 작성. 유입률을 소수로 표기할 때는 "0.008"로, 백분율로 표기할 때는 "0.8%"로 명확히 구분. "× 0.8"이라고만 쓰면 80%로 오해할 수 있으므로 절대 금지.
   revenueImpact: "월 약 X,XXX만원 상당의 추가 유입 기회" 형식
 
-contentGaps: 10개. 아직 아무도 점유하지 않은 AI 인용 기회 키워드. 각각:
+contentGaps: 10개. 아직 아무도 점유하지 않은 AI 인용 기회 키워드. 반드시 이 병원의 주력 진료 분야와 직접 관련된 키워드만 제안하세요. 각각:
   keyword: 롱테일 질문형 키워드 (예: "눈성형 후 붓기 빠지는 기간")
   searchIntent: 환자의 조회 의도 (1문장)
-  difficulty: "쉬움" | "보통" | "어려움"
+  difficulty: "쉬움" | "보통" | "어려움" (변별력 있게 분류: 10개 중 쉬움 3-4개, 보통 3-4개, 어려움 2-3개 비율로)
   opportunityScore: 1-10 정수
   suggestedContent: 콘텐츠 방향 (1-2문장)
   rationale: 사각지대인 근거 (1-2문장)
@@ -537,10 +540,18 @@ aiCitationThreshold: AI 인용 임계점 체크리스트 (5개 항목).
   totalCount: 5
   verdict: 종합 판정
 
-answerCapsule: 답변 캡슐 품질 진단.
+answerCapsule: 답변 캅슐 품질 진단.
   score: 0-100
-  currentBestSentence: 현재 웹사이트에서 가장 AI 인용에 적합한 문장 (없으면 "적합한 답변 캡슐 문장 없음")
-  idealSentence: 이 병원의 진료과에 맞는 이상적인 답변 캡슐 예시 (40-60단어)
+  currentBestSentence: 현재 웹사이트에서 가장 AI 인용에 적합한 문장 (없으면 "적합한 답변 캅슐 문장 없음")
+  idealSentence: 이 병원의 진료과에 맞는 이상적인 답변 캅슐 예시 (40-60단어).
+    [!!! 금지 표현 !!!] 다음 상투적 표현을 절대 사용하지 마세요:
+    - "20년 이상의 임상 경험" / "N년 이상의 경험"
+    - "최첨단 디지털 장비" / "최신 장비"
+    - "환자 중심 진료" / "환자 맞춤형"
+    - "무통 마취 시스템과 멸균 소독 시스템"
+    - "전문 의료진" / "전문 의료 스태프"
+    대신 이 병원의 실제 진료 분야, 위치(지역명), 특화 시술/장비명을 반영한 구체적이고 차별화된 문장을 생성하세요.
+    예시: "강남역 3번 출구 OO안과는 스마일라식/라섹/ICL 수술 전문으로, 연간 3,000건 이상의 시력교정술 실적을 보유하고 있습니다."
   issues: 3개 문제점
   recommendations: 3개 개선 권장사항`;
 
@@ -1120,7 +1131,23 @@ export async function generateRealityDiagnosis(
       summary = summary.replace(/매출\s*기회\s*손실/g, '웹사이트 전환 매출 손실');
       return summary;
     })(),
-    keyFindings: core.keyFindings || FALLBACK_CORE.keyFindings,
+    keyFindings: (() => {
+      const findings = core.keyFindings || FALLBACK_CORE.keyFindings;
+      const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
+      if (mp.estimatedMonthly > 0 && findings.length > 0) {
+        const { formatted: revLossSync } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        // LLM이 생성한 매출 수치를 코드 기반 계산값으로 동기화
+        return findings.map((f: string) => {
+          let result = f;
+          result = result.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, revLossSync);
+          result = result.replace(/약\s*[\d,]+만원(\s*상당)?/g, revLossSync);
+          result = result.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, revLossSync);
+          result = result.replace(/월\s*약?\s*[\d,]+억원/g, revLossSync);
+          return result;
+        });
+      }
+      return findings;
+    })(),
     riskScore: core.riskScore ?? FALLBACK_CORE.riskScore,
     urgencyLevel: core.urgencyLevel || FALLBACK_CORE.urgencyLevel,
     metrics: (() => {

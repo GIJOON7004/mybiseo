@@ -347,7 +347,7 @@ export function generateAdditionalItems(ctx: AnalysisContext): SeoCheckItem[] {
     score: jsonLdErrors === 0 && jsonLdData.length > 0 ? 3 : jsonLdErrors === 0 ? 1 : 0,
     maxScore: 3,
     detail: jsonLdData.length === 0 ? "구조화 데이터가 없습니다." : jsonLdErrors > 0 ? `구조화 데이터 오류 ${jsonLdErrors}건` : "구조화 데이터가 유효합니다.",
-    recommendation: jsonLdErrors > 0 ? "구조화 데이터의 JSON-LD 형식 오류를 수정하세요. @context와 @type은 필수입니다." : "구조화 데이터가 유효합니다.",
+    recommendation: jsonLdData.length === 0 ? "JSON-LD 형식의 구조화 데이터를 추가하세요. @context와 @type은 필수 속성입니다." : jsonLdErrors > 0 ? "구조화 데이터의 JSON-LD 형식 오류를 수정하세요. @context와 @type은 필수입니다." : "구조화 데이터가 유효합니다.",
     impact: "구조화 데이터에 오류가 있으면 검색엔진이 무시합니다. 리치 스니펫이 표시되지 않아 클릭률이 떨어집니다.",
   });
 

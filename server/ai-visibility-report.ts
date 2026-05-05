@@ -15,6 +15,8 @@ import * as QRCode from "qrcode";
 import { invokeLLM } from "./_core/llm";
 import type { RealityDiagnosis as RealityDiagnosisImported } from "./reality-diagnosis";
 type RealityDiagnosis = RealityDiagnosisImported;
+import { resolveSpecialty } from "./specialty-weights";
+import { SPECIALTY_REVENUE_PROFILES } from "./utils/specialty-revenue-data";
 import { translateResultToEnglish } from "./ai-visibility-translate";
 import { krRegularBase64, krBoldBase64 } from "./fonts-base64";
 import { getMonthlyTrendByUrl, getScoreComparisonByUrl } from "./db";
@@ -59,6 +61,11 @@ interface SeoAuditResult {
       impact: string;
     }[];
   }[];
+  /** 사이트 접근 불가 또는 SPA 감지 시 한계 고지 */
+  diagnosticLimitation?: {
+    type: "inaccessible" | "spa_empty" | "blocked";
+    message: string;
+  };
 }
 
 // RealityDiagnosis is imported from ./reality-diagnosis
@@ -737,7 +744,15 @@ function stripMarkdown(text: string): string {
     .replace(/^[-*+]\s/gm, "")
     .replace(/^\d+\.\s/gm, "")
     .replace(/만원원/g, "만원")
-    .replace(/억원원/g, "억원");
+    .replace(/억원원/g, "억원")
+    // HTML 태그 잔존 제거 (</td>, <br>, <p> 등)
+    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
+    // LLM 메타 코멘트 제거 ("(왜 중요한가: ...)" 등 reasoning 흔적)
+    .replace(/\(왜 중요한가:[^)]*\)/g, "")
+    .replace(/\(Why this matters:[^)]*\)/g, "")
+    .replace(/\(참고:[^)]*\)/g, "")
+    .replace(/\(Note:[^)]*\)/g, "")
+    .trim();
 }
 
 function getGradeColor(grade: string): string {
@@ -831,7 +846,19 @@ function drawPageHeader(doc: any, t: Record<string, string>, url: string): void 
   doc.rect(0, 0, 4, 38).fill(C.teal);
   doc.font("KrBold").fontSize(8.5).fillColor(C.teal)
     .text(t.brand, ML, 12, { width: 100 });
-  const displayUrl = url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  // Punycode 디코딩
+  const rawUrl = url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  const displayUrl = (() => {
+    try {
+      if (rawUrl.includes("xn--")) {
+        const { domainToUnicode } = require("url");
+        const parts = rawUrl.split("/");
+        parts[0] = domainToUnicode(parts[0]) || parts[0];
+        return parts.join("/");
+      }
+      return rawUrl;
+    } catch { return rawUrl; }
+  })();
   doc.font("KrRegular").fontSize(7.5).fillColor(C.textLight)
     .text(displayUrl, ML + 100, 13, { width: CW - 100, align: "right" });
   // 하단 2px 티얼 라인
@@ -925,7 +952,19 @@ export async function generateAiVisibilityReport(
   // 병원명
   const rawHospitalName = rd?.hospitalName || auditResult.siteName || url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
   const hospitalName = sanitizeHospitalName(rawHospitalName);
-  const displayUrl = url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  // Punycode 도메인 한글 디코딩 (xn--... → 한글)
+  const rawDisplayUrl = url.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+  const displayUrl = (() => {
+    try {
+      if (rawDisplayUrl.includes("xn--")) {
+        const { domainToUnicode } = require("url");
+        const parts = rawDisplayUrl.split("/");
+        parts[0] = domainToUnicode(parts[0]) || parts[0];
+        return parts.join("/");
+      }
+      return rawDisplayUrl;
+    } catch { return rawDisplayUrl; }
+  })();
 
   const scCx = PW / 2;
   const gradeColor = getGradeColor(grade);
@@ -1061,6 +1100,12 @@ export async function generateAiVisibilityReport(
   const siteW = doc.widthOfString(siteStr);
   doc.text(siteStr, scCx - siteW / 2, PH - 88);
 
+  // F등급(30점 이하) 보고서 한계 고지
+  const numericScore = auditResult.totalScore ?? auditResult.score ?? 0;
+  if (numericScore <= 30) {
+    doc.font("KrRegular").fontSize(5.5).fillColor("#856404")
+      .text("※ 본 진단은 자동 크롤링 시점 데이터 기반이며, JavaScript 렌더링 사이트의 경우 실제와 다를 수 있습니다. 정확한 진단을 위해 재진단을 권장드립니다.", ML + 20, PH - 68, { width: CW - 40, lineGap: 2, align: "center" });
+  }
   // v7: 표지 하단에 disclaimer(데이터 출처) 배치 (위치 교환) + 글씨 진하게
   doc.font("KrRegular").fontSize(5.5).fillColor(C.textLight)
     .text(t.disclaimer, ML + 20, PH - 52, { width: CW - 40, lineGap: 2, align: "center" });
@@ -1171,11 +1216,34 @@ export async function generateAiVisibilityReport(
       doc.font("KrRegular").fontSize(8).fillColor(C.textMid)
         .text(kpi.label, kx + 10, startY + kvH + 2, { width: kpiW - 20 });
     });
-    y += kpiH + 8;
-
+     y += kpiH + 8;
+    // 매출 손실 산정 근거 표시 (v8)
+    if (rd?.specialty) {
+      const resolvedSpec = resolveSpecialty(rd.specialty);
+      const revProfile = SPECIALTY_REVENUE_PROFILES[resolvedSpec] || SPECIALTY_REVENUE_PROFILES["기타"];
+      if (revProfile) {
+        const convRate = Math.min(0.10, Math.max(0.03, revProfile.targetROI / 100));
+        const formulaText = `* 매출 추정 기준: ${rd.specialty} 평균 객단가 ${revProfile.avgNewPatientRevenue}만원 × 온라인 전환율 ${(convRate * 100).toFixed(0)}%`;
+        doc.font("KrRegular").fontSize(6).fillColor(C.textLight)
+          .text(formulaText, ML, y, { width: CW, align: "right" });
+        y += 10;
+      }
+    }
     // v6: reasoning 텍스트 삭제됨 (사용자 요청)
   }
 
+  // 진단 한계 고지 (사이트 접근 불가 / SPA 감지 시)
+  if (result.diagnosticLimitation) {
+    y = ensureSpace(doc, y, 40, hCtx);
+    const limBox = { x: ML, y, w: CW, h: 32 };
+    doc.rect(limBox.x, limBox.y, limBox.w, limBox.h).fill("#FFF3CD");
+    doc.rect(limBox.x, limBox.y, 3, limBox.h).fill("#FFC107");
+    doc.font("KrBold").fontSize(8).fillColor("#856404")
+      .text("⚠️ 진단 한계 안내", limBox.x + 12, limBox.y + 4, { width: limBox.w - 20 });
+    doc.font("KrRegular").fontSize(7.5).fillColor("#856404")
+      .text(result.diagnosticLimitation.message, limBox.x + 12, limBox.y + 16, { width: limBox.w - 20 });
+    y += limBox.h + 8;
+  }
   // Executive Summary 텍스트
   if (rd?.executiveSummary) {
     y = drawParagraph(doc, y, stripMarkdown(rd.executiveSummary));

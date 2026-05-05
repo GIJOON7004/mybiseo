@@ -33,6 +33,11 @@ interface SeoAuditResult {
       impact: string;
     }[];
   }[];
+  /** 사이트 접근 불가 또는 SPA 감지 시 한계 고지 */
+  diagnosticLimitation?: {
+    type: "inaccessible" | "spa_empty" | "blocked";
+    message: string;
+  };
 }
 
 type Lang = "ko" | "en" | "th";
@@ -552,7 +557,22 @@ function esc(s: string): string {
 
 function stripMarkdown(text: string): string {
   if (!text) return "";
-  return text.replace(/#{1,6}\s?/g, "").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1").replace(/\[([^\]]+)\]\([^)]+\)/g, "$1").replace(/^[-*+]\s/gm, "").replace(/^\d+\.\s/gm, "");
+  return text
+    .replace(/#{1,6}\s?/g, "")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/^[-*+]\s/gm, "")
+    .replace(/^\d+\.\s/gm, "")
+    // HTML 태그 잔존 제거
+    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
+    // LLM 메타 코멘트 제거
+    .replace(/\(왜 중요한가:[^)]*\)/g, "")
+    .replace(/\(Why this matters:[^)]*\)/g, "")
+    .replace(/\(참고:[^)]*\)/g, "")
+    .replace(/\(Note:[^)]*\)/g, "")
+    .trim();
 }
 
 export function sanitizeHospitalName(raw: string): string {

@@ -307,6 +307,6 @@ export const benchmarkingPdfRouter = router({
       const fileKey = `benchmarking-reports/${report.hospitalName.replace(/[^a-zA-Z0-9\uAC00-\uD7A3]/g, "_")}-${Date.now()}-${crypto.randomBytes(4).toString("hex")}.pdf`;
       const { url: pdfUrl } = await storagePut(fileKey, Buffer.from(pdfBuffer), "application/pdf");
       await updateBenchmarkingReportStatus(report.id, "completed", { pdfUrl });
-      return { pdfUrl, fileName: `[${report.hospitalName}]벤치마킹_리포트.pdf` };
+      return { pdfUrl, fileName: `[${report.hospitalName}] 벤치마킹 리포트.pdf` };
     }),
 });

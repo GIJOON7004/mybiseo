@@ -73,6 +73,11 @@ export interface SeoAnalysisResult {
   };
   /** Google PageSpeed Insights 실측 데이터 */
   pageSpeed?: PageSpeedMetrics;
+  /** 사이트 접근 불가 또는 SPA 감지 시 한계 고지 메시지 */
+  diagnosticLimitation?: {
+    type: "inaccessible" | "spa_empty" | "blocked";
+    message: string;
+  };
 }
 
 // ── 인메모리 캐시 (5분 TTL) ──
@@ -597,7 +602,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     score: hasHeadingHierarchy && h3Count > 0 ? 6 : h2Count > 0 ? 3 : 0,
     maxScore: 6,
     detail: `H1: ${h1Count}개, H2: ${h2Count}개, H3: ${h3Count}개`,
-    recommendation: hasHeadingHierarchy && h3Count > 0 ? "제목 태그가 계층적으로 잘 구성되어 있습니다." : "H1 → H2 → H3 순서로 계층적인 제목 구조를 만드세요. H2 최소 2개, H3 최소 1개 이상 사용하세요.",
+    recommendation: hasHeadingHierarchy && h3Count > 0 ? "제목 태그가 계층적으로 잘 구성되어 있습니다." : h2Count === 0 ? "H2, H3 태그를 추가하여 콘텐츠를 섹션별로 구조화하세요. 검색엔진이 페이지 구조를 파악하는 데 중요합니다." : h3Count === 0 ? `H2는 ${h2Count}개 있지만 H3 태그가 없습니다. H3를 추가하여 더 세분화된 콘텐츠 구조를 만드세요.` : "H2 태그를 2개 이상 사용하여 콘텐츠를 섹션별로 구분하세요.",
     impact: "검색엔진은 제목 태그를 통해 페이지의 구조와 핵심 주제를 파악합니다.",
   });
 
@@ -834,18 +839,19 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     ].sort((a, b) => b.count - a.count);
     detectedLang = langRatios[0].lang;
   }
-  const langMatchesContent = htmlLang ? htmlLang.startsWith(detectedLang) : false;
+  // ko-KR, ko 모두 정상으로 인정 (BCP 47 표준)
+  const langMatchesContent = htmlLang ? (htmlLang.startsWith(detectedLang) || (detectedLang === "ko" && htmlLang.toLowerCase().startsWith("ko"))) : false;
   const langStatus = !htmlLang ? "fail" : langMatchesContent ? "pass" : "warning";
   const langScore = !htmlLang ? 0 : langMatchesContent ? 3 : 1;
   const langDetail = !htmlLang
     ? "HTML lang 속성이 설정되지 않았습니다."
     : langMatchesContent
-      ? `언어 설정: ${htmlLang} (콘텐츠 언어와 일치)`
+      ? `언어 설정: ${htmlLang} (콘텐츠 언어와 일치 — 적절히 설정됨)`
       : `언어 설정: ${htmlLang} (실제 콘텐츠는 ${detectedLang} 중심 — 불일치)`;
   const langRec = !htmlLang
     ? `<html lang="${country === 'th' ? 'en' : 'ko'}"> 속성을 추가하여 검색엔진에 페이지 언어를 알려주세요.`
     : langMatchesContent
-      ? "언어 설정이 콘텐츠 언어와 올바르게 일치합니다."
+      ? `언어 설정(${htmlLang})이 콘텐츠 언어와 올바르게 일치합니다.`
       : `현재 lang="${htmlLang}"이지만 실제 콘텐츠는 ${detectedLang} 중심입니다. lang="${detectedLang}"로 변경하세요. 잘못된 lang 속성은 검색엔진이 페이지 언어를 오판하게 합니다.`;
   items.push({
     id: "advanced-lang",
@@ -1550,10 +1556,25 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
       crawledUrls: multiPageResult.aggregated.crawledUrls,
       aggregated: multiPageResult.aggregated,
     } : undefined,
-    pageSpeed: pageSpeedData || undefined,
+     pageSpeed: pageSpeedData || undefined,
+    // 사이트 접근 불가 / SPA 빈 콘텐츠 감지 시 한계 고지
+    diagnosticLimitation: (() => {
+      if (!fetchOk) {
+        return {
+          type: "inaccessible" as const,
+          message: `본 진단은 자동 크롤링 시점에 웹사이트 접근이 불가하여 정확한 분석이 제한될 수 있습니다. 실제 웹사이트가 정상 운영 중이라면 재진단을 권장드립니다. (HTTP 상태: ${fetchStatus || '응답 없음'})`,
+        };
+      }
+      // SPA/JS 렌더링 사이트: 응답은 정상이지만 본문 콘텐츠가 거의 없는 경우
+      if (fetchOk && wordCount < 50) {
+        return {
+          type: "spa_empty" as const,
+          message: `본 진단은 JavaScript 렌더링(SPA) 사이트의 경우 정적 HTML만 분석하므로 실제 콘텐츠와 다를 수 있습니다. 정확한 진단을 위해 재진단을 권장드립니다.`,
+        };
+      }
+      return undefined;
+    })(),
   };
-
   setCache(cacheKey, result);
-
   return result;
 }
