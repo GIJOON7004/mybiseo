@@ -134,7 +134,7 @@ describe("Batch 1: GEO 3축 진단 (RxA/F) 섹션", () => {
   });
 
   it("i18n에 GEO 3축 라벨이 ko/en/th 모두 있다", () => {
-    expect(pdfSrc).toContain('geoTriAxisTitle: "GEO 3\ucd95 \uc9c4\ub2e8 (RxA/F)"');
+    expect(pdfSrc).toContain('geoTriAxisTitle: "GEO(Generative Engine Optimization) 3\ucd95 \uc9c4\ub2e8"');
     expect(pdfSrc).toContain('geoTriAxisTitle: "GEO Tri-Axis Diagnosis (RxA/F)"');
     expect(pdfSrc).toContain('geoTriAxisTitle: "การวินิจฉัย GEO 3 แกน (RxA/F)"');
   });

@@ -25,7 +25,7 @@ interface SeoAuditResult {
     items: {
       id: string;
       name: string;
-      status: "pass" | "warning" | "fail";
+      status: "pass" | "warning" | "fail" | "info";
       score: number;
       maxScore: number;
       detail: string;
@@ -139,7 +139,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     searchVolume: "월간 조회량",
     contentGapsTitle: "콘텐츠 사각지대 분석",
     contentGapsSub: "제로클릭 시대, 아직 아무도 선점하지 않은 AI 인용 기회 키워드",
-    geoTriAxisTitle: "GEO 3축 진단 (RxA/F)",
+    geoTriAxisTitle: "GEO(Generative Engine Optimization) 3축 진단",
     geoTriAxisSub: "AI가 답변을 생성할 때 참고하는 3가지 기준: 적합성 · 권위 · 마찰",
     geoTriAxisWhy: "환자의 76%가 AI 답변을 클릭 없이 소비합니다. AI가 답변에 병원을 포함시키려면 이 3축이 모두 충족되어야 합니다.",
     geoRelevance: "적합성 (Relevance)",
@@ -1841,7 +1841,7 @@ function buildExecutiveSummaryPage(t: Record<string, string>, url: string, score
       <!-- 위기 선언 인포박스 -->
       <div class="info-box info-box-danger" style="border-left-width:6px;padding:14px 18px;margin-top:14px;">
         <div style="font-size:13pt;font-weight:600;color:var(--text);line-height:1.7;">
-          ${esc(hospitalName)}${lang === 'ko' ? '은 현재 매월 약 ' : ' is currently missing approximately '}<span style="color:var(--danger);font-size:16pt;font-weight:700;">${missedPatients}${lang === 'ko' ? '명' : ''}</span>${lang === 'ko' ? '의 웹사이트 유입 누락 환자와 ' : ' missed website visitors and '}<span style="color:var(--danger);font-size:16pt;font-weight:700;">${esc(revenueLoss)}</span>${lang === 'ko' ? '의 웹사이트 전환 매출 손실이 발생하고 있습니다' : ' in website conversion revenue loss every month'}
+          ${esc(hospitalName)}${lang === 'ko' ? '은 현재 매월 약 ' : ' is currently missing approximately '}<span style="color:var(--danger);font-size:16pt;font-weight:700;">${missedPatients}${lang === 'ko' ? '명' : ''}</span>${lang === 'ko' ? '의 웹사이트 유입 누락 환자와 ' : ' missed website visitors and '}<span style="color:var(--danger);font-size:16pt;font-weight:700;">${esc(revenueLoss)}</span>${lang === 'ko' ? '의 잠재 매출 기회가 존재합니다' : ' in potential revenue opportunity every month'}
         </div>
       </div>
 
@@ -1850,7 +1850,7 @@ function buildExecutiveSummaryPage(t: Record<string, string>, url: string, score
         <div class="card card-danger-top" style="text-align:center;padding:18px 14px;">
           <div style="margin-bottom:8px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
           <div style="font-size:32pt;font-weight:700;color:var(--danger);line-height:1;">${esc(revenueLoss)}</div>
-          <div style="font-size:10px;font-weight:500;color:var(--text);margin-top:6px;">${lang === 'ko' ? '예상 웹사이트 전환 매출 손실' : 'Est. Website Conversion Revenue Loss'}</div>
+          <div style="font-size:10px;font-weight:500;color:var(--text);margin-top:6px;">${lang === 'ko' ? '예상 잠재 매출 기회' : 'Est. Revenue Opportunity'}</div>
           <div style="font-size:9px;color:var(--gray-3);margin-top:4px;">${lang === 'ko' ? `웹사이트 유입 누락 환자 ${missedPatients}명 기준` : `Based on ${missedPatients} missed website visitors`}</div>
         </div>
         <div class="card card-danger-top" style="text-align:center;padding:18px 14px;">

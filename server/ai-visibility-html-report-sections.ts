@@ -960,7 +960,8 @@ export function buildMarketIntelligencePage(
     "User Experience": 55, "Authority": 45, "Local SEO": 52,
   };
 
-  const catRows = categories.map(c => {
+  const catRows = categories.map(_c => {
+    const c = { ..._c, score: Math.min(_c.score, _c.maxScore) };
     const catLabel = catName(c.name, lang);
     const benchmark = benchmarks[c.name] ?? benchmarks[catLabel] ?? 50;
     const achievement = c.maxScore > 0 ? Math.round((c.score / c.maxScore) * 100) : 0;
@@ -1863,7 +1864,7 @@ export function buildRoiProjectionPage(
 
       ${revenueImpact ? `
       <div class="highlight-card mt-16" style="background:linear-gradient(135deg, var(--navy-900) 0%, var(--navy-700) 100%);color:white;border-radius:12px;padding:16px 20px;text-align:center;">
-        <div style="font-size:10px;color:var(--gray-400);margin-bottom:6px;">${lang === "ko" ? "예상 웹사이트 전환 매출 손실" : "Est. Website Conversion Revenue Loss"}</div>
+        <div style="font-size:10px;color:var(--gray-400);margin-bottom:6px;">${lang === "ko" ? "예상 잠재 매출 기회" : "Est. Revenue Opportunity"}</div>
         <div style="font-size:22px;font-weight:700;color:var(--teal-400);">${esc(revenueImpact)}</div>
         <div style="font-size:9px;color:var(--gray-400);margin-top:6px;">${lang === "ko" ? "* AI 가시성 최적화로 이 중 상당 부분을 회복할 수 있습니다" : "* A significant portion can be recovered through AI visibility optimization"}</div>
       </div>` : ""}

@@ -30,7 +30,7 @@ import { sampleImages, extractImagesFromHtml } from "./utils/image-sampling";
 const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 // ── 타입 정의 ──
-export type SeoCheckStatus = "pass" | "fail" | "warning";
+export type SeoCheckStatus = "pass" | "fail" | "warning" | "info";
 
 export interface SeoCheckItem {
   id: string;
@@ -60,6 +60,7 @@ export interface SeoAnalysisResult {
     passed: number;
     warnings: number;
     failed: number;
+    info: number;
   };
   /** Site name extracted from og:site_name or <title> tag */
   siteName?: string;
@@ -1530,6 +1531,12 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     maxScoreTotal = categories.reduce((s, c) => s + c.maxScore, 0);
   }
 
+  // 최종 안전장치: 모든 카테고리에서 score <= maxScore 보장
+  finalCategories = finalCategories.map(c => ({
+    ...c,
+    score: Math.min(c.score, c.maxScore),
+  }));
+
   // #19 소수점 반올림 규칙 통일: 최종 표시에만 반올림 적용
   const percent = maxScoreTotal > 0 ? displayScore((totalScore / maxScoreTotal) * 100) : 0;
 
@@ -1566,6 +1573,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
       passed: allItems.filter(i => i.status === "pass").length,
       warnings: allItems.filter(i => i.status === "warning").length,
       failed: allItems.filter(i => i.status === "fail").length,
+      info: allItems.filter(i => i.status === "info").length,
     },
     siteName: extractedSiteName,
     faviconUrl: absoluteFavicon,

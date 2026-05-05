@@ -147,10 +147,12 @@ export function applySpecialtyWeights(
 ): { weightedCategories: typeof categories; totalScore: number; maxScore: number } {
   const weightedCategories = categories.map(cat => {
     const weight = getCategoryWeight(cat.name, specialty);
+    const weightedMax = Math.round(cat.maxScore * weight);
+    const weightedScore = Math.min(Math.round(cat.score * weight), weightedMax);
     return {
       ...cat,
-      score: Math.round(cat.score * weight),
-      maxScore: Math.round(cat.maxScore * weight),
+      score: weightedScore,
+      maxScore: weightedMax,
       weight,
     };
   });

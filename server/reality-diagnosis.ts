@@ -322,12 +322,13 @@ ${trafficContext}
 2. 기술 용어는 사용하되 반드시 쉬운 설명을 병기. 예: "Schema Markup(검색엔진이 병원 정보를 자동으로 읽는 코드) 미설정".
 3. 정량적 데이터를 기반으로 서술. "노출이 안 된다" 대신 "10개 핵심 키워드 중 8개에서 미노출 (노출률 20%)".
 4. 경쟁사를 직접 언급하지 않고 시장 환경의 관점에서 서술.
-5. 개선 방안은 구체적이고 실행 가능하게 작성하고, 개선 시 기대 효과를 수치로 제시.
+5. 개선 방안은 구체적이고 실행 가능하게 작성하고, 개선 시 기대 효과를 범위로 제시(예: "10~20%p 개선 가능"). 단정적 수치 대신 "~할 수 있습니다" 표현 사용.
 6. 각 항목마다 "왜 이것이 중요한지"를 비전문가도 이해할 수 있게 1문장으로 설명.
 7. 기존 마케팅 대행사가 커버하지 못하는 AI 최적화 영역을 자연스럽게 부각.
 8. 진료 분야 일관성: 보고서 전체에서 병원의 진료 분야를 일관되게 유지하세요. 메타 키워드와 콘텐츠 전략이 병원의 주력 진료과와 일치해야 합니다.
 9. 출력 금지 표현: "(왜 중요한가: ...)", "(참고: ...)", "(노트: ...)" 같은 메타 코멘트/사고 과정 표현을 절대 출력하지 마세요. 최종 보고서에 인쇄되는 텍스트입니다.
-10. HTML 태그 금지: </td>, <br>, <p> 등 HTML 태그를 절대 포함하지 마세요.`;
+10. HTML 태그 금지: </td>, <br>, <p> 등 HTML 태그를 절대 포함하지 마세요.
+11. 톤 조절: "위기", "심각한 손실", "즉각 조치 필요" 등 공포 유발 표현을 지양하세요. 대신 "개선 기회", "잠재력 미활용", "최적화 여지" 등 긍정적 프레이밍을 사용하세요. 문제를 지적하되 해결 가능성을 강조하는 톤을 유지하세요.`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -387,7 +388,7 @@ contentGaps: 10개. 아직 아무도 점유하지 않은 AI 인용 기회 키워
 actionItems: 9개 (각 단계별 3개씩). 각각:
   priority: "즉시" | "단기" | "중장기" (반드시 이 3가지 중 하나)
   action: 구체적 실행 항목 (2-3문장, 실제 작업 내용 상세히)
-  expectedImpact: 기대 효과 (숫자 포함, 예: "네이버 지역 검색 노출률 20%p 상승, 월 50명 이상의 신규 환자 유입 기대")
+  expectedImpact: 기대 효과 (범위 표기, 예: "네이버 지역 검색 노출률 10~20%p 개선 가능, 월 30~60명의 추가 유입 가능성")
 
 closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요약 2)주요 강점 3)핵심 개선 과제 4)실행 우선순위 5)종합 전망. 각 단락 사이에 빈 줄(\\n\\n)로 구분. 마크다운 서식 사용하지 않기.`;
 
@@ -802,8 +803,8 @@ marketingDirection: 마케팅 활동 방향 가이드.
 
 mybiseoServices: mybiseo 서비스 소개.
   headline: 핵심 메시지 (1문장). 이 병원의 진단 결과를 반영한 맞춤형 메시지.
-  services: 12개 서비스. 각각:
-    name: 서비스명. 다음 12개 중 선택:
+  services: 진단 결과에 가장 관련성 높은 5개 서비스만 선별. 각각:
+    name: 서비스명. 다음 12개 중 이 병원에 가장 필요한 5개만 선택:
       1. "AI 가시성 진단" 2. "AI 콘텐츠 최적화" 3. "AI 최적화 웹사이트 개발" 4. "AI 마케팅 인프라"
       5. "네이버 Cue: 대응" 6. "구글 AI Overview 대응" 7. "ChatGPT/Perplexity 최적화" 8. "답변 캡슐 최적화"
       9. "구조화 데이터 설계" 10. "4채널 신뢰 통합" 11. "AI 시대 CRM" 12. "성과 분석 대시보드"
@@ -915,16 +916,16 @@ mybiseoServices: mybiseo 서비스 소개.
 const SPECIALTY_REVENUE_PARAMS: Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }> = (() => {
   const params: Record<string, { conversionRate: number; avgRevenuePerPatient: number }> = {};
   for (const [key, profile] of Object.entries(SPECIALTY_REVENUE_PROFILES)) {
-    // conversionRate: 온라인 유입 → 실제 내원 전환율 (targetROI 기반 추정)
-    const conversionRate = Math.min(0.10, Math.max(0.03, profile.targetROI / 100));
-    // avgRevenuePerPatient: 신환 1명당 평균 매출 (만원)
-    params[key] = { conversionRate, avgRevenuePerPatient: profile.avgNewPatientRevenue };
+    // conversionRate: 의료 업계 웹사이트 전환율 벤치마크 1~3% (보수적 추정)
+    const conversionRate = Math.min(0.03, Math.max(0.01, profile.targetROI / 300));
+    // avgRevenuePerPatient: 평균 방문당 매출 (만원) - 신환이 아닌 전체 평균 사용
+    params[key] = { conversionRate, avgRevenuePerPatient: profile.avgRevenuePerVisit };
   }
   return params as Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }>;
 })();
 
-const REVENUE_FLOOR = 3000; // 최소 3,000만원
-const REVENUE_CAP = 10000;  // 최대 1억원 (10,000만원)
+// REVENUE_FLOOR 제거: 실제 계산값 그대로 표시 (인위적 최소값 없음)
+const REVENUE_CAP = 15000;  // 최대 1.5억원 (비현실적 수치 방지)
 
 /**
  * 진료과목별 고정 공식으로 매출 손실 계산
@@ -935,17 +936,21 @@ function calculateDeterministicRevenueLoss(missedPatients: number, specialty: st
   const resolved = resolveSpecialty(specialty);
   const params = SPECIALTY_REVENUE_PARAMS[resolved] || SPECIALTY_REVENUE_PARAMS["기타"];
   const rawManwon = Math.round(missedPatients * params.conversionRate * params.avgRevenuePerPatient);
-  const clampedManwon = Math.max(REVENUE_FLOOR, Math.min(REVENUE_CAP, rawManwon));
+  const clampedManwon = Math.min(REVENUE_CAP, Math.max(100, rawManwon)); // 최소 100만원 (비현실적 0 방지)
 
-  // 포맷팅: 1억 이상이면 "X억Y,000만원", 아니면 "X,XXX만원"
+  // 포맷팅: 범위 표기로 변경 (±30% 범위)
+  const lowerManwon = Math.round(clampedManwon * 0.7);
+  const upperManwon = Math.round(clampedManwon * 1.3);
   let formatted: string;
-  if (clampedManwon >= 10000) {
-    const eok = Math.floor(clampedManwon / 10000);
-    const remainder = clampedManwon % 10000;
-    formatted = remainder > 0 ? `월 약 ${eok}억${remainder.toLocaleString()}만원` : `월 약 ${eok}억원`;
-  } else {
-    formatted = `월 약 ${clampedManwon.toLocaleString()}만원`;
-  }
+  const formatManwon = (v: number) => {
+    if (v >= 10000) {
+      const eok = Math.floor(v / 10000);
+      const rem = v % 10000;
+      return rem > 0 ? `${eok}억${Math.round(rem / 1000) * 1000 > 0 ? (Math.round(rem / 100) * 100).toLocaleString() : ""}만원` : `${eok}억원`;
+    }
+    return `${Math.round(v / 100) * 100 > 0 ? (Math.round(v / 100) * 100).toLocaleString() : v.toLocaleString()}만원`;
+  };
+  formatted = `월 약 ${formatManwon(lowerManwon)}~${formatManwon(upperManwon)}`;
 
   return { revenueLossManwon: clampedManwon, formatted };
 }
@@ -1094,8 +1099,9 @@ export async function generateRealityDiagnosis(
         hl = hl.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
         hl = hl.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
       }
-      hl = hl.replace(/잠재\s*환자/g, '미유입 잠재 환자');
+      hl = hl.replace(/(?<!미유입\s*)잠재\s*환자/g, '미유입 잠재 환자');
       hl = hl.replace(/이탈\s*환자/g, '미유입 잠재 환자');
+      hl = hl.replace(/미유입\s+미유입/g, '미유입'); // 중복 방지
       return hl;
     })(),
     executiveSummary: (() => {
@@ -1128,10 +1134,11 @@ export async function generateRealityDiagnosis(
       // "잠재 환자 유입 기회" 패턴을 먼저 잡아 "유입" 중복 방지
       summary = summary.replace(/잠재\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
       summary = summary.replace(/이탈\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
-      summary = summary.replace(/잠재\s*환자/g, '웹사이트 유입 누락 환자');
+      summary = summary.replace(/(?<!누락\s*)잠재\s*환자/g, '웹사이트 유입 누락 환자');
       summary = summary.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
-      summary = summary.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
-      summary = summary.replace(/매출\s*기회\s*손실/g, '웹사이트 전환 매출 손실');
+      summary = summary.replace(/누락\s+누락/g, '누락'); // 중복 방지
+      summary = summary.replace(/예상\s*매출\s*손실/g, '예상 잠재 매출 기회');
+      summary = summary.replace(/매출\s*기회\s*손실/g, '잠재 매출 기회');
       return summary;
     })(),
     keyFindings: (() => {
@@ -1209,10 +1216,11 @@ export async function generateRealityDiagnosis(
       // 표현 개선: "잠재 환자 유입 기회" 패턴을 먼저 잡아 "유입" 중복 방지
       cs = cs.replace(/잠재\s*환자\s*유입\s*기회/g, '미유입 잠재 환자 기회');
       cs = cs.replace(/이탈\s*환자\s*유입\s*기회/g, '미유입 잠재 환자 기회');
-      cs = cs.replace(/잠재\s*환자/g, '미유입 잠재 환자');
+      cs = cs.replace(/(?<!미유입\s*)잠재\s*환자/g, '미유입 잠재 환자');
       cs = cs.replace(/이탈\s*환자/g, '미유입 잠재 환자');
-      cs = cs.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
-      cs = cs.replace(/매출\s*기회\s*손실/g, '웹사이트 전환 매출 손실');
+      cs = cs.replace(/미유입\s+미유입/g, '미유입'); // 중복 방지
+      cs = cs.replace(/예상\s*매출\s*손실/g, '예상 잠재 매출 기회');
+      cs = cs.replace(/매출\s*기회\s*손실/g, '잠재 매출 기회');
       return cs;
     })(),
     // GEO + AI
@@ -1236,7 +1244,7 @@ export async function generateRealityDiagnosis(
     websiteTransformGuide: strategy.websiteTransformGuide || FALLBACK_STRATEGY.websiteTransformGuide,
     contentStrategy: strategy.contentStrategy || FALLBACK_STRATEGY.contentStrategy,
     marketingDirection: strategy.marketingDirection || FALLBACK_STRATEGY.marketingDirection,
-    mybiseoServices: strategy.mybiseoServices || FALLBACK_STRATEGY.mybiseoServices,
+    mybiseoServices: (() => { const svc = strategy.mybiseoServices || FALLBACK_STRATEGY.mybiseoServices; return { ...svc, services: (svc.services || []).slice(0, 5) }; })(),
     // #34 AI 가시성 점수
     aiVisibilityScore: aiVisibility.score,
     aiVisibilityFactors: aiVisibility.factors,

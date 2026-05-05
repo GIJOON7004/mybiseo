@@ -23,15 +23,15 @@ describe("Deterministic Revenue Loss Calculation", () => {
     }
   });
 
-  it("defines REVENUE_FLOOR and REVENUE_CAP constants", () => {
-    expect(rdSource).toContain("REVENUE_FLOOR = 3000");
-    expect(rdSource).toContain("REVENUE_CAP = 10000");
+  it("defines REVENUE_CAP constant (FLOOR removed)", () => {
+    expect(rdSource).toContain("REVENUE_CAP = 15000");
+    expect(rdSource).not.toContain("REVENUE_FLOOR = 3000");
   });
 
   it("defines calculateDeterministicRevenueLoss function", () => {
     expect(rdSource).toContain("function calculateDeterministicRevenueLoss");
     expect(rdSource).toContain("resolveSpecialty(specialty)");
-    expect(rdSource).toContain("Math.max(REVENUE_FLOOR");
+    expect(rdSource).toContain("REVENUE_CAP");
     expect(rdSource).toContain("Math.min(REVENUE_CAP");
   });
 
@@ -82,8 +82,8 @@ describe("KPI Label Changes in PDF Report", () => {
     expect(pdfSource).not.toContain('"예상 누락 환자"');
   });
 
-  it("uses '예상 웹사이트 전환 매출 손실' label instead of '예상 매출 손실'", () => {
-    expect(pdfSource).toContain("예상 웹사이트 전환 매출 손실");
+  it("uses '예상 잠재 매출 기회' label instead of '예상 매출 손실'", () => {
+    expect(pdfSource).toContain("예상 잠재 매출 기회");
     expect(pdfSource).not.toContain('"예상 매출 손실"');
   });
 
@@ -98,8 +98,8 @@ describe("KPI Label Changes in HTML Report", () => {
     "utf-8"
   );
 
-  it("uses '예상 웹사이트 전환 매출 손실' in KPI card", () => {
-    expect(htmlSource).toContain("예상 웹사이트 전환 매출 손실");
+  it("uses '예상 잠재 매출 기회' in KPI card", () => {
+    expect(htmlSource).toContain("예상 잠재 매출 기회");
   });
 
   it("uses '웹사이트 유입 누락 환자' in danger infobox", () => {
@@ -126,8 +126,8 @@ describe("KPI Label Changes in HTML Report Sections", () => {
     expect(sectionsSource).toContain("미유입 잠재 환자 분석");
   });
 
-  it("uses '예상 웹사이트 전환 매출 손실' in highlight card", () => {
-    expect(sectionsSource).toContain("예상 웹사이트 전환 매출 손실");
+  it("uses '예상 잠재 매출 기회' in highlight card", () => {
+    expect(sectionsSource).toContain("예상 잠재 매출 기회");
   });
 
   it("does not contain old '이탈 환자 분석' label", () => {

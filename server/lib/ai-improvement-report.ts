@@ -420,7 +420,7 @@ function generateFallbackReport(
     category: "기술SEO",
     title: "구조화 데이터 및 E-E-A-T 강화",
     description: "AI 검색엔진은 구조화된 데이터와 전문성(E-E-A-T)을 중시합니다. 병원 웹사이트의 기술적 SEO를 강화하면 AI 추천 확률이 높아집니다.",
-    expectedImpact: "AI 인용 점수 15~25점 상승 가능",
+    expectedImpact: "AI 인용 점수 10~20점 개선 가능(경쟁 환경에 따라 상이)",
     actionItems: [
       "Schema.org MedicalOrganization 마크업 추가",
       "의료진 프로필 페이지에 Physician 스키마 적용",
@@ -462,7 +462,7 @@ function generateFallbackReport(
     category: "브랜딩",
     title: "AI 시대 브랜드 인지도 구축",
     description: "장기적으로 AI가 자연스럽게 추천하는 브랜드가 되기 위한 전략이 필요합니다.",
-    expectedImpact: "6개월~1년 내 AI 인용 점수 30점 이상 상승",
+    expectedImpact: "6개월~1년 내 AI 인용 점수 15~30점 개선 가능(경쟁 환경에 따라 상이)",
     actionItems: [
       "의료 전문 매체 기고/인터뷰 활동",
       "학술 발표 및 연구 활동 강화",

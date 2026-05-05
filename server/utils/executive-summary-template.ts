@@ -39,12 +39,12 @@ export function generateTemplatedSummary(ctx: SummaryContext): string {
 
   // 3문장: 비즈니스 영향
   const impactSentence = missedPatientsMonthly > 0
-    ? `이로 인해 월 약 ${missedPatientsMonthly}명의 웹사이트 유입 누락 환자가 발생하고 있으며, ${revenueLossFormatted} 상당의 전환 매출 손실이 추정됩니다.`
+    ? `이로 인해 월 약 ${missedPatientsMonthly}명의 웹사이트 유입 누락 환자가 발생하고 있으며, ${revenueLossFormatted} 상당의 잠재 매출 기회가 존재합니다.`
     : `현재 검색 노출 부족으로 인한 잠재 환자 유입 기회가 상당 부분 누락되고 있습니다.`;
 
   // 4문장: 개선 방향
   const improvementSentence = keyIssuesCount > 0
-    ? `총 ${keyIssuesCount}개의 개선 과제가 발견되었으며${topIssue ? `, 특히 ${topIssue}이(가) 가장 시급합니다` : ``}. 체계적 개선을 통해 3~6개월 내 가시성 점수 20~30점 상승이 기대됩니다.`
+    ? `총 ${keyIssuesCount}개의 개선 과제가 발견되었으며${topIssue ? `, 특히 ${topIssue}이(가) 가장 시급합니다` : ``}. 체계적 개선 시 3~6개월 내 가시성 점수 10~25점 개선이 가능할 수 있습니다(경쟁 환경에 따라 달라짐).`
     : `체계적인 AI 가시성 최적화를 통해 검색 노출과 환자 유입을 크게 개선할 수 있습니다.`;
 
   return `${statusSentence} ${exposureSentence} ${impactSentence} ${improvementSentence}`;

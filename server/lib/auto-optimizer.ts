@@ -34,7 +34,7 @@ interface SeoCheckItem {
   id: string;
   category: string;
   name: string;
-  status: "pass" | "warning" | "fail";
+  status: "pass" | "warning" | "fail" | "info";
   score: number;
   maxScore: number;
   detail: string;

@@ -53,7 +53,7 @@ interface SeoAuditResult {
     items: {
       id: string;
       name: string;
-      status: "pass" | "warning" | "fail";
+      status: "pass" | "warning" | "fail" | "info";
       score: number;
       maxScore: number;
       detail: string;
@@ -317,7 +317,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     contentGapsNormal: "보통",
     contentGapsHard: "어려움",
     contentGapsRationale: "근거",
-    geoTriAxisTitle: "GEO 3축 진단 (RxA/F)",
+    geoTriAxisTitle: "GEO(Generative Engine Optimization) 3축 진단",
     geoTriAxisSub: "AI가 답변을 생성할 때 참고하는 3가지 기준: 적합성 · 권위 · 마찰",
     geoTriAxisWhy: "▶ 환자의 약 70~80%가 AI 답변을 클릭 없이 소비합니다 (Gartner, 2024). AI가 답변에 병원을 포함시키려면 이 3축이 모두 충족되어야 합니다.",
     geoRelevance: "적합성 (Relevance)",
@@ -1195,11 +1195,11 @@ export async function generateAiVisibilityReport(
       },
       {
         value: revenueValue,
-        label: language === "ko" ? (isHighScore ? "추가 성장 기회 금액" : "예상 웹사이트 전환 매출 손실") : "Est. Website Conversion Revenue Loss",
+        label: language === "ko" ? (isHighScore ? "추가 성장 기회 금액" : "예상 잠재 매출 기회") : "Est. Revenue Opportunity",
         color: isHighScore ? C.pass : C.fail,
       },
       {
-        value: rd.urgencyLevel || grade,
+        value: language === "ko" ? ({ critical: "시급", high: "높음", medium: "보통", low: "낮음" }[rd.urgencyLevel as string] || rd.urgencyLevel || grade) : (rd.urgencyLevel || grade),
         label: language === "ko" ? "긴급도" : "Urgency",
         color: score < 40 ? C.fail : score < 60 ? C.warn : C.pass,
       },
@@ -1224,8 +1224,8 @@ export async function generateAiVisibilityReport(
       const resolvedSpec = resolveSpecialty(rd.specialty);
       const revProfile = SPECIALTY_REVENUE_PROFILES[resolvedSpec] || SPECIALTY_REVENUE_PROFILES["기타"];
       if (revProfile) {
-        const convRate = Math.min(0.10, Math.max(0.03, revProfile.targetROI / 100));
-        const formulaText = `* 매출 추정 기준: ${rd.specialty} 평균 객단가 ${revProfile.avgNewPatientRevenue}만원 × 온라인 전환율 ${(convRate * 100).toFixed(0)}%`;
+        const convRate = Math.min(0.03, Math.max(0.01, revProfile.targetROI / 300));
+        const formulaText = `* 산식: 월간 미유입 환자 × 전환율(${(convRate * 100).toFixed(1)}%) × 평균 객단가(${revProfile.avgRevenuePerVisit}만원) | ±30% 범위 표시`;
         doc.font("KrRegular").fontSize(6).fillColor(C.textLight)
           .text(formulaText, ML, y, { width: CW, align: "right" });
         y += 10;
@@ -1297,7 +1297,8 @@ export async function generateAiVisibilityReport(
     y += 26;
 
   // 테이블 행
-  auditResult.categories.forEach((cat, idx) => {
+  auditResult.categories.forEach((_cat, idx) => {
+    const cat = { ..._cat, score: Math.min(_cat.score, _cat.maxScore) };
     y = ensureSpace(doc, y, 30, hCtx);
     const rowH = 30;
     const bgColor = idx % 2 === 0 ? C.white : C.bg;
@@ -1354,7 +1355,8 @@ export async function generateAiVisibilityReport(
   y += 4;
 
   // v3: 카테고리 요약 미니바 차트 먼저 표시
-  auditResult.categories.forEach((cat, ci) => {
+  auditResult.categories.forEach((_cat, ci) => {
+    const cat = { ..._cat, score: Math.min(_cat.score, _cat.maxScore) };
     const catName = language === "ko" ? (CAT_NAMES_KO[cat.name] || cat.name) : cat.name;
     const catPct = cat.maxScore > 0 ? Math.min(100, Math.round((cat.score / cat.maxScore) * 100)) : 0;
     // 달성률 기반 컬러: 0-39% 빨강, 40-59% 노랑, 60-79% 파랑, 80%+ 초록
@@ -1379,7 +1381,8 @@ export async function generateAiVisibilityReport(
   y += 8;
 
   // v3: fail/warning 항목만 표시, 카테고리당 상위 5개로 제한 (페이지 압축)
-  auditResult.categories.forEach((cat) => {
+  auditResult.categories.forEach((_cat) => {
+    const cat = { ..._cat, score: Math.min(_cat.score, _cat.maxScore) };
     const allProblems = cat.items.filter(i => i.status === "fail" || i.status === "warning");
     if (allProblems.length === 0) return;
     // 실패 우선, 점수 낮은 순으로 정렬 후 상위 5개만
@@ -1553,8 +1556,8 @@ export async function generateAiVisibilityReport(
       const revenueDisplay = (language === "ko" && revenueText && !revenueText.includes("월"))
         ? `월 ${revenueText}` : revenueText;
       const mpText = language === "ko"
-        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}명의 잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다. 예상 웹사이트 전환 매출 손실: ${revenueDisplay}`
-        : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} potential patients per month cannot find the hospital through the website. Estimated website conversion revenue loss: ${revenueDisplay}`;
+        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}명의 잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다. 예상 잠재 매출 기회: ${revenueDisplay}`
+        : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} potential patients per month cannot find the hospital through the website. Estimated revenue opportunity: ${revenueDisplay}`;
       y = drawInfoBox(doc, y, mpText, { accentColor: C.fail, bgColor: C.redTint, icon: "!" });
 
       // v6: reasoning 텍스트 삭제됨 (사용자 요청)

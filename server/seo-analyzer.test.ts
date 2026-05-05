@@ -565,7 +565,7 @@ describe("SEO Analyzer v3 — 구조 검증 테스트", () => {
         expect(item).toHaveProperty("detail");
         expect(item).toHaveProperty("recommendation");
         expect(item).toHaveProperty("impact");
-        expect(["pass", "fail", "warning"]).toContain(item.status);
+        expect(["pass", "fail", "warning", "info"]).toContain(item.status);
         expect(item.score).toBeLessThanOrEqual(item.maxScore);
         expect(item.score).toBeGreaterThanOrEqual(0);
       }
@@ -578,7 +578,7 @@ describe("SEO Analyzer v3 — 구조 검증 테스트", () => {
 
     const result = await analyzeSeo("https://test-summary-count-v3.com");
     const totalItems = result.categories.reduce((sum, c) => sum + c.items.length, 0);
-    expect(result.summary.passed + result.summary.warnings + result.summary.failed).toBe(totalItems);
+    expect(result.summary.passed + result.summary.warnings + result.summary.failed + (result.summary.info || 0)).toBe(totalItems);
   });
 
   it("전체 항목 수가 40개 이상이어야 한다", async () => {

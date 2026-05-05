@@ -151,9 +151,9 @@ describe("진단 알고리즘 v4 - 추가 항목 모듈", () => {
       expect(item).toHaveProperty("detail");
       expect(item).toHaveProperty("recommendation");
       expect(item).toHaveProperty("impact");
-      expect(["pass", "fail", "warning"]).toContain(item.status);
+      expect(["pass", "fail", "warning", "info"]).toContain(item.status);
       expect(item.score).toBeGreaterThanOrEqual(0);
-      expect(item.maxScore).toBeGreaterThan(0);
+      if (item.status !== "info") { expect(item.maxScore).toBeGreaterThan(0); } else { expect(item.maxScore).toBe(0); }
       expect(item.score).toBeLessThanOrEqual(item.maxScore);
     }
   });

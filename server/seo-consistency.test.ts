@@ -78,12 +78,12 @@ describe("SEO 진단 일관성 - PageSpeed 항목 고정", () => {
     const items = generateAdditionalItems(makeCtx(null));
     const cwvItems = items.filter(i => CWV_IDS.includes(i.id));
     expect(cwvItems).toHaveLength(5);
-    // 모든 항목의 maxScore가 동일해야 한다 (항목 수 고정)
-    expect(cwvItems.find(i => i.id === "perf-cwv-lcp")!.maxScore).toBe(5);
-    expect(cwvItems.find(i => i.id === "perf-cwv-fcp")!.maxScore).toBe(4);
-    expect(cwvItems.find(i => i.id === "perf-cwv-cls")!.maxScore).toBe(5);
-    expect(cwvItems.find(i => i.id === "perf-cwv-tbt")!.maxScore).toBe(4);
-    expect(cwvItems.find(i => i.id === "perf-pagespeed-score")!.maxScore).toBe(5);
+    // PageSpeed 실패 시 maxScore가 0이어야 한다 (점수 계산에서 제외)
+    expect(cwvItems.find(i => i.id === "perf-cwv-lcp")!.maxScore).toBe(0);
+    expect(cwvItems.find(i => i.id === "perf-cwv-fcp")!.maxScore).toBe(0);
+    expect(cwvItems.find(i => i.id === "perf-cwv-cls")!.maxScore).toBe(0);
+    expect(cwvItems.find(i => i.id === "perf-cwv-tbt")!.maxScore).toBe(0);
+    expect(cwvItems.find(i => i.id === "perf-pagespeed-score")!.maxScore).toBe(0);
   });
 
   it("PageSpeed 실패 시 CWV 항목의 score는 모두 0이어야 한다", () => {
@@ -94,11 +94,11 @@ describe("SEO 진단 일관성 - PageSpeed 항목 고정", () => {
     }
   });
 
-  it("PageSpeed 실패 시 CWV 항목의 status는 모두 fail이어야 한다", () => {
+  it("PageSpeed 실패 시 CWV 항목의 status는 모두 info이어야 한다", () => {
     const items = generateAdditionalItems(makeCtx(null));
     const cwvItems = items.filter(i => CWV_IDS.includes(i.id));
     for (const item of cwvItems) {
-      expect(item.status).toBe("fail");
+      expect(item.status).toBe("info");
     }
   });
 
@@ -116,12 +116,12 @@ describe("SEO 진단 일관성 - PageSpeed 항목 고정", () => {
     expect(itemsWithPS.length).toBe(itemsWithoutPS.length);
   });
 
-  it("PageSpeed 성공/실패 시 maxScore 합계가 동일해야 한다", () => {
-    const itemsWithPS = generateAdditionalItems(makeCtx(mockPageSpeed));
+  it("PageSpeed 실패 시 CWV 항목의 maxScore가 0이어야 한다", () => {
     const itemsWithoutPS = generateAdditionalItems(makeCtx(null));
-    const maxScoreWith = itemsWithPS.reduce((s, i) => s + i.maxScore, 0);
-    const maxScoreWithout = itemsWithoutPS.reduce((s, i) => s + i.maxScore, 0);
-    expect(maxScoreWith).toBe(maxScoreWithout);
+    const cwvItems = itemsWithoutPS.filter(i => CWV_IDS.includes(i.id));
+    for (const item of cwvItems) {
+      expect(item.maxScore).toBe(0);
+    }
   });
 
   it("PageSpeed 성공 시 실제 점수가 반영되어야 한다", () => {
