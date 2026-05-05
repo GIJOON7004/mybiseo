@@ -1119,12 +1119,15 @@ export async function generateRealityDiagnosis(
         topIssue: (core.keyFindings || [])[0],
       };
       let summary = ensureExecutiveSummary(core.executiveSummary, summaryCtx);
-      // 수치 동기화
+      // 수치 동기화 ("월 월" 중복 방지: 2차 replace에서 이미 치환된 부분 스킵)
       if (mp.estimatedMonthly > 0) {
-        summary = summary.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, revLoss);
-        summary = summary.replace(/약\s*[\d,]+만원(\s*상당)?/g, revLoss);
+        summary = summary.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+만원(\s*상당)?/g, revLoss);
+        summary = summary.replace(/(?<!월\s)(?<!월)약\s*[\d,]+만원(\s*상당)?/g, revLoss);
         summary = summary.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, revLoss);
       }
+      // "잠재 환자 유입 기회" 패턴을 먼저 잡아 "유입" 중복 방지
+      summary = summary.replace(/잠재\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
+      summary = summary.replace(/이탈\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
       summary = summary.replace(/잠재\s*환자/g, '웹사이트 유입 누락 환자');
       summary = summary.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
       summary = summary.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
@@ -1136,13 +1139,13 @@ export async function generateRealityDiagnosis(
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0 && findings.length > 0) {
         const { formatted: revLossSync } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
-        // LLM이 생성한 매출 수치를 코드 기반 계산값으로 동기화
+        // LLM이 생성한 매출 수치를 코드 기반 계산값으로 동기화 ("월 월" 중복 방지)
         return findings.map((f: string) => {
           let result = f;
-          result = result.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, revLossSync);
-          result = result.replace(/약\s*[\d,]+만원(\s*상당)?/g, revLossSync);
+          result = result.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+만원(\s*상당)?/g, revLossSync);
+          result = result.replace(/(?<!월\s)(?<!월)약\s*[\d,]+만원(\s*상당)?/g, revLossSync);
           result = result.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, revLossSync);
-          result = result.replace(/월\s*약?\s*[\d,]+억원/g, revLossSync);
+          result = result.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+억원/g, revLossSync);
           return result;
         });
       }
@@ -1187,8 +1190,8 @@ export async function generateRealityDiagnosis(
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0) {
         const { formatted, revenueLossManwon } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
-        cs = cs.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, formatted);
-        cs = cs.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
+        cs = cs.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+만원(\s*상당)?/g, formatted);
+        cs = cs.replace(/(?<!월\s)(?<!월)약\s*[\d,]+만원(\s*상당)?/g, formatted);
         cs = cs.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
         // "연간 약 X억Y만원" 패턴도 동적 계산값으로 치환 (월액 xd7 12)
         const annualManwon = revenueLossManwon * 12;
@@ -1203,7 +1206,9 @@ export async function generateRealityDiagnosis(
         cs = cs.replace(/연간\s*약?\s*[\d,]+억[\d,]*만?원/g, annualFormatted);
         cs = cs.replace(/연간\s*약?\s*[\d,]+만원/g, annualFormatted);
       }
-      // 표현 개선: "웹사이트 유입 누락 환자" 대신 더 자연스러운 표현 사용
+      // 표현 개선: "잠재 환자 유입 기회" 패턴을 먼저 잡아 "유입" 중복 방지
+      cs = cs.replace(/잠재\s*환자\s*유입\s*기회/g, '미유입 잠재 환자 기회');
+      cs = cs.replace(/이탈\s*환자\s*유입\s*기회/g, '미유입 잠재 환자 기회');
       cs = cs.replace(/잠재\s*환자/g, '미유입 잠재 환자');
       cs = cs.replace(/이탈\s*환자/g, '미유입 잠재 환자');
       cs = cs.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
@@ -1211,7 +1216,16 @@ export async function generateRealityDiagnosis(
       return cs;
     })(),
     // GEO + AI
-    geoTriAxis: geoAi.geoTriAxis || FALLBACK_GEO_AI.geoTriAxis,
+    geoTriAxis: (() => {
+      const geo = geoAi.geoTriAxis || FALLBACK_GEO_AI.geoTriAxis;
+      // LLM이 계산한 overallGeoScore를 코드에서 R×A/max(F,10) 공식으로 재계산하여 일관성 보장
+      const R = geo.relevance?.score ?? 0;
+      const A = geo.authority?.score ?? 0;
+      const F = geo.friction?.score ?? 100;
+      const computed = Math.round((R * A) / Math.max(F, 10));
+      const clamped = Math.min(100, Math.max(0, computed));
+      return { ...geo, overallGeoScore: clamped };
+    })(),
     aiCitationThreshold: geoAi.aiCitationThreshold || FALLBACK_GEO_AI.aiCitationThreshold,
     answerCapsule: geoAi.answerCapsule || FALLBACK_GEO_AI.answerCapsule,
     // Channel

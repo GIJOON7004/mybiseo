@@ -459,9 +459,26 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   // ═══════════════════════════════════════════════════════════════
 
   // 1-1. Title 태그 (10점) — 기준 강화: 30~60자 사이만 pass
-  const titleDisplay = (rawTitle.length < 10 && ogTitleForFallback.length >= 10)
-    ? `"${ogTitleForFallback}" (og:title ${ogTitleForFallback.length}자, title 태그: "${rawTitle}")`
-    : `"${effectiveTitle}" (${titleLen}자)`;
+  // 타이틀 중복 출력 감지 (동일 문자열이 2회 이상 반복)
+  const titleIsDuplicated = (() => {
+    if (!effectiveTitle || effectiveTitle.length < 10) return false;
+    const half = Math.floor(effectiveTitle.length / 2);
+    const firstHalf = effectiveTitle.substring(0, half).trim();
+    const secondHalf = effectiveTitle.substring(half).trim();
+    // 앞절반과 뒷절반이 80% 이상 일치하면 중복
+    if (firstHalf.length > 5 && secondHalf.startsWith(firstHalf.substring(0, Math.floor(firstHalf.length * 0.8)))) return true;
+    // 또는 정확히 두 번 반복되는 패턴
+    for (let len = 10; len <= half; len++) {
+      const segment = effectiveTitle.substring(0, len);
+      if (effectiveTitle.includes(segment + segment)) return true;
+    }
+    return false;
+  })();
+  const titleDisplay = titleIsDuplicated
+    ? `"타이틀 태그가 중복 출력되고 있습니다" (실제 값: ${effectiveTitle.substring(0, 60)}${effectiveTitle.length > 60 ? '...' : ''}, ${titleLen}자)`
+    : (rawTitle.length < 10 && ogTitleForFallback.length >= 10)
+      ? `"${ogTitleForFallback}" (og:title ${ogTitleForFallback.length}자, title 태그: "${rawTitle}")`
+      : `"${effectiveTitle}" (${titleLen}자)`;
   const titleOptimal = titleLen >= 30 && titleLen <= 60;
   items.push({
     id: "meta-title",
@@ -1472,10 +1489,11 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     const actualMaxScore = catItems.reduce((s, i) => s + i.maxScore, 0);
     // (#10) 카테고리별 만점 고정 테이블 적용
     const fixedMax = CATEGORY_MAX_SCORES[name];
+    const catMax = fixedMax || actualMaxScore;
     return {
       name,
-      score: catItems.reduce((s, i) => s + i.score, 0),
-      maxScore: fixedMax || actualMaxScore,
+      score: Math.min(catItems.reduce((s, i) => s + i.score, 0), catMax),
+      maxScore: catMax,
       items: catItems,
     };
   });

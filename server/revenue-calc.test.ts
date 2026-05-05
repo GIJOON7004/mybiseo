@@ -62,7 +62,7 @@ describe("Deterministic Revenue Loss Calculation", () => {
     
     const labelMatches = rdSource.match(/웹사이트 유입 누락 환자/g);
     expect(labelMatches).not.toBeNull();
-    expect(labelMatches!.length).toBeGreaterThanOrEqual(3);
+    expect(labelMatches!.length).toBeGreaterThanOrEqual(2); // headline + executiveSummary (closingStatement uses "미유입 잠재 환자")
   });
 
   it("uses correct conversion rates per specialty", () => {

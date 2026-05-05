@@ -572,6 +572,8 @@ function stripMarkdown(text: string): string {
     .replace(/\(Why this matters:[^)]*\)/g, "")
     .replace(/\(참고:[^)]*\)/g, "")
     .replace(/\(Note:[^)]*\)/g, "")
+    // "제로클릭" 표기 통일
+    .replace(/제로[\s-]*클릭/g, "제로클릭")
     .trim();
 }
 
