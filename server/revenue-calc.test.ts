@@ -77,8 +77,8 @@ describe("KPI Label Changes in PDF Report", () => {
     "utf-8"
   );
 
-  it("uses '예상 웹사이트 유입 누락 환자' label instead of '예상 누락 환자'", () => {
-    expect(pdfSource).toContain("예상 웹사이트 유입 누락 환자");
+  it("uses '예상 미유입 잠재 환자' label instead of '예상 누락 환자'", () => {
+    expect(pdfSource).toContain("예상 미유입 잠재 환자");
     expect(pdfSource).not.toContain('"예상 누락 환자"');
   });
 
@@ -88,7 +88,7 @@ describe("KPI Label Changes in PDF Report", () => {
   });
 
   it("uses '웹사이트 유입 누락 환자가 발생' in info box text", () => {
-    expect(pdfSource).toContain("웹사이트 유입 누락 환자가 발생하고 있습니다");
+    expect(pdfSource).toContain("잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다");
   });
 });
 
@@ -118,12 +118,12 @@ describe("KPI Label Changes in HTML Report Sections", () => {
     "utf-8"
   );
 
-  it("uses '예상 웹사이트 유입 누락 환자' in metric boxes", () => {
-    expect(sectionsSource).toContain("예상 웹사이트 유입 누락 환자");
+  it("uses '예상 미유입 잠재 환자' in metric boxes", () => {
+    expect(sectionsSource).toContain("예상 미유입 잠재 환자");
   });
 
-  it("uses '웹사이트 유입 누락 환자 분석' section title", () => {
-    expect(sectionsSource).toContain("웹사이트 유입 누락 환자 분석");
+  it("uses '미유입 잠재 환자 분석' section title", () => {
+    expect(sectionsSource).toContain("미유입 잠재 환자 분석");
   });
 
   it("uses '예상 웹사이트 전환 매출 손실' in highlight card", () => {

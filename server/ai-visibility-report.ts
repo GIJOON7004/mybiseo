@@ -312,7 +312,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     contentGapsRationale: "근거",
     geoTriAxisTitle: "GEO 3축 진단 (RxA/F)",
     geoTriAxisSub: "AI가 답변을 생성할 때 참고하는 3가지 기준: 적합성 · 권위 · 마찰",
-    geoTriAxisWhy: "▶ 환자의 76%가 AI 답변을 클릭 없이 소비합니다. AI가 답변에 병원을 포함시키려면 이 3축이 모두 충족되어야 합니다.",
+    geoTriAxisWhy: "▶ 환자의 약 70~80%가 AI 답변을 클릭 없이 소비합니다 (Gartner, 2024). AI가 답변에 병원을 포함시키려면 이 3축이 모두 충족되어야 합니다.",
     geoRelevance: "적합성 (Relevance)",
     geoAuthority: "권위 (Authority)",
     geoFriction: "마찰 (Friction)",
@@ -341,7 +341,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     aiSimNotRecommended: "미추천",
     naverCueTitle: "네이버 Cue: 대응 진단",
     naverCueSub: "네이버 AI(Cue:) 대응 준비도",
-    naverCueWhy: "▶ 네이버는 한국 포털 시장의 60%를 차지합니다. Cue: AI 답변이 확대되면 기존 포털 노출 전략이 무력화될 수 있습니다.",
+    naverCueWhy: "▶ 네이버는 한국 포털 시장의 약 50~60%를 차지합니다. Cue: AI 답변이 확대되면 기존 포털 노출 전략이 무력화될 수 있습니다.",
     strategicGuideTitle: "전략 가이드",
     strategicGuideSub: "제로클릭 시대, 병원이 살아남기 위한 맞춤형 전략",
     guideWebsite: "웹사이트 변환 가이드",
@@ -469,7 +469,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     contentGapsRationale: "Rationale",
     geoTriAxisTitle: "GEO Tri-Axis Diagnosis (RxA/F)",
     geoTriAxisSub: "Three criteria AI uses when generating answers: Relevance · Authority · Friction",
-    geoTriAxisWhy: "▶ 76% of patients consume AI answers without clicking. All three axes must be met for AI to include your hospital.",
+    geoTriAxisWhy: "▶ About 70-80% of patients consume AI answers without clicking (Gartner, 2024). All three axes must be met for AI to include your hospital.",
     geoRelevance: "Relevance",
     geoAuthority: "Authority",
     geoFriction: "Friction",
@@ -498,7 +498,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     aiSimNotRecommended: "Not Recommended",
     naverCueTitle: "Naver Cue: Response Diagnosis",
     naverCueSub: "Naver AI (Cue:) readiness assessment",
-    naverCueWhy: "▶ Naver holds 60% of the Korean portal market. As Cue: AI answers expand, existing portal strategies may become ineffective.",
+    naverCueWhy: "▶ Naver holds approximately 50-60% of the Korean portal market. As Cue: AI answers expand, existing portal strategies may become ineffective.",
     strategicGuideTitle: "Strategic Guide",
     strategicGuideSub: "Customized strategies for surviving the zero-click era",
     guideWebsite: "Website Transformation Guide",
@@ -626,7 +626,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     contentGapsRationale: "เหตุผล",
     geoTriAxisTitle: "การวินิจฉัย GEO 3 แกน (RxA/F)",
     geoTriAxisSub: "เกณฑ์ 3 ข้อที่ AI ใช้: ความเกี่ยวข้อง · อำนาจ · อุปสรรค",
-    geoTriAxisWhy: "▶ 76% ของผู้ป่วยใช้คำตอบ AI โดยไม่คลิก",
+    geoTriAxisWhy: "▶ ประมาณ 70-80% ของผู้ป่วยใช้คำตอบ AI โดยไม่คลิก (Gartner, 2024)",
     geoRelevance: "ความเกี่ยวข้อง",
     geoAuthority: "อำนาจ",
     geoFriction: "อุปสรรค",
@@ -655,7 +655,7 @@ const i18n: Record<Lang, Record<string, string>> = {
     aiSimNotRecommended: "ไม่แนะนำ",
     naverCueTitle: "Naver Cue: การวินิจฉัยการตอบสนอง",
     naverCueSub: "การประเมินความพร้อม Naver AI (Cue:)",
-    naverCueWhy: "▶ Naver ครอง 60% ของตลาดพอร์ทัลเกาหลี",
+    naverCueWhy: "▶ Naver ครองประมาณ 50-60% ของตลาดพอร์ทัลเกาหลี",
     strategicGuideTitle: "คู่มือกลยุทธ์",
     strategicGuideSub: "กลยุทธ์ที่ปรับแต่งสำหรับยุค zero-click",
     guideWebsite: "คู่มือการปรับเว็บไซต์",
@@ -1126,25 +1126,30 @@ export async function generateAiVisibilityReport(
     const revenueRaw = (rd.missedPatients?.revenueImpact || "-").replace(/만원원/g, "만원").replace(/억원원/g, "억원");
     const revenueValue = (() => {
       if (revenueRaw === "-") return "-";
-      // 이미 "월"이 포함되어 있으면 숫자+단위만 추출
+      // revenueRaw에 이미 "월"이 포함되어 있으면 그대로 사용 (중복 방지)
+      if (revenueRaw.includes("월")) {
+        return revenueRaw;
+      }
       const numMatch = revenueRaw.match(/[\d,]+\s*[만억]*\s*[원]?/);
       if (numMatch) {
         const cleaned = numMatch[0].replace(/\s/g, "");
         const hasWon = cleaned.endsWith("원");
         return language === "ko" ? `월 ${cleaned}${hasWon ? "" : "원"}` : cleaned;
       }
-      return language === "ko" && !revenueRaw.includes("월") ? `월 ${revenueRaw}` : revenueRaw;
+      return language === "ko" ? `월 ${revenueRaw}` : revenueRaw;
     })();
+    // A등급 이상(80점+)은 "추가 성장 기회" 프레이밍, 미만은 "매출 손실" 프레이밍
+    const isHighScore = score >= 80;
     const kpis = [
       {
         value: rd.missedPatients?.estimatedMonthly ? `${language === "ko" ? "월 " : ""}${rd.missedPatients.estimatedMonthly.toLocaleString()}${language === "ko" ? "명" : ""}` : "-",
-        label: language === "ko" ? "예상 웹사이트 유입 누락 환자" : "Est. Missed Website Visitors",
-        color: C.fail,
+        label: language === "ko" ? (isHighScore ? "추가 유입 가능 잠재 환자" : "예상 미유입 잠재 환자") : "Est. Missed Website Visitors",
+        color: isHighScore ? C.pass : C.fail,
       },
       {
         value: revenueValue,
-        label: language === "ko" ? "예상 웹사이트 전환 매출 손실" : "Est. Website Conversion Revenue Loss",
-        color: C.fail,
+        label: language === "ko" ? (isHighScore ? "추가 성장 기회 금액" : "예상 웹사이트 전환 매출 손실") : "Est. Website Conversion Revenue Loss",
+        color: isHighScore ? C.pass : C.fail,
       },
       {
         value: rd.urgencyLevel || grade,
@@ -1281,7 +1286,7 @@ export async function generateAiVisibilityReport(
   // v3: 카테고리 요약 미니바 차트 먼저 표시
   auditResult.categories.forEach((cat, ci) => {
     const catName = language === "ko" ? (CAT_NAMES_KO[cat.name] || cat.name) : cat.name;
-    const catPct = cat.maxScore > 0 ? Math.round((cat.score / cat.maxScore) * 100) : 0;
+    const catPct = cat.maxScore > 0 ? Math.min(100, Math.round((cat.score / cat.maxScore) * 100)) : 0;
     // 달성률 기반 컬러: 0-39% 빨강, 40-59% 노랑, 60-79% 파랑, 80%+ 초록
     const catColor = catPct < 40 ? C.fail : catPct < 60 ? C.warn : catPct < 80 ? C.blue : C.pass;
     y = ensureSpace(doc, y, 18, hCtx);
@@ -1317,7 +1322,7 @@ export async function generateAiVisibilityReport(
     const hiddenCount = allProblems.length - problemItems.length;
     y = ensureSpace(doc, y, 50, hCtx);
     const catName = language === "ko" ? (CAT_NAMES_KO[cat.name] || cat.name) : cat.name;
-    const catPct = cat.maxScore > 0 ? Math.round((cat.score / cat.maxScore) * 100) : 0;
+    const catPct = cat.maxScore > 0 ? Math.min(100, Math.round((cat.score / cat.maxScore) * 100)) : 0;
     const catColor = catPct >= 70 ? C.pass : catPct >= 40 ? C.warn : C.fail;
     // 카테고리 헤더
     doc.roundedRect(ML, y, CW, 20, 4).fill(C.tealDark);
@@ -1478,7 +1483,7 @@ export async function generateAiVisibilityReport(
       const revenueDisplay = (language === "ko" && revenueText && !revenueText.includes("월"))
         ? `월 ${revenueText}` : revenueText;
       const mpText = language === "ko"
-        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}명의 웹사이트 유입 누락 환자가 발생하고 있습니다. 예상 웹사이트 전환 매출 손실: ${revenueDisplay}`
+        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}명의 잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다. 예상 웹사이트 전환 매출 손실: ${revenueDisplay}`
         : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} potential patients per month cannot find the hospital through the website. Estimated website conversion revenue loss: ${revenueDisplay}`;
       y = drawInfoBox(doc, y, mpText, { accentColor: C.fail, bgColor: C.redTint, icon: "!" });
 
@@ -1491,9 +1496,17 @@ export async function generateAiVisibilityReport(
   // 경쟁 환경 분석 (컴팩트)
   // ═══════════════════════════════════════════════
   if (rd?.competitors && rd.competitors.length > 0) {
+    // 모든 경쟁사가 "정보 부족"이면 대체 문구로 표시
+    const allLackInfo = rd.competitors.every(c => c.advantage.includes("정보 부족") || c.advantage.includes("insufficient") || c.advantage.trim().length < 5);
     y = ensureSpace(doc, y, 120, hCtx);
     y = drawSubTitle(doc, y, t.realityCompetitors);
     y += 4;
+    if (allLackInfo) {
+      const altMsg = language === "ko"
+        ? "경쟁사 분석은 별도 컨설팅 시 상세 제공됩니다. 현재 공개된 데이터만으로는 정확한 경쟁 환경 파악이 어렵습니다."
+        : "Detailed competitor analysis is available during consultation. Public data alone is insufficient for accurate competitive landscape assessment.";
+      y = drawInfoBox(doc, y, altMsg, { accentColor: C.warn, bgColor: C.bg, icon: "i" });
+    } else {
 
     // 경쟁사 테이블
     const compCols = [
@@ -1525,6 +1538,7 @@ export async function generateAiVisibilityReport(
       y += rowH;
     });
     y += 12;
+    } // end else (allLackInfo)
   }
 
 
@@ -1773,7 +1787,7 @@ export async function generateAiVisibilityReport(
   // AI 추천 시뮬레이터 — 핵심 영업 섹션
   // ═══════════════════════════════════════════════
   // SECTION: AI 추천 시뮬레이터
-  if (rd?.aiSimulator) {
+  if (rd?.aiSimulator && rd.aiSimulator.query && rd.aiSimulator.results.length > 0) {
     y = ensureSpace(doc, y, 80, hCtx);
     y = drawSectionTitle(doc, y, t.aiSimulatorTitle, t.aiSimulatorSub);
     y += 2;

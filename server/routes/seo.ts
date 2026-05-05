@@ -260,9 +260,9 @@ export const seoAnalyzerRouter = router({
       const siteName = sanitizeHospitalName(result.siteName || safeDomain);
       const lang = input.language || "ko";
       const fileNameMap: Record<string, string> = {
-        ko: `[${siteName}]AI가시성진단서.pdf`,
-        en: `[${siteName}]AI_Visibility_Report.pdf`,
-        th: `[${siteName}]รายงานการมองเห็น_AI.pdf`,
+        ko: `[${siteName}] AI 가시성 진단서.pdf`,
+        en: `[${siteName}] AI Visibility Report.pdf`,
+        th: `[${siteName}] รายงานการมองเห็น AI.pdf`,
       };
       const fileName = fileNameMap[lang] || fileNameMap.ko;
       return { pdfUrl, fileName };
@@ -370,9 +370,9 @@ export const seoAnalyzerRouter = router({
           const siteName = result.siteName || safeDomain;
           const lang = input.language || "ko";
           const fileNameMap: Record<string, string> = {
-            ko: `[${siteName}]AI가시성진단서.pdf`,
-            en: `[${siteName}]AI_Visibility_Report.pdf`,
-            th: `[${siteName}]รายงานการมองเห็น_AI.pdf`,
+            ko: `[${siteName}] AI 가시성 진단서.pdf`,
+            en: `[${siteName}] AI Visibility Report.pdf`,
+            th: `[${siteName}] รายงานการมองเห็น AI.pdf`,
           };
 
           results.push({

@@ -1083,8 +1083,8 @@ export async function generateRealityDiagnosis(
         hl = hl.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
         hl = hl.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
       }
-      hl = hl.replace(/잠재\s*환자/g, '웹사이트 유입 누락 환자');
-      hl = hl.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
+      hl = hl.replace(/잠재\s*환자/g, '미유입 잠재 환자');
+      hl = hl.replace(/이탈\s*환자/g, '미유입 잠재 환자');
       return hl;
     })(),
     executiveSummary: (() => {
@@ -1159,13 +1159,26 @@ export async function generateRealityDiagnosis(
       let cs = core.closingStatement || FALLBACK_CORE.closingStatement;
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0) {
-        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        const { formatted, revenueLossManwon } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
         cs = cs.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, formatted);
         cs = cs.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
         cs = cs.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
+        // "연간 약 X억Y만원" 패턴도 동적 계산값으로 치환 (월액 xd7 12)
+        const annualManwon = revenueLossManwon * 12;
+        let annualFormatted: string;
+        if (annualManwon >= 10000) {
+          const eok = Math.floor(annualManwon / 10000);
+          const remainder = annualManwon % 10000;
+          annualFormatted = remainder > 0 ? `연간 약 ${eok}억${remainder.toLocaleString()}만원` : `연간 약 ${eok}억원`;
+        } else {
+          annualFormatted = `연간 약 ${annualManwon.toLocaleString()}만원`;
+        }
+        cs = cs.replace(/연간\s*약?\s*[\d,]+억[\d,]*만?원/g, annualFormatted);
+        cs = cs.replace(/연간\s*약?\s*[\d,]+만원/g, annualFormatted);
       }
-      cs = cs.replace(/잠재\s*환자/g, '웹사이트 유입 누락 환자');
-      cs = cs.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
+      // 표현 개선: "웹사이트 유입 누락 환자" 대신 더 자연스러운 표현 사용
+      cs = cs.replace(/잠재\s*환자/g, '미유입 잠재 환자');
+      cs = cs.replace(/이탈\s*환자/g, '미유입 잠재 환자');
       cs = cs.replace(/예상\s*매출\s*손실/g, '예상 웹사이트 전환 매출 손실');
       cs = cs.replace(/매출\s*기회\s*손실/g, '웹사이트 전환 매출 손실');
       return cs;

@@ -766,7 +766,7 @@ export function generateAdditionalItems(ctx: AnalysisContext): SeoCheckItem[] {
       maxScore: 5,
       detail: hasCls ? `CLS: ${clsVal.toFixed(3)} (Google PageSpeed 실측)${clsGood ? ' — 양호' : clsOk ? ' — 개선 필요' : ' — 불량'}` : "CLS: 측정 불가 (Google PageSpeed API 응답 없음)",
       recommendation: hasCls ? (clsGood ? "CLS가 0.1 이하로 레이아웃이 안정적입니다." : clsOk ? `CLS가 ${clsVal.toFixed(3)}로 개선이 필요합니다. 이미지/동영상에 width/height를 명시하고, 동적 콘텐츠 삽입을 줄이세요.` : `CLS가 ${clsVal.toFixed(3)}로 매우 불안정합니다. 모든 이미지/동영상에 크기를 명시하고, 광고/배너가 레이아웃을 밀어내지 않도록 고정 영역을 확보하세요.`) : "Google PageSpeed API에서 데이터를 가져오지 못했습니다. 재진단을 권장합니다.",
-      impact: "CLS는 페이지 로딩 중 레이아웃이 얼마나 흥들리는지 측정합니다. 0.1 이하면 '좋음', 0.25 초과면 '불량'입니다. 레이아웃 불안정은 사용자 경험을 크게 저해합니다.",
+      impact: "CLS는 페이지 로딩 중 레이아웃이 얼마나 흔들리는지 측정합니다. 0.1 이하면 '좋음', 0.25 초과면 '불량'입니다. 레이아웃 불안정은 사용자 경험을 크게 저해합니다.",
     });
 
     // 9-12. TBT (Total Blocking Time) (4점)

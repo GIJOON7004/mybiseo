@@ -1320,7 +1320,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   });
 
   // 8-11. llms.txt 파일 (1점) — 신규
-  // llms.txt는 AI 크롤러를 위한 새로운 표준 파일
+  // llms.txt는 AI 크롤러를 위해 새롭게 부상하는 파일 형식
   let hasLlmsTxt = false;
   try {
     const llmsRes = await fetchWithRetry(`${baseUrl}/llms.txt`, 2000, 0, country);
@@ -1337,8 +1337,8 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     score: hasLlmsTxt ? 1 : 0,
     maxScore: 1,
     detail: hasLlmsTxt ? "llms.txt 파일이 존재합니다." : "llms.txt 파일이 없습니다.",
-    recommendation: hasLlmsTxt ? "llms.txt가 설정되어 있어 AI 크롤러에게 사이트 정보를 효과적으로 전달합니다." : "llms.txt 파일을 생성하세요. 이 파일은 AI 크롤러에게 사이트의 핵심 정보(서비스, 전문 분야, 연락처 등)를 구조화된 형태로 전달하는 새로운 표준입니다.",
-    impact: "llms.txt는 AI 검색엔진을 위한 새로운 표준 파일입니다. robots.txt가 검색엔진 크롤러를 위한 것이라면, llms.txt는 AI 크롤러를 위한 것입니다. 이 파일이 있으면 AI가 사이트를 더 정확하게 이해합니다.",
+    recommendation: hasLlmsTxt ? "llms.txt가 설정되어 있어 AI 크롤러에게 사이트 정보를 효과적으로 전달합니다." : "llms.txt 파일을 생성하세요. 이 파일은 AI 크롤러에게 사이트의 핵심 정보(서비스, 전문 분야, 연락처 등)를 구조화된 형태로 전달하는 새롭게 부상하는 제안(proposal)입니다.",
+    impact: "llms.txt는 AI 검색엔진을 위해 새롭게 부상하는 파일 형식입니다. robots.txt가 검색엔진 크롤러를 위한 것이라면, llms.txt는 AI 크롤러를 위한 것입니다. 이 파일이 있으면 AI가 사이트를 더 정확하게 이해합니다.",
   });
 
   // 8-12. AI 최적 인용 블록 감지 (4점) — 신규: 134-167단어(한국어 80-120어절) 자기완결형 문단
