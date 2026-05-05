@@ -93,3 +93,8 @@
 - [x] X-Content-Type-Options, X-Frame-Options 보안 헤더 추가
 - [x] Server 헤더 제거
 - [x] PageSpeed API 타임아웃 15s→45s 확대 (실제 응답 20s+ 대응)
+
+## Google Search Console 연동 및 DB 마이그레이션
+- [x] consultation_inquiries 테이블에 hospital_id 컨럼 마이그레이션 적용 (DROP+재생성, monthly_reports도 동시 수정)
+- [x] Google Search Console 서비스 계정 키 환경변수(GOOGLE_SERVICE_ACCOUNT_KEY) 등록 (mybiseo-gsc-reader@mybiseo-api.iam.gserviceaccount.com)
+- [x] 통합 테스트 skip 해제 후 전체 테스트 통과 확인 (28개 통합 테스트 + GSC 인증 테스트 통과)

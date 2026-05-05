@@ -150,7 +150,7 @@ describe("11번: 에디션성형외과 통합 테스트", () => {
     });
   });
 
-  describe.skip("Phase 2: 추적 코드 시뮬레이션 - 상담 문의 (DB 마이그레이션 대기)", () => {
+  describe("Phase 2: 추적 코드 시뮬레이션 - 상담 문의", () => {
     it("ChatGPT에서 유입된 상담 문의", async () => {
       const result = await insertConsultationInquiry({
         hospitalId,
@@ -237,7 +237,7 @@ describe("11번: 에디션성형외과 통합 테스트", () => {
     });
   });
 
-  describe.skip("Phase 4: 상담 관리 기능 검증 (DB 마이그레이션 대기)", () => {
+  describe("Phase 4: 상담 관리 기능 검증", () => {
     it("상담 목록 조회", async () => {
       const consultations = await getConsultationsByHospital(hospitalId);
       expect(consultations).toBeDefined();
@@ -284,7 +284,7 @@ describe("11번: 에디션성형외과 통합 테스트", () => {
     });
   });
 
-  describe.skip("Phase 5: 월간 리포트 데이터 준비 (DB 마이그레이션 대기)", () => {
+  describe("Phase 5: 월간 리포트 데이터 준비", () => {
     it("월간 방문 요약 조회", async () => {
       const summary = await getMonthlyVisitSummary(hospitalId, now.getFullYear(), now.getMonth() + 1);
       expect(summary).toBeDefined();
@@ -304,7 +304,7 @@ describe("11번: 에디션성형외과 통합 테스트", () => {
     });
   });
 
-  describe.skip("Phase 6: 관리자 병원 현황 대시보드 (DB 마이그레이션 대기)", () => {
+  describe("Phase 6: 관리자 병원 현황 대시보드", () => {
     it("전체 병원 현황 조회", async () => {
       const overview = await getAdminHospitalOverview();
       expect(overview).toBeDefined();
