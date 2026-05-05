@@ -25,7 +25,6 @@ import { validateMinItems, CATEGORY_MAX_SCORES, TOTAL_MAX_SCORE } from "./utils/
 import { detectDynamicContent } from "./utils/dynamic-content-detector";
 import { analyzeMultipleKeywords } from "./utils/keyword-exposure-checker";
 import { sampleImages, extractImagesFromHtml } from "./utils/image-sampling";
-import { calculateCalibrationFactor } from "./utils/specialty-weight-calibration";
 
 // ── (#8) 표준 User-Agent ──
 const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
@@ -400,7 +399,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
 
   const [multiPageResult, pageSpeedData] = await Promise.all([
     crawlWithTimeout(crawlSubPages(url, html, $, $('body').text().replace(/\s+/g, ' ').trim(), baseUrl, country), 15000, emptyMultiPage),
-    crawlWithTimeout(fetchPageSpeedWithRetry(url, "mobile"), 15000, null),
+    crawlWithTimeout(fetchPageSpeedWithRetry(url, "mobile"), 45000, null),
   ]);
   const agg = multiPageResult.aggregated;
 

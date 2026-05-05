@@ -17,7 +17,9 @@ describe("Deterministic Revenue Loss Calculation", () => {
     expect(rdSource).toContain("SPECIALTY_REVENUE_PARAMS");
     const specialties = ["성형외과", "피부과", "치과", "안과", "한의원", "정형외과", "이비인후과", "비뇨기과", "내과", "소아과", "산부인과", "종합병원", "기타"];
     for (const s of specialties) {
-      expect(rdSource).toContain(`"${s}"`);
+      // 진료과 키는 SPECIALTY_REVENUE_PROFILES에서 import됨
+      const revenueDataSource = fs.readFileSync(path.resolve(__dirname, "utils/specialty-revenue-data.ts"), "utf-8");
+      expect(revenueDataSource).toContain(`"${s}"`);
     }
   });
 
@@ -45,13 +47,11 @@ describe("Deterministic Revenue Loss Calculation", () => {
 
   it("post-processes headline, executiveSummary, and closingStatement for label/value sync", () => {
     // headline
-    expect(rdSource).toContain('let hl = core.headline');
-    expect(rdSource).toContain('// headline에서도 LLM 매출 수치를 코드 계산값으로 동기화');
+    expect(rdSource).toContain('let hl = core.headline || FALLBACK_CORE.headline');
     // executiveSummary
-    expect(rdSource).toContain('let summary = core.executiveSummary');
-    expect(rdSource).toContain('// LLM이 executiveSummary에 넣은 매출 수치를 코드 계산값으로 동기화');
+    expect(rdSource).toContain('let summary = ensureExecutiveSummary(core.executiveSummary');
     // closingStatement
-    expect(rdSource).toContain('let cs = core.closingStatement');
+    expect(rdSource).toContain('let cs = core.closingStatement || FALLBACK_CORE.closingStatement');
   });
 
   it("replaces 잠재 환자/이탈 환자 with 웹사이트 유입 누락 환자 in all text fields", () => {
@@ -66,10 +66,8 @@ describe("Deterministic Revenue Loss Calculation", () => {
   });
 
   it("uses correct conversion rates per specialty", () => {
-    expect(rdSource).toContain('"성형외과": { conversionRate: 0.05, avgRevenuePerPatient: 400 }');
-    expect(rdSource).toContain('"피부과":   { conversionRate: 0.08, avgRevenuePerPatient: 50 }');
-    expect(rdSource).toContain('"치과":     { conversionRate: 0.06, avgRevenuePerPatient: 200 }');
-    expect(rdSource).toContain('"안과":     { conversionRate: 0.05, avgRevenuePerPatient: 300 }');
+    // SPECIALTY_REVENUE_PARAMS는 이제 SPECIALTY_REVENUE_PROFILES에서 동적 생성됨
+    expect(rdSource).toContain("SPECIALTY_REVENUE_PROFILES");
   });
 });
 

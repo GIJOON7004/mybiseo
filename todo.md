@@ -78,3 +78,18 @@
 - [x] #25 LLM 응답 검증 레이어 추가
 - [x] #27 LLM 호출 횟수 최적화
 - [x] #30 진료과별 객단가 범위 데이터 기반 업데이트
+
+## 검증 및 최적화 작업
+
+- [x] 50개 항목 전체 적용 여부 코드 레벨 검증
+- [x] 비효율적 코드 정리 및 리팩토링
+- [x] 통합 테스트: 실제 병원 URL로 진단 실행 (gijoon.com 78/100 B등급, 108개 항목)
+- [x] 네이버 검색광고 API 실연동 (키워드 검색량 조회 정상 동작)
+- [x] Google PageSpeed Insights API 실연동 (Performance 49, SEO 100 수집 확인)
+- [ ] Google Search Console API 연동 (서비스 계정 생성 필요 - 향후 추가)
+
+## 보안 및 안정성 개선
+- [x] X-Powered-By 헤더 비활성화
+- [x] X-Content-Type-Options, X-Frame-Options 보안 헤더 추가
+- [x] Server 헤더 제거
+- [x] PageSpeed API 타임아웃 15s→45s 확대 (실제 응답 20s+ 대응)

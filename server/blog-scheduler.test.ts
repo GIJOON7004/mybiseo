@@ -74,6 +74,7 @@ vi.mock("./db", () => ({
   deleteChatSession: vi.fn(),
   getChatStats: vi.fn().mockResolvedValue({ totalSessions: 0, totalMessages: 0 }),
   findChatSessionByPhone: vi.fn(),
+  getHospitalProfileByUserId: vi.fn().mockResolvedValue({ id: 1, userId: 1, hospitalName: "테스트병원", specialty: "성형외과" }),
 }));
 
 vi.mock("./notifier", () => ({

@@ -152,7 +152,7 @@ vi.mock("./db", () => {
     getLeadFunnelStats: vi.fn().mockResolvedValue({ total: 0 }),
     // Hospital
     createHospitalProfile: vi.fn().mockResolvedValue(undefined),
-    getHospitalProfileByUserId: vi.fn().mockResolvedValue(null),
+    getHospitalProfileByUserId: vi.fn().mockImplementation(async (userId: number) => userId === 1 ? { id: 1, userId: 1, hospitalName: "테스트병원", specialty: "성형외과" } : null),
     updateHospitalProfile: vi.fn().mockResolvedValue(undefined),
     getHospitalDashboardData: vi.fn().mockResolvedValue(null),
     getAllHospitalProfiles: vi.fn().mockResolvedValue([]),

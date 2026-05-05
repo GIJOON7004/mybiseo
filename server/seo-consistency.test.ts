@@ -150,8 +150,8 @@ describe("SEO 진단 일관성 - 타임아웃 강화 확인", () => {
     const code = fs.readFileSync("server/seo-analyzer.ts", "utf-8");
     // crawlSubPages 타임아웃 15000
     expect(code).toContain("15000, emptyMultiPage");
-    // PageSpeed 타임아웃 15000
-    expect(code).toContain("15000, null");
+    // PageSpeed 타임아웃 45000
+    expect(code).toContain("45000, null");
   });
 
   it("PageSpeed 재시도 로직이 포함되어 있어야 한다", async () => {

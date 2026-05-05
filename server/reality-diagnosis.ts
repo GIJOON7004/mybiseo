@@ -21,9 +21,10 @@ import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-s
 import { displayPercent } from "./utils/score-rounding";
 import { normalizeCompetitors } from "./utils/competitor-schema";
 import { classifySpecialty } from "./utils/specialty-classifier";
-import { validateJsonResponse, recordLLMCall, getCachedLLMResponse, cacheLLMResponse, clearLLMCache } from "./utils/llm-validator";
+import { validateJsonResponse, recordLLMCall } from "./utils/llm-validator";
 import { estimateAIVisibility } from "./utils/search-rank-checker";
-import { calculateMarketingValue } from "./utils/specialty-revenue-data";
+import { calculateMarketingValue, SPECIALTY_REVENUE_PROFILES } from "./utils/specialty-revenue-data";
+import { getKeywordSearchVolume, estimateOrganicShare, calculateKeywordMarketingValue, type KeywordSearchVolume } from "./utils/naver-ad-api";
 
 // ── 타입 정의 ──
 export interface KeywordExposure {
@@ -201,6 +202,24 @@ export interface RealityDiagnosis {
       relevanceToHospital: string;
     }[];
     ctaMessage: string;
+  };
+  // #34 AI 가시성 점수
+  aiVisibilityScore?: number;
+  aiVisibilityFactors?: { name: string; score: number; weight: number }[];
+  // #30 마케팅 가치 분석
+  marketingValue?: {
+    monthlyValue: number;
+    seoInvestmentScore: number;
+    recommendation: string;
+  };
+  // #33 네이버 검색광고 API 실연동 데이터
+  naverSearchData?: {
+    keyword: string;
+    monthlySearches: number;
+    competitionLevel: string;
+    organicSharePercent: number;
+    adSharePercent: number;
+    recommendation: string;
   };
 }
 
@@ -882,7 +901,6 @@ mybiseoServices: mybiseo 서비스 소개.
 }
 // ── 진료과목별 매출 손실 결정론적 계산 (LLM 의존 제거) ──
 // #30 객단가 데이터 기반 업데이트: SPECIALTY_REVENUE_PROFILES에서 실제 데이터 참조
-import { SPECIALTY_REVENUE_PROFILES } from "./utils/specialty-revenue-data";
 const SPECIALTY_REVENUE_PARAMS: Record<SpecialtyType, { conversionRate: number; avgRevenuePerPatient: number }> = (() => {
   const params: Record<string, { conversionRate: number; avgRevenuePerPatient: number }> = {};
   for (const [key, profile] of Object.entries(SPECIALTY_REVENUE_PROFILES)) {
@@ -1034,6 +1052,21 @@ export async function generateRealityDiagnosis(
   // #30 객단가 데이터 기반 마케팅 가치 계산
   const marketingValue = calculateMarketingValue(effectiveSpecialty as any);
 
+  // #33 네이버 검색광고 API 실연동 - 키워드 검색량 조회
+  let naverKeywordData: KeywordSearchVolume | null = null;
+  let organicShareAnalysis: { organicSharePercent: number; adSharePercent: number; recommendation: string } | null = null;
+  try {
+    const searchKeyword = effectiveSpecialty !== "기타" ? effectiveSpecialty : (siteName || domain);
+    const naverResult = await getKeywordSearchVolume([searchKeyword]);
+    if (naverResult.success && naverResult.keywords.length > 0) {
+      naverKeywordData = naverResult.keywords[0];
+      organicShareAnalysis = estimateOrganicShare(naverKeywordData);
+      console.log(`[RealityDiagnosis] 네이버 API: "${naverKeywordData.keyword}" 월간검색량=${naverKeywordData.totalMonthlySearches} 경쟁도=${naverKeywordData.competitionLevel}`);
+    }
+  } catch (e) {
+    console.warn("[RealityDiagnosis] 네이버 API 호출 실패 (fallback 사용):", (e as Error).message);
+  }
+
   const elapsed = Date.now() - startTime;
   console.log(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status} | AI가시성:${aiVisibility.score} 마케팅가치:${marketingValue.seoInvestmentScore}`);
   return {
@@ -1150,5 +1183,23 @@ export async function generateRealityDiagnosis(
     contentStrategy: strategy.contentStrategy || FALLBACK_STRATEGY.contentStrategy,
     marketingDirection: strategy.marketingDirection || FALLBACK_STRATEGY.marketingDirection,
     mybiseoServices: strategy.mybiseoServices || FALLBACK_STRATEGY.mybiseoServices,
+    // #34 AI 가시성 점수
+    aiVisibilityScore: aiVisibility.score,
+    aiVisibilityFactors: aiVisibility.factors,
+    // #30 마케팅 가치 분석
+    marketingValue: {
+      monthlyValue: marketingValue.monthlyValue,
+      seoInvestmentScore: marketingValue.seoInvestmentScore,
+      recommendation: marketingValue.recommendation,
+    },
+    // #33 네이버 검색광고 API 실연동 데이터
+    naverSearchData: naverKeywordData && organicShareAnalysis ? {
+      keyword: naverKeywordData.keyword,
+      monthlySearches: naverKeywordData.totalMonthlySearches,
+      competitionLevel: naverKeywordData.competitionLevel,
+      organicSharePercent: organicShareAnalysis.organicSharePercent,
+      adSharePercent: organicShareAnalysis.adSharePercent,
+      recommendation: organicShareAnalysis.recommendation,
+    } : undefined,
   };
 }

@@ -41,6 +41,7 @@ vi.mock("./db", async () => {
     createBlogCategory: vi.fn().mockResolvedValue(undefined),
     updateBlogCategory: vi.fn().mockResolvedValue(undefined),
     deleteBlogCategory: vi.fn().mockResolvedValue(undefined),
+    getHospitalProfileByUserId: vi.fn().mockImplementation(async (userId: number) => userId === 1 ? { id: 1, userId: 1, hospitalName: "테스트병원", specialty: "성형외과" } : null),
   };
 });
 
