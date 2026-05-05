@@ -86,7 +86,7 @@
 - [x] 통합 테스트: 실제 병원 URL로 진단 실행 (gijoon.com 78/100 B등급, 108개 항목)
 - [x] 네이버 검색광고 API 실연동 (키워드 검색량 조회 정상 동작)
 - [x] Google PageSpeed Insights API 실연동 (Performance 49, SEO 100 수집 확인)
-- [ ] Google Search Console API 연동 (서비스 계정 생성 필요 - 향후 추가)
+- [x] Google Search Console API 연동 모듈 구현 (server/utils/gsc-client.ts)
 
 ## 보안 및 안정성 개선
 - [x] X-Powered-By 헤더 비활성화
