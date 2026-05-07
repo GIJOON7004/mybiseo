@@ -1190,7 +1190,7 @@ export async function generateAiVisibilityReport(
     const kpis = [
       {
         value: rd.missedPatients?.estimatedMonthly ? `${language === "ko" ? "월 " : ""}${rd.missedPatients.estimatedMonthly.toLocaleString()}${language === "ko" ? "명" : ""}` : "-",
-        label: language === "ko" ? (isHighScore ? "추가 유입 가능 잠재 환자" : "예상 미유입 잠재 환자") : "Est. Missed Website Visitors",
+        label: language === "ko" ? (isHighScore ? "추가 유입 가능 트래픽" : "예상 미유입 트래픽") : "Est. Missed Website Traffic",
         color: isHighScore ? C.pass : C.fail,
       },
       {
@@ -1208,15 +1208,24 @@ export async function generateAiVisibilityReport(
       const kx = ML + ki * (kpiW + 10);
       doc.roundedRect(kx, y, kpiW, kpiH, 4).fill(C.bg);
       doc.roundedRect(kx, y, kpiW, 3, 0).fill(kpi.color);
-      // v4: 숫자 수직 중앙 배치
-      doc.font("KrBold").fontSize(16).fillColor(kpi.color);
+      // v5: 동적 폰트 사이징 — 텍스트가 카드 너비를 초과하면 폰트 축소
       const kvStr = String(kpi.value);
+      const maxTextW = kpiW - 20;
+      let fontSize = 16;
+      doc.font("KrBold").fontSize(fontSize);
+      while (doc.widthOfString(kvStr) > maxTextW && fontSize > 9) {
+        fontSize -= 1;
+        doc.font("KrBold").fontSize(fontSize);
+      }
+      doc.fillColor(kpi.color);
       const kvH = doc.currentLineHeight();
-      const textBlockH = kvH + 14; // 숫자 + 라벨 높이
-      const startY = y + 3 + (kpiH - 3 - textBlockH) / 2; // 상단 바 제외 후 중앙
-      doc.text(kvStr, kx + 10, startY, { width: kpiW - 20 });
-      doc.font("KrRegular").fontSize(8).fillColor(C.textMid)
-        .text(kpi.label, kx + 10, startY + kvH + 2, { width: kpiW - 20 });
+      const labelFontSize = 8;
+      const labelH = 12;
+      const textBlockH = kvH + 4 + labelH;
+      const startY = y + 3 + (kpiH - 3 - textBlockH) / 2;
+      doc.text(kvStr, kx + 10, startY, { width: maxTextW });
+      doc.font("KrRegular").fontSize(labelFontSize).fillColor(C.textMid)
+        .text(kpi.label, kx + 10, startY + kvH + 4, { width: maxTextW });
     });
      y += kpiH + 8;
     // 매출 손실 산정 근거 표시 (v8)
@@ -1225,7 +1234,7 @@ export async function generateAiVisibilityReport(
       const revProfile = SPECIALTY_REVENUE_PROFILES[resolvedSpec] || SPECIALTY_REVENUE_PROFILES["기타"];
       if (revProfile) {
         const convRate = Math.min(0.03, Math.max(0.01, revProfile.targetROI / 300));
-        const formulaText = `* 산식: 월간 미유입 환자 × 전환율(${(convRate * 100).toFixed(1)}%) × 평균 객단가(${revProfile.avgRevenuePerVisit}만원) | ±30% 범위 표시`;
+        const formulaText = `* 산식: ①월간 미유입 트래픽 → ②전환율(${(convRate * 100).toFixed(1)}%) → ③예상 환자 수 → ④객단가(${revProfile.avgRevenuePerVisit}만원) → ⑤잠재 매출 | ±30% 범위`;
         doc.font("KrRegular").fontSize(6).fillColor(C.textLight)
           .text(formulaText, ML, y, { width: CW, align: "right" });
         y += 10;
@@ -1317,8 +1326,8 @@ export async function generateAiVisibilityReport(
     doc.font("KrRegular").fontSize(8.5).fillColor(C.text)
       .text(catName, catCols[0].x + 8, y + (rowH - 10) / 2, { width: catCols[0].w - 12 });
 
-    // 점수 — 정중앙
-    const scoreLabel = `${cat.score}/${cat.maxScore}`;
+    // 점수 — 정중앙 (#7 달성률 병기)
+    const scoreLabel = `${cat.score}/${cat.maxScore} (${pctInt}%)`;
     doc.font("KrBold").fontSize(8.5).fillColor(C.text);
     const slW = doc.widthOfString(scoreLabel);
     doc.text(scoreLabel, catCols[1].x + (catCols[1].w - slW) / 2, y + (rowH - 10) / 2);
@@ -1556,8 +1565,8 @@ export async function generateAiVisibilityReport(
       const revenueDisplay = (language === "ko" && revenueText && !revenueText.includes("월"))
         ? `월 ${revenueText}` : revenueText;
       const mpText = language === "ko"
-        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}명의 잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다. 예상 잠재 매출 기회: ${revenueDisplay}`
-        : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} potential patients per month cannot find the hospital through the website. Estimated revenue opportunity: ${revenueDisplay}`;
+        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}회의 트래픽이 웹사이트로 유입되지 못하고 있습니다. 예상 잠재 매출 기회: ${revenueDisplay}`
+        : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} monthly website visits are not being captured. Estimated revenue opportunity: ${revenueDisplay}`;
       y = drawInfoBox(doc, y, mpText, { accentColor: C.fail, bgColor: C.redTint, icon: "!" });
 
       // v6: reasoning 텍스트 삭제됨 (사용자 요청)
@@ -2205,7 +2214,8 @@ export async function generateAiVisibilityReport(
     // rd.mybiseoServices 기반 서비스 렌더링
     if (rd.mybiseoServices) {
       y = ensureSpace(doc, y, 60, hCtx);
-      y = drawSectionTitle(doc, y, t.guideMybiseo, language === "ko" ? "AI 시대에 병원이 필요로 하는 12가지 서비스" : "12 essential services for hospitals in the AI era");
+      const svcCount = rd.mybiseoServices.services?.length || 5;
+      y = drawSectionTitle(doc, y, t.guideMybiseo, language === "ko" ? `AI 시대에 귀 병원에 꼭 필요한 ${svcCount}가지 서비스` : `${svcCount} essential services for your hospital in the AI era`);
       // rd.mybiseoServices.headline
       y = drawParagraph(doc, y, stripMarkdown(rd.mybiseoServices.headline));
       // rd.mybiseoServices.services — 2열 카드 그리드

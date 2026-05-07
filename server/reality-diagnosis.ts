@@ -308,11 +308,12 @@ async function fetchTrafficData(domain: string): Promise<TrafficInsight | null> 
 const SYSTEM_PROMPT = "You are a Korean medical AI visibility diagnostic expert specializing in the zero-click era. Always respond in Korean. Generate factual, data-driven analysis focused on AI platform citation, GEO (Generative Engine Optimization), and digital visibility across AI platforms (ChatGPT, Perplexity, Gemini, Claude) and portals (Naver, Google). Use specific numbers and make the analysis compelling — the reader (hospital director) should clearly understand why each issue matters and what they stand to gain by fixing it. Write in a professional yet persuasive diagnostic tone. Explain technical terms in parentheses so non-experts can understand. Emphasize areas that traditional marketing agencies cannot cover (AI optimization, structured data, answer capsules).";
 
 // ── 공통 컨텍스트 빌더 ──
-function buildContext(domain: string, siteName: string | undefined, specialty: string, seoScore: number, seoGrade: string, categoryScores: Record<string, number>, trafficContext: string): string {
+function buildContext(domain: string, siteName: string | undefined, specialty: string, seoScore: number, seoGrade: string, categoryScores: Record<string, number>, trafficContext: string, region?: string): string {
   return `[분석 대상]
 - 도메인: ${domain}
 - 병원명: ${siteName || domain}
 - 진료과: ${specialty || "미지정"}
+- 지역: ${region || "미지정"}
 - AI 가시성 진단 점수: ${seoScore}/100 (등급: ${seoGrade})
 - 카테고리별 점수: ${JSON.stringify(categoryScores)}
 ${trafficContext}
@@ -328,7 +329,8 @@ ${trafficContext}
 8. 진료 분야 일관성: 보고서 전체에서 병원의 진료 분야를 일관되게 유지하세요. 메타 키워드와 콘텐츠 전략이 병원의 주력 진료과와 일치해야 합니다.
 9. 출력 금지 표현: "(왜 중요한가: ...)", "(참고: ...)", "(노트: ...)" 같은 메타 코멘트/사고 과정 표현을 절대 출력하지 마세요. 최종 보고서에 인쇄되는 텍스트입니다.
 10. HTML 태그 금지: </td>, <br>, <p> 등 HTML 태그를 절대 포함하지 마세요.
-11. 톤 조절: "위기", "심각한 손실", "즉각 조치 필요" 등 공포 유발 표현을 지양하세요. 대신 "개선 기회", "잠재력 미활용", "최적화 여지" 등 긍정적 프레이밍을 사용하세요. 문제를 지적하되 해결 가능성을 강조하는 톤을 유지하세요.`;
+11. 톤 조절: "위기", "심각한 손실", "즉각 조치 필요" 등 공포 유발 표현을 지양하세요. 대신 "개선 기회", "잠재력 미활용", "최적화 여지" 등 긍정적 프레이밍을 사용하세요. 문제를 지적하되 해결 가능성을 강조하는 톤을 유지하세요.
+12. 표현 금지: "매출 손실", "손실 금액", "손실액" 등 "손실" 표현을 절대 사용하지 마세요. 대신 "잠재 매출 기회", "추가 유입 기회", "성장 가능성" 등을 사용하세요.`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -541,10 +543,10 @@ aiCitationThreshold: AI 인용 임계점 체크리스트 (5개 항목).
   totalCount: 5
   verdict: 종합 판정
 
-answerCapsule: 답변 캅슐 품질 진단.
+answerCapsule: 답변 캡슐 품질 진단.
   score: 0-100
-  currentBestSentence: 현재 웹사이트에서 가장 AI 인용에 적합한 문장 (없으면 "적합한 답변 캅슐 문장 없음")
-  idealSentence: 이 병원의 진료과에 맞는 이상적인 답변 캅슐 예시 (40-60단어).
+  currentBestSentence: 현재 웹사이트에서 가장 AI 인용에 적합한 문장 (없으면 "적합한 답변 캡슐 문장 없음")
+  idealSentence: 이 병원의 진료과에 맞는 이상적인 답변 캡슐 예시 (40-60단어).
     [!!! 금지 표현 !!!] 다음 상투적 표현을 절대 사용하지 마세요:
     - "20년 이상의 임상 경험" / "N년 이상의 경험"
     - "최첨단 디지털 장비" / "최신 장비"
@@ -661,7 +663,7 @@ crossChannelTrust: 4채널 교차 신뢰 진단.
   verdict: 종합 판정 (1-2문장)
 
 aiSimulator: AI 추천 시뮬레이터 결과.
-  query: "지역 + 진료과 + 추천해줘" 형식의 시뮬레이션 질의
+  query: 반드시 병원의 실제 위치(역명/동네)와 진료과를 반영한 구체적 질의어를 생성하세요. 예: "신논현역 성형외과 추천해줘", "강남 눈성형 잘하는 병원". "강남 성형외과 추천해줘"처럼 범용적인 질의어는 사용하지 마세요.
   results: 5개 AI 엔진별 결과. 각각:
     engine: "ChatGPT" | "Gemini" | "Perplexity" | "Claude" | "네이버 Cue"
     mentioned: true/false (AI가 이 병원을 언급할 가능성 추정)
@@ -998,6 +1000,7 @@ export async function generateRealityDiagnosis(
   seoGrade: string,
   categoryScores: Record<string, number>,
   siteName?: string,
+  region?: string,
 ): Promise<RealityDiagnosis> {
   const startTime = Date.now();
 
@@ -1012,6 +1015,8 @@ export async function generateRealityDiagnosis(
   const effectiveSpecialty = classificationResult.confidence >= 50 
     ? classificationResult.primary 
     : specialty || classificationResult.primary;
+  // #3 객단가 적용: calculateDeterministicRevenueLoss에 effectiveSpecialty 사용
+  const revenueSpecialty = effectiveSpecialty;
 
   // SimilarWeb 데이터와 LLM 호출을 병렬로 시작
   const trafficPromise = fetchTrafficData(domain);
@@ -1031,7 +1036,7 @@ export async function generateRealityDiagnosis(
 [SimilarWeb 트래픽 데이터: 조회 불가]
 해당 도메인의 트래픽이 SimilarWeb 최소 추적 기준(월 5,000회) 미만입니다.`;
 
-  const context = buildContext(domain, siteName, specialty, seoScore, seoGrade, categoryScores, trafficContext);
+  const context = buildContext(domain, siteName, specialty, seoScore, seoGrade, categoryScores, trafficContext, region);
 
   // 4개 LLM 호출을 병렬로 실행
   const [coreResult, geoAiResult, channelResult, strategyResult] = await Promise.allSettled([
@@ -1087,14 +1092,14 @@ export async function generateRealityDiagnosis(
   console.log(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status} | AI가시성:${aiVisibility.score} 마케팅가치:${marketingValue.seoInvestmentScore}`);
   return {
     hospitalName: siteName || domain,
-    specialty: specialty || "일반",
+    specialty: revenueSpecialty || "일반",
     // Core
     headline: (() => {
       let hl = core.headline || FALLBACK_CORE.headline;
       // headline에서도 LLM 매출 수치를 코드 계산값으로 동기화
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0) {
-        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty);
         hl = hl.replace(/월\s*약?\s*[\d,]+만원(\s*상당)?/g, formatted);
         hl = hl.replace(/약\s*[\d,]+만원(\s*상당)?/g, formatted);
         hl = hl.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
@@ -1109,11 +1114,11 @@ export async function generateRealityDiagnosis(
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       const m = core.metrics || FALLBACK_CORE.metrics;
       const { formatted: revLoss } = mp.estimatedMonthly > 0
-        ? calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty)
+        ? calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty)
         : { formatted: "산출 불가" };
       const summaryCtx: SummaryContext = {
         hospitalName: siteName || domain,
-        specialty: specialty || "일반",
+        specialty: revenueSpecialty || "일반",
         seoScore: seoScore,
         seoGrade: seoGrade,
         missedPatientsMonthly: mp.estimatedMonthly,
@@ -1139,13 +1144,16 @@ export async function generateRealityDiagnosis(
       summary = summary.replace(/누락\s+누락/g, '누락'); // 중복 방지
       summary = summary.replace(/예상\s*매출\s*손실/g, '예상 잠재 매출 기회');
       summary = summary.replace(/매출\s*기회\s*손실/g, '잠재 매출 기회');
+      summary = summary.replace(/매출\s*손실/g, '잠재 매출 기회');
+      summary = summary.replace(/손실\s*금액/g, '잠재 매출 기회');
+      summary = summary.replace(/손실액/g, '잠재 매출 기회');
       return summary;
     })(),
     keyFindings: (() => {
       const findings = core.keyFindings || FALLBACK_CORE.keyFindings;
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0 && findings.length > 0) {
-        const { formatted: revLossSync } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        const { formatted: revLossSync } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty);
         // LLM이 생성한 매출 수치를 코드 기반 계산값으로 동기화 ("월 월" 중복 방지)
         return findings.map((f: string) => {
           let result = f;
@@ -1153,18 +1161,27 @@ export async function generateRealityDiagnosis(
           result = result.replace(/(?<!월\s)(?<!월)약\s*[\d,]+만원(\s*상당)?/g, revLossSync);
           result = result.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, revLossSync);
           result = result.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+억원/g, revLossSync);
+          result = result.replace(/매출\s*손실/g, '잠재 매출 기회');
+          result = result.replace(/손실\s*금액/g, '잠재 매출 기회');
+          result = result.replace(/손실액/g, '잠재 매출 기회');
           return result;
         });
       }
       return findings;
     })(),
     riskScore: core.riskScore ?? FALLBACK_CORE.riskScore,
-    urgencyLevel: core.urgencyLevel || FALLBACK_CORE.urgencyLevel,
+    // #10 우선순위 산정: 달성률(seoScore) 기반 자동 공식 (LLM 의존 제거)
+    urgencyLevel: (() => {
+      if (seoScore < 30) return "critical";
+      if (seoScore < 50) return "high";
+      if (seoScore < 70) return "medium";
+      return "low";
+    })(),
     metrics: (() => {
       const m = core.metrics || FALLBACK_CORE.metrics;
       // metrics.estimatedRevenueLoss도 동기화
       if (m.missedPatientsMonthly > 0) {
-        const { formatted } = calculateDeterministicRevenueLoss(m.missedPatientsMonthly, specialty);
+        const { formatted } = calculateDeterministicRevenueLoss(m.missedPatientsMonthly, revenueSpecialty);
         return { ...m, estimatedRevenueLoss: formatted };
       }
       return m;
@@ -1185,18 +1202,43 @@ export async function generateRealityDiagnosis(
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       // 코드 기반 결정론적 매출 손실 계산 (LLM 추정 대체)
       if (mp.estimatedMonthly > 0) {
-        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        const { formatted } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty);
         return { ...mp, revenueImpact: formatted };
       }
       return mp;
     })(),
     contentGaps: core.contentGaps || FALLBACK_CORE.contentGaps,
-    actionItems: core.actionItems || FALLBACK_CORE.actionItems,
+    // #11 단계별 효과 합산 측 처리: 추가 유입 합산이 미유입 추정값을 초과하지 않도록
+    actionItems: (() => {
+      const items = core.actionItems || FALLBACK_CORE.actionItems;
+      const missedMonthly = (core.missedPatients || FALLBACK_CORE.missedPatients).estimatedMonthly || 0;
+      if (missedMonthly <= 0 || items.length === 0) return items;
+      // expectedImpact에서 숫자 추출하여 합산 캡 적용
+      let totalExtracted = 0;
+      const extractNum = (text: string): number => {
+        const match = text.match(/(\d+)~(\d+)명/);
+        if (match) return (parseInt(match[1]) + parseInt(match[2])) / 2;
+        const single = text.match(/(\d+)명/);
+        if (single) return parseInt(single[1]);
+        return 0;
+      };
+      items.forEach((item: any) => { totalExtracted += extractNum(item.expectedImpact || ""); });
+      // 합산이 미유입의 120%를 초과하면 "가능성" 톤으로 변경
+      if (totalExtracted > missedMonthly * 1.2) {
+        return items.map((item: any) => ({
+          ...item,
+          expectedImpact: item.expectedImpact
+            ? item.expectedImpact.replace(/(달\s*)?(추가\s*유입|유입\s*증가)/g, '추가 유입 가능성')
+            : item.expectedImpact
+        }));
+      }
+      return items;
+    })(),
     closingStatement: (() => {
       let cs = core.closingStatement || FALLBACK_CORE.closingStatement;
       const mp = core.missedPatients || FALLBACK_CORE.missedPatients;
       if (mp.estimatedMonthly > 0) {
-        const { formatted, revenueLossManwon } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty);
+        const { formatted, revenueLossManwon } = calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty);
         cs = cs.replace(/(?:매)?월\s*(?:매출\s*)?약?\s*[\d,]+만원(\s*상당)?/g, formatted);
         cs = cs.replace(/(?<!월\s)(?<!월)약\s*[\d,]+만원(\s*상당)?/g, formatted);
         cs = cs.replace(/[\d,]+억[\d,]*만원(\s*상당)?/g, formatted);
@@ -1221,6 +1263,9 @@ export async function generateRealityDiagnosis(
       cs = cs.replace(/미유입\s+미유입/g, '미유입'); // 중복 방지
       cs = cs.replace(/예상\s*매출\s*손실/g, '예상 잠재 매출 기회');
       cs = cs.replace(/매출\s*기회\s*손실/g, '잠재 매출 기회');
+      cs = cs.replace(/매출\s*손실/g, '잠재 매출 기회');
+      cs = cs.replace(/손실\s*금액/g, '잠재 매출 기회');
+      cs = cs.replace(/손실액/g, '잠재 매출 기회');
       return cs;
     })(),
     // GEO + AI
@@ -1234,7 +1279,20 @@ export async function generateRealityDiagnosis(
       const clamped = Math.min(100, Math.max(0, computed));
       return { ...geo, overallGeoScore: clamped };
     })(),
-    aiCitationThreshold: geoAi.aiCitationThreshold || FALLBACK_GEO_AI.aiCitationThreshold,
+    aiCitationThreshold: (() => {
+      const cit = geoAi.aiCitationThreshold || FALLBACK_GEO_AI.aiCitationThreshold;
+      // #6 다채널 일관성 판정 동기화: crossChannelTrust.overallConsistency 기반으로 met 값 강제
+      const crossConsistency = (channel.crossChannelTrust || FALLBACK_CHANNEL.crossChannelTrust).overallConsistency || 0;
+      const items = (cit.items || []).map((item: any) => {
+        if (item.condition && item.condition.includes("다채널 일관성")) {
+          // 60점 이상이면 충족, 미만이면 미충족
+          return { ...item, met: crossConsistency >= 60 };
+        }
+        return item;
+      });
+      const metCount = items.filter((i: any) => i.met).length;
+      return { ...cit, items, metCount, totalCount: items.length || 5 };
+    })(),
     answerCapsule: geoAi.answerCapsule || FALLBACK_GEO_AI.answerCapsule,
     // Channel
     crossChannelTrust: channel.crossChannelTrust || FALLBACK_CHANNEL.crossChannelTrust,

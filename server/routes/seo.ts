@@ -208,6 +208,7 @@ export const seoAnalyzerRouter = router({
       seoGrade: z.string(),
       categoryScores: z.record(z.string(), z.number()),
       siteName: z.string().optional(),
+      region: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
       const domain = input.url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");
@@ -218,6 +219,7 @@ export const seoAnalyzerRouter = router({
         input.seoGrade,
         input.categoryScores as Record<string, number>,
         input.siteName,
+        input.region,
       );
     }),
 

@@ -36,12 +36,12 @@ describe("Deterministic Revenue Loss Calculation", () => {
   });
 
   it("applies deterministic calculation to missedPatients.revenueImpact", () => {
-    expect(rdSource).toContain("calculateDeterministicRevenueLoss(mp.estimatedMonthly, specialty)");
+    expect(rdSource).toContain("calculateDeterministicRevenueLoss(mp.estimatedMonthly, revenueSpecialty)");
     expect(rdSource).toContain("return { ...mp, revenueImpact: formatted }");
   });
 
   it("applies deterministic calculation to metrics.estimatedRevenueLoss", () => {
-    expect(rdSource).toContain("calculateDeterministicRevenueLoss(m.missedPatientsMonthly, specialty)");
+    expect(rdSource).toContain("calculateDeterministicRevenueLoss(m.missedPatientsMonthly, revenueSpecialty)");
     expect(rdSource).toContain("return { ...m, estimatedRevenueLoss: formatted }");
   });
 
@@ -77,18 +77,18 @@ describe("KPI Label Changes in PDF Report", () => {
     "utf-8"
   );
 
-  it("uses '예상 미유입 잠재 환자' label instead of '예상 누락 환자'", () => {
-    expect(pdfSource).toContain("예상 미유입 잠재 환자");
-    expect(pdfSource).not.toContain('"예상 누락 환자"');
+  it("uses '예상 미유입 트래픽' label instead of '예상 누락 환자'", () => {
+    expect(pdfSource).toContain("예상 미유입 트래픽");
+    expect(pdfSource).not.toContain('"\uc608\uc0c1 \ub204\ub77d \ud658\uc790"');
   });
 
   it("uses '예상 잠재 매출 기회' label instead of '예상 매출 손실'", () => {
     expect(pdfSource).toContain("예상 잠재 매출 기회");
-    expect(pdfSource).not.toContain('"예상 매출 손실"');
+    expect(pdfSource).not.toContain('"\uc608\uc0c1 \ub9e4\ucd9c \uc190\uc2e4"');
   });
 
-  it("uses '웹사이트 유입 누락 환자가 발생' in info box text", () => {
-    expect(pdfSource).toContain("잠재 환자가 웹사이트를 통해 유입되지 못하고 있습니다");
+  it("uses '트래픽이 웹사이트로 유입되지 못하고' in info box text", () => {
+    expect(pdfSource).toContain("트래픽이 웹사이트로 유입되지 못하고 있습니다");
   });
 });
 
@@ -118,12 +118,12 @@ describe("KPI Label Changes in HTML Report Sections", () => {
     "utf-8"
   );
 
-  it("uses '예상 미유입 잠재 환자' in metric boxes", () => {
-    expect(sectionsSource).toContain("예상 미유입 잠재 환자");
+  it("uses '예상 미유입 트래픽' in metric boxes", () => {
+    expect(sectionsSource).toContain("예상 미유입 트래픽");
   });
 
-  it("uses '미유입 잠재 환자 분석' section title", () => {
-    expect(sectionsSource).toContain("미유입 잠재 환자 분석");
+  it("uses '미유입 트래픽 분석' section title", () => {
+    expect(sectionsSource).toContain("미유입 트래픽 분석");
   });
 
   it("uses '예상 잠재 매출 기회' in highlight card", () => {

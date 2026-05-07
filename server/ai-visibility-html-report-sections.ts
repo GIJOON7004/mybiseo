@@ -813,7 +813,7 @@ export function buildCompetitorPage(
         <div class="callout-icon">${statusIcon("warning")}</div>
         <div class="callout-body">
           <div class="callout-title">${lang === "ko" ? "경쟁 압력 감지" : "Competitive Pressure Detected"}</div>
-          <div class="callout-text">${lang === "ko" ? `분석 대상 ${competitors.length}개 경쟁 병원 중 ${highVisCount}개가 이미 높은 AI 가시성을 확보했습니다. 이들은 AI 검색에서 귀 병원의 잠재 환자를 흡수하고 있을 수 있습니다.` : `${highVisCount} of ${competitors.length} competitors already have high AI visibility.`}</div>
+          <div class="callout-text">${lang === "ko" ? `분석 대상 ${competitors.length}개 경쟁 병원 중 ${highVisCount}개가 이미 높은 AI 가시성을 확보했습니다. 이들은 AI 검색에서 귀 병원으로 유입될 수 있는 트래픽을 흡수하고 있을 수 있습니다.` : `${highVisCount} of ${competitors.length} competitors already have high AI visibility.`}</div>
         </div>
       </div>` : ""}
       ${competitors.map((c, idx) => {
@@ -895,7 +895,7 @@ export function buildAdSavingsPage(
           <div class="value">${organicShare}%</div>
         </div>
         <div class="metric-box" style="border-top:3px solid var(--warn);">
-          <div class="label">${lang === "ko" ? "예상 미유입 잠재 환자" : "Est. Missed Website Visitors"}</div>
+          <div class="label">${lang === "ko" ? "예상 미유입 트래픽" : "Est. Missed Website Traffic"}</div>
           <div class="value">${fmtNum(missedMonthly)}</div>
         </div>
       </div>
@@ -1616,8 +1616,8 @@ export function buildTrafficDeepAnalysisPage(
         '05'
       )}
       <div class="section-intro">${lang === "ko"
-        ? `${hospitalName}의 웹사이트 트래픽 데이터를 SimilarWeb 기반으로 분석합니다. 방문자 행동 패턴과 미유입 잠재 환자 추정치를 통해 개선 기회를 식별합니다.`
-        : `Analyzing ${hospitalName}'s website traffic data via SimilarWeb. Identifying improvement opportunities through visitor behavior patterns and estimated patient loss.`
+        ? `${hospitalName}의 웹사이트 트래픽 데이터를 SimilarWeb 기반으로 분석합니다. 방문자 행동 패턴과 미유입 트래픽 추정치를 통해 개선 기회를 식별합니다.`
+        : `Analyzing ${hospitalName}'s website traffic data via SimilarWeb. Identifying improvement opportunities through visitor behavior patterns and estimated missed traffic.`
       }</div>
 
       <div class="grid-2 gap-8 mb-16">
@@ -1672,11 +1672,11 @@ export function buildTrafficDeepAnalysisPage(
 
       <!-- Missed Patients Analysis -->
       ${missed ? `
-      <div class="sub-title">${lang === "ko" ? "미유입 잠재 환자 분석" : "Missed Website Visitor Analysis"}</div>
+      <div class="sub-title">${lang === "ko" ? "미유입 트래픽 분석" : "Missed Website Traffic Analysis"}</div>
       <div class="card" style="border-left:4px solid var(--fail);padding:16px 18px;">
         <div class="grid-2 gap-16">
           <div>
-            <div class="fs-9 text-muted mb-4">${lang === "ko" ? "예상 월간 미유입 잠재 환자" : "Est. Monthly Missed Website Visitors"}</div>
+            <div class="fs-9 text-muted mb-4">${lang === "ko" ? "예상 월간 미유입 트래픽" : "Est. Monthly Missed Website Traffic"}</div>
             <div class="fs-20 fw-700 text-fail">${missedMonthly.toLocaleString()}${lang === "ko" ? "명" : ""}</div>
             ${revenueImpact ? `<div class="fs-10 fw-600 mt-4" style="color:var(--fail);">${esc(revenueImpact)}</div>` : ""}
           </div>
@@ -1833,7 +1833,7 @@ export function buildRoiProjectionPage(
         <div class="fs-10 fw-600 text-navy mb-8">${lang === "ko" ? "현재 상태 (기준점)" : "Current State (Baseline)"}</div>
         <div class="grid-3 gap-8">
           <div><div class="fs-9 text-muted">${lang === "ko" ? "월간 오가닉 유입" : "Monthly Organic"}</div><div class="fs-14 fw-700 text-navy">${fmtNum(currentOrganic)}</div></div>
-          <div><div class="fs-9 text-muted">${lang === "ko" ? "예상 월간 미유입 잠재 환자" : "Est. Monthly Missed Website Visitors"}</div><div class="fs-14 fw-700 text-fail">${fmtNum(missedMonthly)}</div></div>
+          <div><div class="fs-9 text-muted">${lang === "ko" ? "예상 월간 미유입 트래픽" : "Est. Monthly Missed Website Traffic"}</div><div class="fs-14 fw-700 text-fail">${fmtNum(missedMonthly)}</div></div>
           <div><div class="fs-9 text-muted">${lang === "ko" ? "AI 가시성 점수" : "AI Visibility Score"}</div><div class="fs-14 fw-700 text-navy">${score}/100</div></div>
         </div>
       </div>
