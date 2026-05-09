@@ -359,3 +359,19 @@
 - [x] BlogPost.tsx의 Article Schema/메타태그/OG 적용 검증 (useSEO + Article JSON-LD + BreadcrumbList 확인)
 - [x] diagnosis-automation.ts를 email 발송 플로우에 연결 (sendReport 내부에서 checkDiagnosisAutomation 호출)
 - [x] 자동 발송 전 품질 검증 실패 시 차단 + 운영자 알림 (notifyOwner 호출)
+
+## 코드베이스 효율화 개선 (4개 AI 리뷰 기반)
+
+### Phase A: Quick Wins
+- [x] A-1: Rate Limiting 미들웨어 추가 (전역 100회/15분 + 진단 3회/시간 + 이메일 5회/시간 + 인증 10회/15분)
+- [x] A-2: 에러 핸들러 production stack trace 제거 (NODE_ENV 기반 조건부 노출)
+- [x] A-3: /public/llms.txt 개선 (회사정보 + 가치제안 + 서비스 URL + 경쟁우위 + 기술스택 상세화)
+- [x] A-4: DB 커넥션 풀 타임아웃 설정 (10커넥션/10초 timeout/60초 idle/keepalive + graceful shutdown)
+
+### Phase B: 중기 리팩토링
+- [ ] B-1: ServicePageLayout 공통 컴포넌트 추출 (5개 서비스 페이지 중복 제거)
+- [ ] B-2: ai-visibility-report.ts 4개 모듈 분할 (2500줄 → 각 500~700줄)
+- [ ] B-3: db.ts 도메인별 분리 (seo/blog/user/abtest)
+- [ ] B-4: 핵심 비즈니스 로직 통합 테스트 5개 작성
+- [ ] B-5: AI 크롤러 감지 미들웨어 강화 + Prerender 개선
+- [ ] B-6: LLM 호출 캐싱 레이어 (DB 기반 24h TTL)

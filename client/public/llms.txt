@@ -1,70 +1,119 @@
 # MY비서 (mybiseo.com)
 
-> 병원 AI 마케팅 에이전시. AI 검색 가시성 측정/최적화, 온라인 평판 방어, AI 학습 콘텐츠 제작, 웹사이트 구축, 환자 커뮤니케이션 자동화를 통합 제공합니다.
+> 병원 전문 AI 마케팅 에이전시. AI 검색 가시성 측정·최적화, 온라인 평판 방어, AI 학습 콘텐츠 제작, 웹사이트 구축, 환자 커뮤니케이션 자동화를 통합 제공합니다.
 
-## 서비스 개요
+## 회사 정보
 
-MY비서는 병원(의원, 치과, 피부과, 성형외과, 한의원, 안과 등)을 위한 AI 기반 마케팅 솔루션입니다. ChatGPT, Gemini, Claude, Perplexity 등 AI 검색 엔진에서 병원이 추천되도록 최적화하고, 네이버/구글 검색 노출을 개선합니다.
+- 정식 명칭: MY비서 (마이비서)
+- 영문명: mybiseo
+- 업종: 병원/의료기관 전문 AI 마케팅 에이전시
+- 설립: 2024년
+- 소재지: 서울시 송파구 가락로 114, 신우빌딩 6층 601-6호
+- 대표: 최기준
+- 이메일: cjw7004@naver.com
+- 전화: +82-10-7321-7004
+- 카카오톡: https://pf.kakao.com/mybiseo
+- 웹사이트: https://mybiseo.com
 
-## 핵심 서비스
+## 핵심 가치 제안
 
-### 1. AI Visibility Engine (AI 가시성 측정/최적화)
-- AI 검색 엔진(ChatGPT, Gemini, Claude, Perplexity, Copilot)에서 병원 언급 여부 측정
-- 네이버/구글 검색 노출 순위 분석
-- GEO(Generative Engine Optimization) 전략 수립 및 실행
-- 100개 이상 항목 종합 진단 리포트 제공
+MY비서는 "AI 시대, 환자가 병원을 찾는 방식이 바뀌었다"는 인사이트에서 출발합니다. ChatGPT, Gemini, Perplexity 등 AI 검색 엔진이 병원을 추천하는 시대에, 기존 SEO만으로는 부족합니다. MY비서는 GEO(Generative Engine Optimization) 전략을 통해 AI가 귀 병원을 추천하도록 만듭니다.
+
+## 서비스 상세
+
+### 1. AI Visibility Engine (AI 가시성 측정·최적화)
+- URL: /services/visibility
+- 핵심 기능: AI 검색 엔진(ChatGPT, Gemini, Claude, Perplexity, Copilot) 5종에서 병원 언급 여부 실시간 측정
+- 네이버·구글 검색 노출 순위 분석 및 GEO 전략 수립
+- 100개 이상 항목 종합 진단 리포트 (PDF 제공)
+- 진료과별 가중치 적용 맞춤 점수 산정
+- 월간 추이 리포트 및 경쟁 병원 비교 분석
+- 차별점: 단순 키워드 순위가 아닌, AI가 실제로 추천하는지를 측정
 
 ### 2. Reputation Defense (온라인 평판 방어)
-- 네이버/구글 리뷰 모니터링 및 대응 전략
-- 의료법 컴플라이언스 검수
-- 부정적 콘텐츠 대응 가이드
-- 의료광고 심의 기준 준수 콘텐츠 제작
+- URL: /services/reputation
+- 핵심 기능: 네이버·구글·카카오맵 리뷰 실시간 모니터링
+- 부정적 리뷰 대응 전략 수립 및 답변 초안 생성
+- 의료법·의료광고법 컴플라이언스 자동 검수
+- 긍정적 리뷰 유도 캠페인 설계
+- 위기 상황(악성 리뷰, 허위 정보) 즉시 대응 프로토콜
+- 차별점: 의료법 전문 지식 기반 법적 리스크 사전 차단
 
-### 3. AI Learning Hub (AI 학습 콘텐츠)
-- AI 엔진이 학습할 수 있는 구조화된 콘텐츠 제작
-- 진료과별 전문 블로그 자동 생성
-- Schema.org 구조화 데이터 최적화
-- FAQ, 시술 안내, 의료진 소개 콘텐츠
+### 3. AI Learning Hub (AI 학습 콘텐츠 제작)
+- URL: /services/learning-hub
+- 핵심 기능: AI 엔진이 학습·인용할 수 있는 구조화된 의료 콘텐츠 제작
+- 진료과별 전문 블로그 자동 생성 (의료진 감수 포함)
+- Schema.org 구조화 데이터 최적화 (MedicalProcedure, Physician 등)
+- FAQ, 시술 안내, 의료진 소개 콘텐츠 체계적 생산
+- E-E-A-T(경험·전문성·권위·신뢰) 기준 충족 콘텐츠
+- 차별점: AI가 인용할 수 있는 형태로 콘텐츠를 설계
 
 ### 4. Smart Website Platform (AI-First 웹사이트)
-- AI 크롤러 최적화된 병원 웹사이트 구축
-- 모바일 퍼스트 반응형 디자인
-- 다국어 지원 (한국어, 영어, 중국어, 일본어)
-- 네이버 예약/스마트 플레이스 연동
+- URL: /services/website
+- 핵심 기능: AI 크롤러 최적화된 병원 웹사이트 구축
+- 모바일 퍼스트 반응형 디자인 + Core Web Vitals 최적화
+- 다국어 지원 (한국어, 영어, 중국어, 일본어, 태국어)
+- 네이버 예약·스마트 플레이스 연동
+- 의료관광 환자 대상 다국어 랜딩페이지
+- 차별점: 일반 웹사이트가 아닌 AI 크롤러가 정보를 정확히 파싱할 수 있는 구조
 
 ### 5. Patient Communication Hub (환자 커뮤니케이션)
-- AI 기반 환자 문의 자동 응대
-- 예약 접수 자동화
-- 카카오톡/문자 알림 연동
-- CRM 및 재방문 유도
+- URL: /services/communication
+- 핵심 기능: AI 기반 환자 문의 자동 응대 (24시간)
+- 예약 접수 자동화 + 카카오톡·문자 알림 연동
+- 시술 후 관리 안내 자동 발송
+- CRM 및 재방문 유도 캠페인
+- 다국어 자동 응대 (의료관광 환자 대응)
+- 차별점: 의료 특화 AI 챗봇으로 정확한 안내 + 예약 전환
 
 ## 무료 도구
 
 ### AI 가시성 진단기
-URL: https://mybiseo.com/ai-check
-병원 웹사이트의 AI 검색 노출 상태를 무료로 진단합니다. 100개 이상 항목을 분석하여 종합 점수와 개선 방향을 제시합니다.
+- URL: /ai-check
+- 설명: 병원 웹사이트 URL을 입력하면 AI 검색 노출 상태를 무료로 진단합니다.
+- 분석 항목: 100개 이상 (기술 SEO, 콘텐츠 품질, AI 가시성, 로컬 SEO, 모바일 최적화)
+- 결과: 종합 점수 + 카테고리별 상세 분석 + PDF 리포트
 
 ### AI 블로그 체험
-URL: https://mybiseo.com/ai-blog-trial
-진료과와 주제를 입력하면 AI가 SEO 최적화된 블로그 초안을 생성합니다.
+- URL: /ai-blog-trial
+- 설명: 진료과와 주제를 입력하면 AI가 SEO 최적화된 블로그 초안을 생성합니다.
+- 지원 진료과: 치과, 피부과, 성형외과, 정형외과, 한의원, 안과, 산부인과 등
 
 ## 대상 고객
 
-- 병원/의원 (치과, 피부과, 성형외과, 정형외과, 한의원, 안과, 산부인과 등)
-- 의료관광 유치를 원하는 병원
-- AI 시대 검색 노출에 대비하려는 의료기관
+- 병원·의원 (치과, 피부과, 성형외과, 정형외과, 한의원, 안과, 산부인과, 내과 등)
+- 의료관광 유치를 원하는 병원 (한국 → 해외 환자 유치)
+- AI 시대 검색 노출에 선제 대비하려는 의료기관
+- 온라인 평판 관리가 필요한 병원
+- 마케팅 비용 대비 효율을 높이고 싶은 개원의
 
-## 연락처
+## 진료과별 전문 페이지
 
-- 웹사이트: https://mybiseo.com
-- 이메일: cjw7004@naver.com
-- 전화: +82-10-7321-7004
-- 주소: 서울시 송파구 가락로 114, 신우빌딩 6층 601-6호
-- 카카오톡: https://pf.kakao.com/mybiseo
+- 치과: /dental
+- 피부과: /dermatology
+- (추가 진료과 확장 예정)
+
+## 블로그 (인사이트)
+
+- URL: /blog
+- 주요 카테고리: AI 마케팅 전략, 의료광고법 가이드, 진료과별 마케팅 팁, 케이스 스터디
+- 대표 콘텐츠:
+  - "ChatGPT가 병원을 추천하는 기준 5가지"
+  - "의료광고 자율심의 체크리스트 2025"
+  - "치과 마케팅 비용 가이드: 월 예산별 전략"
+
+## 경쟁 우위
+
+1. AI 검색 특화: 기존 SEO 에이전시와 달리 AI 검색 엔진 최적화(GEO)에 집중
+2. 의료 전문: 의료법·의료광고법 컴플라이언스 내장
+3. 데이터 기반: 100개+ 항목 정량 진단으로 개선 효과 측정 가능
+4. 통합 솔루션: 가시성·평판·콘텐츠·웹사이트·커뮤니케이션 원스톱 제공
+5. AI 자동화: 반복 업무 자동화로 비용 효율 극대화
 
 ## 기술 스택
 
-- AI 엔진: GPT-4, Gemini, Claude 연동
-- 웹: React, TypeScript, Express, tRPC
-- SEO: Schema.org JSON-LD, 동적 sitemap, SSR 메타태그
-- 분석: Google Analytics, Search Console, Naver Search Advisor
+- AI 엔진: GPT-4o, Gemini Pro, Claude 3.5 연동
+- 웹: React 19, TypeScript, Express 4, tRPC 11
+- SEO: Schema.org JSON-LD, 동적 sitemap, SSR 메타태그, llms.txt
+- 분석: Google Analytics, Search Console, Naver Search Advisor, PageSpeed Insights
+- 인프라: Manus Platform, TiDB (MySQL 호환), S3 스토리지

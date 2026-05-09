@@ -6,6 +6,7 @@ import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { registerSeoMiddleware } from "../seo-middleware";
+import { registerRateLimiting } from "./rate-limit";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -32,6 +33,7 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   app.disable("x-powered-by");
+  app.set("trust proxy", 1); // 프록시 환경에서 정확한 클라이언트 IP 식별
   // Security headers
   app.use((req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
@@ -43,6 +45,9 @@ async function startServer() {
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // Rate Limiting (보안 + LLM 비용 보호)
+  registerRateLimiting(app);
+
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   // Phase 0: SEO 미들웨어 (sitemap, robots.txt, AI 크롤러 대응)
@@ -55,6 +60,17 @@ async function startServer() {
       createContext,
     })
   );
+  // Global error handler — production에서 stack trace 노출 방지
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const status = err.status || err.statusCode || 500;
+    const isDev = process.env.NODE_ENV === "development";
+    console.error(`[Error ${status}]`, isDev ? err : err.message);
+    res.status(status).json({
+      error: err.message || "서버 오류가 발생했습니다.",
+      ...(isDev && { stack: err.stack }),
+    });
+  });
+
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
@@ -75,3 +91,13 @@ async function startServer() {
 }
 
 startServer().catch(console.error);
+
+// Graceful shutdown
+import { closeDb } from "../db";
+const shutdown = async (signal: string) => {
+  console.log(`\n[${signal}] Shutting down gracefully...`);
+  await closeDb();
+  process.exit(0);
+};
+process.on("SIGINT", () => shutdown("SIGINT"));
+process.on("SIGTERM", () => shutdown("SIGTERM"));

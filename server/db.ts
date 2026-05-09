@@ -5,17 +5,38 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
+/**
+ * DB 커넥션 풀 설정 (drizzle-orm/mysql2 내장 풀 사용)
+ * drizzle()에 URL 문자열을 전달하면 내부적으로 mysql2 pool을 생성합니다.
+ * connection config는 URL 파라미터로 전달합니다.
+ */
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      // drizzle-orm이 내부적으로 mysql2 pool을 생성 (커넥션 풀 설정은 URL 파라미터로 제어)
+      _db = drizzle(process.env.DATABASE_URL + "&connectionLimit=10&connectTimeout=10000&waitForConnections=true");
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
     }
   }
   return _db;
+}
+
+/** Graceful shutdown — 서버 종료 시 커넥션 풀 정리 */
+export async function closeDb(): Promise<void> {
+  if (_db) {
+    try {
+      // drizzle의 $client는 내부 mysql2 pool
+      const client = (_db as any).$client;
+      if (client && typeof client.end === 'function') {
+        await client.end();
+      }
+    } catch (e) {
+      console.warn("[Database] Error closing pool:", e);
+    }
+    _db = null;
+  }
 }
 
 export async function upsertUser(user: InsertUser): Promise<void> {
