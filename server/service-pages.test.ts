@@ -15,6 +15,17 @@ function readPage(name: string): string {
   return readFileSync(resolve(clientDir, `pages/${name}.tsx`), "utf-8");
 }
 
+/** 페이지 + 공통 레이아웃 소스를 합쳐서 검증 (리팩토링 후 공통 텍스트는 레이아웃에 위치) */
+function readPageWithLayout(name: string): string {
+  const page = readPage(name);
+  try {
+    const layout = readFileSync(resolve(clientDir, "components/ServicePageLayout.tsx"), "utf-8");
+    return page + "\n" + layout;
+  } catch {
+    return page;
+  }
+}
+
 function readComponent(name: string): string {
   return readFileSync(resolve(clientDir, `components/${name}.tsx`), "utf-8");
 }
@@ -103,7 +114,7 @@ describe("Phase 3: 서비스 상세 페이지", () => {
   });
 
   describe("AI Visibility Engine 핵심 콘텐츠", () => {
-    const src = readPage("ServiceVisibility");
+    const src = readPageWithLayout("ServiceVisibility");
 
     it("문제 정의 섹션이 포함되어 있다", () => {
       expect(src).toMatch(/AI\s*검색|가시성/);
@@ -127,7 +138,7 @@ describe("Phase 3: 서비스 상세 페이지", () => {
   });
 
   describe("Reputation Defense 핵심 콘텐츠", () => {
-    const src = readPage("ServiceReputation");
+    const src = readPageWithLayout("ServiceReputation");
 
     it("평판 방어 관련 문제 정의가 있다", () => {
       expect(src).toMatch(/부정\s*리뷰|평판|악성/);
@@ -147,7 +158,7 @@ describe("Phase 3: 서비스 상세 페이지", () => {
   });
 
   describe("AI Learning Hub 핵심 콘텐츠", () => {
-    const src = readPage("ServiceLearningHub");
+    const src = readPageWithLayout("ServiceLearningHub");
 
     it("AI 학습 관련 문제 정의가 있다", () => {
       expect(src).toMatch(/AI.*학습|부정확.*답변|Knowledge\s*Base/);
@@ -167,7 +178,7 @@ describe("Phase 3: 서비스 상세 페이지", () => {
   });
 
   describe("Smart Website 핵심 콘텐츠", () => {
-    const src = readPage("ServiceWebsite");
+    const src = readPageWithLayout("ServiceWebsite");
 
     it("핵심 기능 섹션이 있다", () => {
       expect(src).toMatch(/핵심\s*기능/);
@@ -183,7 +194,7 @@ describe("Phase 3: 서비스 상세 페이지", () => {
   });
 
   describe("Patient Communication 핵심 콘텐츠", () => {
-    const src = readPage("ServiceCommunication");
+    const src = readPageWithLayout("ServiceCommunication");
 
     it("핵심 기능 섹션이 있다", () => {
       expect(src).toMatch(/핵심\s*기능/);

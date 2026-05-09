@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { invokeLLMCached } from "../llm-cache";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   createAiBlogTrial, createAiContentLog, createCardnewsTemplate, getAiBlogTrialStats,
@@ -100,10 +101,10 @@ JSON: {"title": "...", "content": "...", "tags": ["..."]}`
         userId: ctx.user?.id,
       });
 
-      // 2단계: 의료광고법 검수
+      // 2단계: 의료광고법 검수 (동일 콘텐츠 반복 검수 시 캐시 활용)
       let review = null;
       try {
-        const reviewResult = await invokeLLM({
+        const reviewResult = await invokeLLMCached({
           messages: [
             {
               role: "system",
@@ -902,14 +903,14 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
       return JSON.parse(typeof rawReview === "string" ? rawReview : "{}");
     }),
 
-  // ─── 네이버 블로그 발행 준비 (HTML 변환) ───
+  // ─── 네이버 블로그 발행 준비 (HTML 변환 — 동일 콘텐츠 재변환 시 캐시) ───
   prepareNaverBlog: protectedProcedure
     .input(z.object({ contentId: z.number() }))
     .mutation(async ({ input }) => {
       const content = await getContentById(input.contentId);
       if (!content) throw new TRPCError({ code: "NOT_FOUND", message: "콘텐츠를 찾을 수 없습니다" });
-      // 마크다운 → HTML 변환 (LLM 사용)
-      const htmlResult = await invokeLLM({
+      // 마크다운 → HTML 변환 (LLM 사용, 캐시 적용)
+      const htmlResult = await invokeLLMCached({
         messages: [
           {
             role: "system",

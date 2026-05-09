@@ -1052,3 +1052,18 @@ export const diagnosisAutomationConfig = mysqlTable("diagnosis_automation_config
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 export type DiagnosisAutomationConfig = typeof diagnosisAutomationConfig.$inferSelect;
+
+/**
+ * AI 크롤러 방문 로그 — AI 봇이 어떤 페이지를 크롤링하는지 추적
+ */
+export const aiCrawlerVisits = mysqlTable("ai_crawler_visits", {
+  id: int("id").autoincrement().primaryKey(),
+  crawlerName: varchar("crawler_name", { length: 100 }).notNull(),
+  path: varchar("path", { length: 500 }).notNull(),
+  userAgent: text("user_agent"),
+  ip: varchar("ip", { length: 45 }),
+  visitedAt: timestamp("visited_at").defaultNow().notNull(),
+});
+
+export type AiCrawlerVisit = typeof aiCrawlerVisits.$inferSelect;
+export type InsertAiCrawlerVisit = typeof aiCrawlerVisits.$inferInsert;

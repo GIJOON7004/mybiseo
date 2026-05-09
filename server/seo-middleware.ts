@@ -1,13 +1,16 @@
 /**
- * SEO Middleware — Phase 0 기술 기반
+ * SEO Middleware — Phase B 강화
  * 1. AI 크롤러 감지 및 사전 렌더링 HTML 반환
- * 2. 동적 sitemap.xml 생성
- * 3. llms.txt 서빙 (public에서 직접 서빙되지만 fallback)
+ * 2. 크롤러 방문 DB 로깅 (fire-and-forget)
+ * 3. 동적 sitemap.xml 생성
+ * 4. robots.txt + llms.txt 서빙
+ * 5. 서비스 상세 페이지 메타데이터 완비
  */
 import type { Express, Request, Response, NextFunction } from "express";
 import { getDb } from "./db";
+import { sql } from "drizzle-orm";
 
-// AI 크롤러 User-Agent 패턴
+// ── AI 크롤러 User-Agent 패턴 ──
 const AI_CRAWLER_PATTERNS = [
   "GPTBot",
   "ChatGPT-User",
@@ -19,6 +22,8 @@ const AI_CRAWLER_PATTERNS = [
   "Bytespider",
   "Cohere-ai",
   "Meta-ExternalAgent",
+  "Applebot-Extended",
+  "YouBot",
 ];
 
 // 일반 검색 크롤러
@@ -45,7 +50,32 @@ function isCrawler(userAgent: string): boolean {
   return isAICrawler(userAgent) || isSearchCrawler(userAgent);
 }
 
-// 페이지별 메타데이터 정의
+/** 크롤러 이름 감지 */
+function detectCrawlerName(userAgent: string): string | null {
+  const ua = userAgent.toLowerCase();
+  for (const pattern of AI_CRAWLER_PATTERNS) {
+    if (ua.includes(pattern.toLowerCase())) return pattern;
+  }
+  for (const pattern of SEARCH_CRAWLER_PATTERNS) {
+    if (ua.includes(pattern.toLowerCase())) return pattern;
+  }
+  return null;
+}
+
+/** 비동기 크롤러 방문 로깅 (fire-and-forget) */
+async function logCrawlerVisit(crawlerName: string, path: string, userAgent: string, ip: string): Promise<void> {
+  try {
+    const database = await getDb();
+    if (!database) return;
+    await database.execute(
+      sql`INSERT INTO ai_crawler_visits (crawler_name, path, user_agent, ip) VALUES (${crawlerName}, ${path.slice(0, 500)}, ${userAgent.slice(0, 2000)}, ${ip.slice(0, 45)})`
+    );
+  } catch {
+    // 로깅 실패는 무시 — 크롤러 응답에 영향 주지 않음
+  }
+}
+
+// ── 페이지별 메타데이터 정의 ──
 interface PageMeta {
   title: string;
   description: string;
@@ -100,6 +130,32 @@ function getPageMeta(path: string): PageMeta {
       description: "매월 AI 검색 노출 성과가 우수한 병원을 선정하여 발표합니다.",
       canonical: base + "/awards",
     },
+    // ── 서비스 상세 페이지 ──
+    "/services/visibility": {
+      title: "AI Visibility Engine | MY비서 — AI 검색 가시성 측정·최적화",
+      description: "ChatGPT, Gemini, Perplexity 등 AI 검색에서 병원이 추천되는지 측정하고, GEO 전략으로 AI 노출을 극대화합니다.",
+      canonical: base + "/services/visibility",
+    },
+    "/services/reputation": {
+      title: "Reputation Defense System | MY비서 — 병원 온라인 평판 방어",
+      description: "부정 리뷰 실시간 감지, AI 기반 대응 전략 수립, 긍정 리뷰 유도 시스템으로 병원 평판을 보호합니다.",
+      canonical: base + "/services/reputation",
+    },
+    "/services/learning-hub": {
+      title: "AI Learning Hub | MY비서 — AI가 학습하는 병원 콘텐츠 제작",
+      description: "AI가 병원 정보를 정확히 학습할 수 있도록 구조화된 Knowledge Base를 구축합니다.",
+      canonical: base + "/services/learning-hub",
+    },
+    "/services/website": {
+      title: "Smart Website Platform | MY비서 — AI 크롤러 최적화 병원 웹사이트",
+      description: "AI 크롤러가 읽기 쉬운 구조, Schema 마크업, llms.txt 자동 생성 등 AI 시대에 최적화된 병원 웹사이트를 구축합니다.",
+      canonical: base + "/services/website",
+    },
+    "/services/communication": {
+      title: "Patient Communication Hub | MY비서 — 환자 소통 자동화",
+      description: "AI 챗봇, 스마트 예약, 노쇼 방지 리마인더, 환자 CRM으로 병원 환자 소통을 완전 자동화합니다.",
+      canonical: base + "/services/communication",
+    },
   };
 
   return pages[path] || {
@@ -144,6 +200,11 @@ function generatePrerenderedHtml(meta: PageMeta): string {
   <nav>
     <a href="https://mybiseo.com/">홈</a>
     <a href="https://mybiseo.com/ai-check">AI 가시성 진단</a>
+    <a href="https://mybiseo.com/services/visibility">AI Visibility Engine</a>
+    <a href="https://mybiseo.com/services/reputation">Reputation Defense</a>
+    <a href="https://mybiseo.com/services/learning-hub">AI Learning Hub</a>
+    <a href="https://mybiseo.com/services/website">Smart Website</a>
+    <a href="https://mybiseo.com/services/communication">Communication Hub</a>
     <a href="https://mybiseo.com/blog">블로그</a>
     <a href="https://mybiseo.com/ai-hub">AI 학습 허브</a>
     <a href="https://mybiseo.com/privacy">개인정보처리방침</a>
@@ -169,6 +230,11 @@ async function generateSitemap(): Promise<string> {
     { loc: "/ai-hub", priority: "0.7", changefreq: "weekly" },
     { loc: "/awards", priority: "0.6", changefreq: "monthly" },
     { loc: "/seo-history", priority: "0.6", changefreq: "weekly" },
+    { loc: "/services/visibility", priority: "0.8", changefreq: "monthly" },
+    { loc: "/services/reputation", priority: "0.8", changefreq: "monthly" },
+    { loc: "/services/learning-hub", priority: "0.8", changefreq: "monthly" },
+    { loc: "/services/website", priority: "0.7", changefreq: "monthly" },
+    { loc: "/services/communication", priority: "0.7", changefreq: "monthly" },
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
   ];
 
@@ -277,6 +343,9 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
+User-agent: Applebot-Extended
+Allow: /
+
 Sitemap: https://mybiseo.com/sitemap.xml
 `);
   });
@@ -295,16 +364,30 @@ Sitemap: https://mybiseo.com/sitemap.xml
     }
 
     const ua = req.headers["user-agent"] || "";
+    const crawlerName = detectCrawlerName(ua);
 
-    // AI 크롤러인 경우 사전 렌더링 HTML 반환
-    if (isAICrawler(ua)) {
+    // AI 크롤러인 경우 사전 렌더링 HTML 반환 + 방문 로깅
+    if (crawlerName && isAICrawler(ua)) {
       const meta = getPageMeta(req.path);
       const html = generatePrerenderedHtml(meta);
+      // fire-and-forget 로깅
+      const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "";
+      logCrawlerVisit(crawlerName, req.path, ua, clientIp);
       res.setHeader("Content-Type", "text/html; charset=utf-8");
       res.setHeader("X-Prerendered", "ai-crawler");
+      res.setHeader("X-Crawler-Detected", crawlerName);
       return res.send(html);
+    }
+
+    // 일반 검색 크롤러도 로깅 (사전 렌더링은 하지 않음)
+    if (crawlerName && isSearchCrawler(ua)) {
+      const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "";
+      logCrawlerVisit(crawlerName, req.path, ua, clientIp);
     }
 
     next();
   });
 }
+
+// Export for testing
+export { isAICrawler, isSearchCrawler, isCrawler, detectCrawlerName, getPageMeta, AI_CRAWLER_PATTERNS, SEARCH_CRAWLER_PATTERNS };

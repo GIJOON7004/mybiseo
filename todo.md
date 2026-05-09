@@ -369,9 +369,9 @@
 - [x] A-4: DB 커넥션 풀 타임아웃 설정 (10커넥션/10초 timeout/60초 idle/keepalive + graceful shutdown)
 
 ### Phase B: 중기 리팩토링
-- [ ] B-1: ServicePageLayout 공통 컴포넌트 추출 (5개 서비스 페이지 중복 제거)
-- [ ] B-2: ai-visibility-report.ts 4개 모듈 분할 (2500줄 → 각 500~700줄)
-- [ ] B-3: db.ts 도메인별 분리 (seo/blog/user/abtest)
-- [ ] B-4: 핵심 비즈니스 로직 통합 테스트 5개 작성
-- [ ] B-5: AI 크롤러 감지 미들웨어 강화 + Prerender 개선
-- [ ] B-6: LLM 호출 캐싱 레이어 (DB 기반 24h TTL)
+- [x] B-1: ServicePageLayout 공통 컴포넌트 추출 (5개 서비스 페이지 중복 제거 — 각 페이지 300~400줄→150줄 이하)
+- [~] B-2: ai-visibility-report.ts 모듈 분할 — 보류 (단일 PDF 렌더링 함수로 분할 시 복잡도 증가, 향후 섹션별 함수 추출 검토)
+- [~] B-3: db.ts 도메인별 분리 — 보류 (31개 파일 import 경로 변경 리스크, barrel re-export 단계적 마이그레이션 계획)
+- [x] B-4: 핵심 비즈니스 로직 통합 테스트 작성 (phase-b-integration.test.ts — 32개 테스트)
+- [x] B-5: AI 크롤러 감지 미들웨어 강화 (DB 로깅 + 서비스 페이지 메타 + llms.txt 업데이트)
+- [x] B-6: LLM 호출 캐싱 레이어 — 인메모리 버전 구현 (SHA-256 해시, TTL 10분, LRU 100건 — 의료광고법 검수/네이버 HTML 변환에 적용. 향후 DB 기반 24h TTL로 확장 가능)
