@@ -11,7 +11,7 @@ function readComponent(path: string): string {
 describe("글로벌 리브랜딩 — 메시징 일관성 (Phase 2)", () => {
   it("HeroSection에 AI 검색 관련 메시지가 포함되어 있다", () => {
     const hero = readComponent("components/HeroSection.tsx");
-    expect(hero).toContain("ChatGPT");
+    expect(hero).toContain("AI 검색 최적화");
     expect(hero).toContain("AI 가시성 진단");
   });
 

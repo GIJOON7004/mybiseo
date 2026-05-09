@@ -16,9 +16,9 @@ describe("36차 UX 개선 — Phase 2 현재 구조 기준", () => {
     expect(hero).toContain("/ai-check");
   });
 
-  it("HeroSection에 ChatGPT 메시지가 사용된다", () => {
+  it("HeroSection에 AI 검색 최적화 메시지가 사용된다", () => {
     const hero = readComponent("components/HeroSection.tsx");
-    expect(hero).toContain("ChatGPT");
+    expect(hero).toContain("AI 검색 최적화");
   });
 
   it("SeoChecker에 보고서 언어 선택 기능이 있다 (ko/en/th)", () => {

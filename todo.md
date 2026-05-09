@@ -194,10 +194,10 @@
 
 ### ⚠ GEO 3축 약어 풀이 + 가중치 산정 방식 명시
 - [x] "GEO 3축 진단 (RxA/F)" → GEO(Generative Engine Optimization) 풀이 추가
-- [ ] 카테고리별 가중치 산정 방식 보고서 내 간략 설명 추가 — 향후 개선
+- [ ] 카테고리별 가중치 산정 방식 보고서 내 간략 설명 추가 (Phase 3 백로그)
 
 ### 🛠 PDF 접힘 항목 처리
-- [ ] "+ N개 추가 항목" → PDF에서는 전체 노출 또는 부록 페이지 분기
+- [ ] "+ N개 추가 항목" → PDF에서는 전체 노출 또는 부록 페이지 분기 (Phase 3 백로그)
 
 ## 4차 피드백 종합 개선 (젠스파크+클로드+직접 검증, 14건)
 
@@ -306,3 +306,6 @@
 - [x] 불필요한 섹션 제거 (ProcessSection, ROICalculator, RoadmapSection, ContactSection, EmpathySection 제거)
 - [x] 컴플라이언스 시각화/신뢰 지표 → TechSection에 통합 (기술력 섹션이 의료법 감사 시스템 + 신뢰 지표 역할 수행)
 - [x] PriceCompareSection 데스크톱 테이블 DOM 구조 버그 수정 (tbody 중첩 → React.Fragment)
+
+## 히어로 섹션 복원
+- [x] HeroSection.tsx를 Phase 2 개편 이전 원래 상태로 복원 (v27: 국가 선택 탭 버튼 + AI 검색 최적화 메시지)
