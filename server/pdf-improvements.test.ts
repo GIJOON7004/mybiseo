@@ -102,12 +102,9 @@ describe("A-7: 공감(Empathy) 섹션", () => {
     expect(content).toMatch(/원장님|고민|불안|답답/);
   });
 
-  it("Home.tsx에서 EmpathySection이 import되어야 한다", () => {
-    const homeContent = fs.readFileSync(
-      path.resolve(CLIENT_DIR, "pages/Home.tsx"),
-      "utf-8"
-    );
-    expect(homeContent).toContain("EmpathySection");
+  it("EmpathySection.tsx 레거시 파일이 존재해야 한다 (Home에서는 Phase 2에서 제거됨)", () => {
+    const filePath = path.resolve(CLIENT_DIR, "components/EmpathySection.tsx");
+    expect(fs.existsSync(filePath)).toBe(true);
   });
 });
 

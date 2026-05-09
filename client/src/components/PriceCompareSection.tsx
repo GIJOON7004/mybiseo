@@ -1,123 +1,233 @@
-/*
- * v9: 통합 비교표 — 12개 서비스 기준, 금액 비교 제거 → 서비스 품질 차이 중심
- * "모든 서비스는 매출 상승에 기여한다" 메시지 강화
+/**
+ * 비교표 섹션 — 3카테고리 비교
+ * "마이비서 vs 일반 마케팅 에이전시 vs 일반 검색 최적화 도구"
+ * 경쟁사 실명 완전 삭제, 추상화된 비교
  */
 import React from "react";
 import { FadeInSection } from "@/components/FadeInSection";
-import { Check, X, Stethoscope, TrendingUp } from "lucide-react";
+import { Check, X, Minus, TrendingUp, Scale } from "lucide-react";
 
-const comparisonItems = [
-  // 1단계: 발견 (환자가 병원을 찾는 단계)
-  { category: "발견", label: "AI 검색 노출 (AI 검색 최적화)", traditional: "대응 불가", mybiseo: "ChatGPT 등 5대 AI에서 병원 추천되도록 최적화", traditionalBad: true },
-  { category: "발견", label: "AI 블로그 제작", traditional: "키워드 나열식 대량 생산", mybiseo: "환자가 검색하는 키워드 기반 + 의료광고법 자동 검사", traditionalBad: true },
-  { category: "발견", label: "AI 콘텐츠 자동 생산", traditional: "미제공", mybiseo: "원장님 인터뷰 1개로 블로그+숟폼+카드뉴스 13개+ 자동", traditionalBad: true },
-  { category: "발견", label: "해외 환자 유치 (의료관광)", traditional: "에이전시 수수료 의존", mybiseo: "20개국 언어로 AI 검색 노출 + 해외 환자 직접 유치", traditionalBad: true },
+type Rating = "full" | "partial" | "none";
 
-  // 2단계: 전환 (환자가 예약하는 단계)
-  { category: "전환", label: "24시간 AI 상담", traditional: "미제공", mybiseo: "밤·주말에도 AI가 환자 상담 + 예약 접수 + 20개국 언어", traditionalBad: true },
-  { category: "전환", label: "병원 홈페이지", traditional: "템플릿 기반 단순 제작", mybiseo: "환자가 예약하도록 유도하는 설계 + 데이터로 지속 개선", traditionalBad: true },
-  { category: "전환", label: "노쇼 방지", traditional: "미제공", mybiseo: "AI가 노쇼 예측 + 자동 리마인드 + 대기자 자동 배정", traditionalBad: true },
+interface ComparisonRow {
+  category: string;
+  feature: string;
+  mybiseo: Rating;
+  agency: Rating;
+  seoTool: Rating;
+  mybiseoNote?: string;
+}
 
-  // 3단계: 유지·확장 (매출을 키우는 단계)
-  { category: "유지·확장", label: "환자 관리 (CRM)", traditional: "엑셀 수기 관리", mybiseo: "환자·예약·매출·VIP 통합 관리 시스템", traditionalBad: true },
-  { category: "유지·확장", label: "성과 확인 대시보드", traditional: "월 1회 PDF 보고", mybiseo: "실시간으로 성과 확인 + AI가 개선점 제안", traditionalBad: true },
-  { category: "유지·확장", label: "브랜딩·SNS", traditional: "단순 포스팅 대행", mybiseo: "병원만의 시그니처 브랜딩 + 채널별 전략", traditionalBad: true },
-  { category: "유지·확장", label: "전략 컨설팅", traditional: "미제공", mybiseo: "경쟁 병원 분석 + 매달 전략 미팅", traditionalBad: true },
-  { category: "유지·확장", label: "병원 전용 앱", traditional: "미제공", mybiseo: "병원 전용 모바일 앱 포함 (개발중)", traditionalBad: true },
+const comparisonData: ComparisonRow[] = [
+  // 발견 단계
+  { category: "발견", feature: "AI 검색 최적화 (GEO)", mybiseo: "full", agency: "none", seoTool: "partial", mybiseoNote: "5대 AI 플랫폼 최적화" },
+  { category: "발견", feature: "네이버·구글 검색 최적화", mybiseo: "full", agency: "partial", seoTool: "full" },
+  { category: "발견", feature: "의료 전문 콘텐츠 제작", mybiseo: "full", agency: "partial", seoTool: "none", mybiseoNote: "의료광고법 자동 검사" },
+  { category: "발견", feature: "해외 환자 유치 (다국어)", mybiseo: "full", agency: "none", seoTool: "none", mybiseoNote: "20개국 언어 AI 최적화" },
+
+  // 전환 단계
+  { category: "전환", feature: "24시간 AI 환자 상담", mybiseo: "full", agency: "none", seoTool: "none", mybiseoNote: "예약 접수까지 완결" },
+  { category: "전환", feature: "전환율 최적화 (CRO)", mybiseo: "full", agency: "partial", seoTool: "none" },
+  { category: "전환", feature: "노쇼 방지 시스템", mybiseo: "full", agency: "none", seoTool: "none" },
+
+  // 관리·성장 단계
+  { category: "관리·성장", feature: "실시간 성과 대시보드", mybiseo: "full", agency: "none", seoTool: "partial" },
+  { category: "관리·성장", feature: "월간 전략 미팅", mybiseo: "full", agency: "partial", seoTool: "none" },
+  { category: "관리·성장", feature: "의료법 컴플라이언스", mybiseo: "full", agency: "none", seoTool: "none", mybiseoNote: "AI 실시간 감사" },
+  { category: "관리·성장", feature: "경쟁 병원 분석", mybiseo: "full", agency: "none", seoTool: "partial" },
 ];
 
-// 카테고리별 그룹핑
-const categories = ["발견", "전환", "유지·확장"];
+const categories = ["발견", "전환", "관리·성장"];
+const categoryLabels: Record<string, string> = {
+  "발견": "🔍 1단계 · 환자가 병원을 찾는 단계",
+  "전환": "🎯 2단계 · 환자가 예약하는 단계",
+  "관리·성장": "📈 3단계 · 매출을 키우는 단계",
+};
+
+function RatingIcon({ rating }: { rating: Rating }) {
+  if (rating === "full") {
+    return <Check className="w-4 h-4 text-brand" />;
+  }
+  if (rating === "partial") {
+    return <Minus className="w-4 h-4 text-amber-400/80" />;
+  }
+  return <X className="w-4 h-4 text-red-400/60" />;
+}
+
+function RatingLabel({ rating }: { rating: Rating }) {
+  if (rating === "full") return <span className="text-brand text-[10px] font-medium">제공</span>;
+  if (rating === "partial") return <span className="text-amber-400/80 text-[10px]">일부</span>;
+  return <span className="text-red-400/60 text-[10px]">미제공</span>;
+}
 
 export default function PriceCompareSection() {
   return (
     <section id="price-compare" className="py-10 lg:py-14">
-      <div className="container max-w-4xl">
+      <div className="container max-w-5xl">
         <FadeInSection delay={0} className="text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand/20 bg-brand/5 text-brand text-xs font-medium mb-5 tracking-wide">
-            <Stethoscope className="w-3.5 h-3.5" />
+            <Scale className="w-3.5 h-3.5" />
             비교
           </div>
           <h2 className="font-display font-bold text-2xl sm:text-3xl tracking-tight mb-4">
-            일반 마케팅 업체 vs <span className="text-brand">MY비서</span>
+            어떤 선택이 <span className="text-brand">병원 매출</span>을 만들까요?
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-lg mx-auto leading-relaxed">
-            같은 항목이라도 <span className="text-brand font-semibold">어떻게 하느냐</span>에 따라
-            <br />
-            결과는 완전히 달라집니다.
+            같은 "마케팅"이라도 접근 방식에 따라 결과가 완전히 다릅니다.
           </p>
         </FadeInSection>
 
-        <FadeInSection delay={0.1} className="rounded-2xl border border-border overflow-hidden">
-          <table className="w-full text-left border-collapse table-fixed">
-            <thead>
-              <tr className="bg-muted/50">
-                <th className="px-2.5 py-3 sm:p-4 text-[11px] sm:text-sm font-medium text-muted-foreground w-[28%]">
-                  서비스
-                </th>
-                <th className="px-2.5 py-3 sm:p-4 text-[11px] sm:text-sm font-medium text-muted-foreground text-center border-l border-border w-[32%]">
-                  일반 업체
-                </th>
-                <th className="px-2.5 py-3 sm:p-4 text-[11px] sm:text-sm font-medium text-brand text-center border-l border-border bg-brand/5 w-[40%]">
-                  MY비서
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {categories.map((cat) => {
-                const items = comparisonItems.filter((item) => item.category === cat);
-                return (
-                  <React.Fragment key={cat}>
-                    {/* 카테고리 헤더 */}
-                    <tr className="bg-muted/30 border-t border-border">
-                      <td colSpan={3} className="px-2.5 py-2 sm:px-4 sm:py-2.5">
-                        <span className="text-[10px] sm:text-xs font-bold text-brand/80 uppercase tracking-wider">
-                          {cat === "발견" ? "🔍 1단계 · 발견" : cat === "전환" ? "🎯 2단계 · 전환" : "📈 3단계 · 유지·확장"}
-                        </span>
-                      </td>
-                    </tr>
-                    {items.map((item, i) => (
-                      <tr key={i} className="border-t border-border transition-colors duration-200 hover:bg-brand/[0.03]">
-                        <td className="px-2.5 py-2.5 sm:p-4 text-[11px] sm:text-sm text-foreground font-medium align-middle leading-tight">
-                          {item.label}
-                        </td>
-                        <td className="px-2.5 py-2.5 sm:p-4 text-[11px] sm:text-sm text-center border-l border-border align-middle">
-                          <span className="inline-flex items-center justify-center gap-0.5 sm:gap-1">
-                            {item.traditionalBad && <X className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400/60 shrink-0" />}
-                            <span className="text-muted-foreground/70 leading-tight">{item.traditional}</span>
-                          </span>
-                        </td>
-                        <td className="px-2.5 py-2.5 sm:p-4 text-[11px] sm:text-sm text-brand font-medium text-center border-l border-border bg-brand/5 align-middle">
-                          <span className="inline-flex items-center justify-center gap-0.5 sm:gap-1">
-                            <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-brand shrink-0" />
-                            <span className="leading-tight">{item.mybiseo}</span>
+        {/* 비교표 */}
+        <FadeInSection delay={0.05} className="rounded-2xl border border-border overflow-hidden">
+          {/* 모바일: 카드형, 데스크톱: 테이블 */}
+
+          {/* 데스크톱 테이블 */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-muted/50">
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground w-[30%]">
+                    서비스 항목
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-brand text-center border-l border-border bg-brand/5 w-[25%]">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span className="font-semibold">MY비서</span>
+                      <span className="text-[9px] text-brand/70 font-normal">병원 특화 AI 마케팅</span>
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground text-center border-l border-border w-[22%]">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>일반 에이전시</span>
+                      <span className="text-[9px] text-muted-foreground/60 font-normal">종합 마케팅 대행</span>
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-xs font-medium text-muted-foreground text-center border-l border-border w-[23%]">
+                    <div className="flex flex-col items-center gap-0.5">
+                      <span>일반 검색 도구</span>
+                      <span className="text-[9px] text-muted-foreground/60 font-normal">셀프서비스 툴</span>
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((cat) => {
+                  const items = comparisonData.filter((row) => row.category === cat);
+                  return (
+                    <React.Fragment key={cat}>
+                      {/* 카테고리 헤더 */}
+                      <tr className="bg-muted/30 border-t border-border">
+                        <td colSpan={4} className="px-4 py-2">
+                          <span className="text-[10px] font-bold text-brand/80 uppercase tracking-wider">
+                            {categoryLabels[cat]}
                           </span>
                         </td>
                       </tr>
-                    ))}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-            <tfoot>
-              <tr className="border-t-2 border-border bg-muted/30">
-                <td className="px-2.5 py-3 sm:p-4 text-[11px] sm:text-sm font-bold text-foreground align-middle">
-                  결론
-                </td>
-                <td className="px-2.5 py-3 sm:p-4 text-center border-l border-border align-middle">
-                  <span className="text-[10px] sm:text-sm font-semibold text-muted-foreground">
-                    항목별 개별 관리 · 단순 대행
-                  </span>
-                </td>
-                <td className="px-2.5 py-3 sm:p-4 text-center border-l border-border bg-brand/5 align-middle">
-                  <span className="inline-flex items-center gap-1 text-[10px] sm:text-sm font-bold text-brand">
-                    <TrendingUp className="w-3.5 h-3.5" />
-                    12개 서비스 통합 · 매출 상승에 집중
-                  </span>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
+                      {items.map((row, i) => (
+                        <tr key={i} className="border-t border-border transition-colors duration-200 hover:bg-brand/[0.02]">
+                          <td className="px-4 py-3 text-sm text-foreground font-medium align-middle">
+                            {row.feature}
+                          </td>
+                          <td className="px-4 py-3 text-center border-l border-border bg-brand/5 align-middle">
+                            <div className="flex flex-col items-center gap-0.5">
+                              <RatingIcon rating={row.mybiseo} />
+                              {row.mybiseoNote && (
+                                <span className="text-[9px] text-brand/70 leading-tight">{row.mybiseoNote}</span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-center border-l border-border align-middle">
+                            <RatingIcon rating={row.agency} />
+                          </td>
+                          <td className="px-4 py-3 text-center border-l border-border align-middle">
+                            <RatingIcon rating={row.seoTool} />
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-border bg-muted/30">
+                  <td className="px-4 py-3 text-sm font-bold text-foreground align-middle">
+                    종합
+                  </td>
+                  <td className="px-4 py-3 text-center border-l border-border bg-brand/5 align-middle">
+                    <span className="inline-flex items-center gap-1 text-sm font-bold text-brand">
+                      <TrendingUp className="w-4 h-4" />
+                      11/11 제공
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center border-l border-border align-middle">
+                    <span className="text-xs text-muted-foreground">3/11 일부 제공</span>
+                  </td>
+                  <td className="px-4 py-3 text-center border-l border-border align-middle">
+                    <span className="text-xs text-muted-foreground">4/11 일부 제공</span>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          {/* 모바일 카드형 */}
+          <div className="sm:hidden divide-y divide-border">
+            {/* 범례 */}
+            <div className="px-4 py-3 bg-muted/50 flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground font-medium">범례:</span>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1"><Check className="w-3 h-3 text-brand" /> 제공</span>
+                <span className="flex items-center gap-1"><Minus className="w-3 h-3 text-amber-400/80" /> 일부</span>
+                <span className="flex items-center gap-1"><X className="w-3 h-3 text-red-400/60" /> 미제공</span>
+              </div>
+            </div>
+
+            {categories.map((cat) => {
+              const items = comparisonData.filter((row) => row.category === cat);
+              return (
+                <div key={cat}>
+                  <div className="px-4 py-2 bg-muted/30">
+                    <span className="text-[10px] font-bold text-brand/80 uppercase tracking-wider">
+                      {categoryLabels[cat]}
+                    </span>
+                  </div>
+                  {items.map((row, i) => (
+                    <div key={i} className="px-4 py-3 border-t border-border/50">
+                      <div className="text-xs font-medium text-foreground mb-2">{row.feature}</div>
+                      <div className="grid grid-cols-3 gap-2 text-center">
+                        <div className="flex flex-col items-center gap-0.5">
+                          <RatingIcon rating={row.mybiseo} />
+                          <span className="text-[9px] text-brand font-medium">MY비서</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <RatingIcon rating={row.agency} />
+                          <span className="text-[9px] text-muted-foreground">에이전시</span>
+                        </div>
+                        <div className="flex flex-col items-center gap-0.5">
+                          <RatingIcon rating={row.seoTool} />
+                          <span className="text-[9px] text-muted-foreground">검색 도구</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+
+            {/* 모바일 종합 */}
+            <div className="px-4 py-3 bg-brand/5">
+              <div className="flex items-center justify-center gap-2">
+                <TrendingUp className="w-4 h-4 text-brand" />
+                <span className="text-sm font-bold text-brand">MY비서: 11개 항목 모두 제공</span>
+              </div>
+            </div>
+          </div>
+        </FadeInSection>
+
+        {/* 하단 메시지 */}
+        <FadeInSection delay={0.1} className="text-center mt-6">
+          <p className="text-xs text-muted-foreground/70">
+            * 비교 기준: 2026년 기준 국내 주요 의료 마케팅 에이전시 및 검색 최적화 도구 서비스 범위 조사
+          </p>
         </FadeInSection>
       </div>
     </section>

@@ -6,18 +6,14 @@ import HeroSection from "@/components/HeroSection";
 // Below-the-fold: lazy load for faster initial paint
 const StakesSection = lazy(() => import("@/components/StakesSection"));
 const ServicesSection = lazy(() => import("@/components/ServicesSection"));
-const ProcessSection = lazy(() => import("@/components/ProcessSection"));
+const TimelineSection = lazy(() => import("@/components/TimelineSection"));
+const PriceCompareSection = lazy(() => import("@/components/PriceCompareSection"));
 const TechSection = lazy(() => import("@/components/TechSection"));
 const ResultsSection = lazy(() => import("@/components/ResultsSection"));
-const ROICalculator = lazy(() => import("@/components/ROICalculator"));
-const PriceCompareSection = lazy(() => import("@/components/PriceCompareSection"));
 const PricingSection = lazy(() => import("@/components/PricingSection"));
-// GuaranteeSection 삭제됨
-const RoadmapSection = lazy(() => import("@/components/RoadmapSection"));
-const EmpathySection = lazy(() => import("@/components/EmpathySection"));
 const CEOSection = lazy(() => import("@/components/CEOSection"));
 const FAQSection = lazy(() => import("@/components/FAQSection"));
-const ContactSection = lazy(() => import("@/components/ContactSection"));
+const FooterCTASection = lazy(() => import("@/components/FooterCTASection"));
 const Footer = lazy(() => import("@/components/Footer"));
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 
@@ -71,17 +67,14 @@ function usePrefetchSections() {
 
       // Priority 2: 나머지
       setTimeout(() => {
-        import("@/components/ProcessSection");
+        import("@/components/TimelineSection");
+        import("@/components/PriceCompareSection");
         import("@/components/TechSection");
         import("@/components/ResultsSection");
-        import("@/components/ROICalculator");
-        import("@/components/PriceCompareSection");
         import("@/components/PricingSection");
-        // GuaranteeSection 삭제됨
-        import("@/components/RoadmapSection");
         import("@/components/CEOSection");
         import("@/components/FAQSection");
-        import("@/components/ContactSection");
+        import("@/components/FooterCTASection");
         import("@/components/Footer");
         import("@/components/ChatBot");
       }, 3000);
@@ -116,23 +109,23 @@ export default function Home() {
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 3. 해결책 제시: 12개 서비스 (발견→전환→유지확장 = 매출 상승) ─── */}
+        {/* ─── 3. 서비스 카드 (3압도 + 2보조) ─── */}
         <LazySection className="bg-card/30"><ServicesSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 4. 비교: 일반 업체 vs MY비서 ─── */}
-        <LazySection><PriceCompareSection /></LazySection>
+        {/* ─── 4. "원장의 한 달" 타임라인 ─── */}
+        <LazySection><TimelineSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 5. 차별화: 왜 MY비서인가 (기술력) ─── */}
-        <LazySection className="bg-card/30"><TechSection /></LazySection>
+        {/* ─── 5. 차별화 비교표 (3카테고리) ─── */}
+        <LazySection className="bg-card/30"><PriceCompareSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 6. 도입 프로세스 ─── */}
-        <LazySection><ProcessSection /></LazySection>
+        {/* ─── 6. 기술력: 왜 MY비서인가 ─── */}
+        <LazySection><TechSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
@@ -141,35 +134,23 @@ export default function Home() {
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 8. ROI 계산기 ─── */}
-        <LazySection><ROICalculator /></LazySection>
+        {/* ─── 8. 가격 안내 (맞춤 견적 CTA) ─── */}
+        <LazySection><PricingSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 9. 가격 안내 ─── */}
-        <LazySection className="bg-card/30"><PricingSection /></LazySection>
+        {/* ─── 9. 대표 편지 ─── */}
+        <LazySection className="bg-card/30"><CEOSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-
-
-        {/* ─── 11. 로드맵 ─── */}
-        <LazySection className="bg-card/30"><RoadmapSection /></LazySection>
+        {/* ─── 10. FAQ ─── */}
+        <LazySection><FAQSection /></LazySection>
 
         <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
 
-        {/* ─── 12. 대표 편지 ─── */}
-        <LazySection><CEOSection /></LazySection>
-
-        <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-
-        {/* ─── 13. FAQ ─── */}
-        <LazySection className="bg-card/30"><FAQSection /></LazySection>
-
-        <div className="h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-
-        {/* ─── 14. 전환 유도: 상담 신청 ─── */}
-        <LazySection><ContactSection /></LazySection>
+        {/* ─── 11. 푸터 CTA: 마지막 전환 기회 ─── */}
+        <LazySection className="bg-card/30"><FooterCTASection /></LazySection>
       </main>
       <Suspense fallback={null}>
         <Footer />

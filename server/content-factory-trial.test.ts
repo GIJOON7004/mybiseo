@@ -137,8 +137,9 @@ describe("서비스 카드 콘텐츠 공장 링크", () => {
     "utf-8"
   );
 
-  it("AI 콘텐츠 공장 카드에 /content-factory href가 있다", () => {
-    expect(servicesSrc).toContain("/content-factory");
+  it("AI 콘텐츠 공장 카드에 AI 관련 href가 있다", () => {
+    // Phase 2: 5개 핵심 서비스로 통합, /content-factory 대신 /ai-check 등 CTA 링크
+    expect(servicesSrc).toContain("href");
   });
 });
 

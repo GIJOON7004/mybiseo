@@ -1,4 +1,3 @@
-import { readRouterSource } from "./test-helpers";
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "fs";
 import { join } from "path";
@@ -9,22 +8,17 @@ function readComponent(path: string): string {
   return readFileSync(join(clientDir, path), "utf-8");
 }
 
-describe("36차 UX 개선 — 국가 선택 & 언어 선택 & 액션 패널", () => {
-  it("HeroSection에 국가 선택 기능이 포함되어 있다 (국기 클릭 전환)", () => {
+
+describe("36차 UX 개선 — Phase 2 현재 구조 기준", () => {
+  it("HeroSection에 AI 가시성 진단 CTA가 포함되어 있다", () => {
     const hero = readComponent("components/HeroSection.tsx");
-    expect(hero).toContain("COUNTRY_OPTIONS");
-    expect(hero).toContain("FlagKR");
-    expect(hero).toContain("FlagTH");
-    expect(hero).toContain("setCountry");
-    expect(hero).toContain("flagcdn.com");
-    expect(hero).toContain("showCountryMenu");
-    expect(hero).toContain("국가 선택");
+    expect(hero).toContain("AI 가시성 진단");
+    expect(hero).toContain("/ai-check");
   });
 
-  it("HeroSection에 '해외 신환' 표현이 사용된다", () => {
+  it("HeroSection에 ChatGPT 메시지가 사용된다", () => {
     const hero = readComponent("components/HeroSection.tsx");
-    expect(hero).toContain("해외 신환");
-    expect(hero).not.toContain("전 세계 환자가 찾아옵니다");
+    expect(hero).toContain("ChatGPT");
   });
 
   it("SeoChecker에 보고서 언어 선택 기능이 있다 (ko/en/th)", () => {
@@ -44,23 +38,22 @@ describe("36차 UX 개선 — 국가 선택 & 언어 선택 & 액션 패널", ()
   });
 
   it("seo-report-pdf에 3개 언어 i18n이 정의되어 있다", () => {
-    // seo-report-pdf.ts is now a thin wrapper; check HTML engine for language support
     const engine = readFileSync(join(__dirname, "ai-visibility-html-engine.ts"), "utf-8");
     expect(engine).toContain("generateHtmlPdfReport");
-    // Verify the wrapper delegates correctly
     const pdf = readFileSync(join(__dirname, "seo-report-pdf.ts"), "utf-8");
     expect(pdf).toContain("generateHtmlPdfReport");
     expect(pdf).toContain("generateSeoReportPdf");
   });
 
-  it("routers.ts generateReport에 language 파라미터가 있다", () => {
-    const routers = readRouterSource();
-    expect(routers).toContain('language: z.enum(["ko", "en", "th"])');
+  it("seo 라우터에 language 파라미터가 있어야 한다", () => {
+    const seoRouter = readFileSync(join(__dirname, "..", "server", "routes", "seo.ts"), "utf-8");
+    expect(seoRouter).toContain('language: z.enum(["ko", "en", "th"])');
   });
 
-  it("ServicesSection에서 '전 세계 환자' 표현이 '해외 신환'으로 변경되었다", () => {
+  it("ServicesSection에 해외 관련 서비스가 포함되어 있다", () => {
     const services = readComponent("components/ServicesSection.tsx");
-    expect(services).toContain("해외 신환이 검색하면");
-    expect(services).not.toContain("전 세계 환자가 검색하면");
+    // Phase 2: 5개 핵심 서비스 중 해외 다국어 GEO 전략 포함
+    expect(services).toContain("해외");
+    expect(services).toContain("다국어");
   });
 });

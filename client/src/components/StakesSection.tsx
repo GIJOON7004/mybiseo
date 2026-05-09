@@ -1,12 +1,12 @@
 /**
  * A-6: Stakes(실패의 위험) 섹션
  * SB7 프레임워크 — "행동하지 않으면 잃는 것"을 객관적 데이터와 구체적 출처로 보여줌
- * v3: 70% 통계 카드 삭제 + 하단 보충 데이터 바 삭제
+ * v4: 수치 출처 + 측정방법 명시 강화
  */
 import { FadeInSection } from "@/components/FadeInSection";
 import { useInView } from "@/hooks/useInView";
 import { useEffect, useState } from "react";
-import { AlertTriangle, TrendingDown, Search, MousePointerClick, ArrowRight, ExternalLink } from "lucide-react";
+import { AlertTriangle, TrendingDown, Search, MousePointerClick, ExternalLink } from "lucide-react";
 
 /* ── 카운트업 훅 ── */
 function useCountUp(target: number, duration: number = 1200) {
@@ -58,9 +58,12 @@ const stakes = [
     icon: Search,
     stat: "51%",
     numericTarget: 51,
-    isNegative: false,    label: "의료 검색의 절반이 AI 답변으로 대체",
+    isNegative: false,
+    label: "의료 검색의 절반이 AI 답변으로 대체",
     detail:
-      "환자가 '치아 교정 잘하는 병원' 같은 걸 검색하면, 구글이 AI로 병원을 추천해줍니다. 여기에 우리 병원이 없으면 환자는 다른 병원으로 갑니다.",    source: "WebFX, 130,000+ 건강 검색 쿼리 분석",
+      "환자가 '치아 교정 잘하는 병원' 같은 걸 검색하면, 구글이 AI로 병원을 추천해줍니다. 여기에 우리 병원이 없으면 환자는 다른 병원으로 갑니다.",
+    source: "WebFX",
+    methodology: "130,000+ 건강 관련 검색 쿼리 AI Overview 출현율 분석",
     sourceDate: "2026.02",
     sourceUrl: "https://www.easternprogress.com/ai-overviews-in-healthcare-what-a-study-of-more-than-130k-health-queries-reveals/article_a81cb8ec-d374-5e3c-871d-fc55020b55c2.html",
   },
@@ -72,7 +75,8 @@ const stakes = [
     label: "AI 답변이 나오면 병원 클릭이 61% 감소",
     detail:
       "쉽게 말해, AI가 다른 병원을 추천하면 우리 병원 홈페이지 클릭이 61% 줄어든다는 뜻입니다. 유료 광고를 돌려도 효과가 68% 떨어집니다.",
-    source: "Seer Interactive, 25.1M 노출 데이터 분석",
+    source: "Seer Interactive",
+    methodology: "25.1M 노출 데이터 기반 AI Overview 유/무 CTR 비교 분석",
     sourceDate: "2025.09",
     sourceUrl: "https://www.seerinteractive.com/insights/ai-overviews-impact-on-organic-and-paid-ctr",
   },
@@ -84,7 +88,8 @@ const stakes = [
     label: "2026년까지 기존 검색 유입 25% 감소 전망",
     detail:
       "환자들이 네이버·구글 대신 AI에게 물어보는 비율이 빠르게 늘고 있습니다. 이미 검색의 69%는 클릭 없이 AI 답변만 보고 끝납니다.",
-    source: "Gartner 공식 전망 보고서",
+    source: "Gartner",
+    methodology: "글로벌 검색 엔진 이용 행태 예측 모델 기반 공식 전망",
     sourceDate: "2024.02",
     sourceUrl: "https://www.gartner.com/en/newsroom/press-releases/2024-02-19-gartner-predicts-search-engine-volume-will-drop-25-percent-by-2026-due-to-ai-chatbots-and-other-virtual-agents",
   },
@@ -158,26 +163,30 @@ export default function StakesSection() {
                 {/* 설명 */}
                 <p className="text-xs text-muted-foreground leading-relaxed pl-14">{item.detail}</p>
 
-                {/* 출처 — 링크 포함 + hover 강조 */}
-                <a
-                  href={item.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-[10px] mt-2 pl-14 transition-all duration-300 hover:underline group-hover:opacity-100 opacity-60"
-                  style={{ color: "oklch(0.65 0.14 200)" }}
-                >
-                  <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                  <span>
-                    {item.source} ({item.sourceDate})
-                  </span>
-                </a>
+                {/* 출처 + 측정방법 */}
+                <div className="mt-3 pl-14 space-y-0.5">
+                  <a
+                    href={item.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[10px] transition-all duration-300 hover:underline group-hover:opacity-100 opacity-70"
+                    style={{ color: "oklch(0.65 0.14 200)" }}
+                  >
+                    <ExternalLink className="w-2.5 h-2.5 shrink-0" />
+                    <span>
+                      출처: {item.source} ({item.sourceDate})
+                    </span>
+                  </a>
+                  <p className="text-[9px] text-muted-foreground/60 leading-relaxed">
+                    측정: {item.methodology}
+                  </p>
+                </div>
               </div>
             </FadeInSection>
           ))}
         </div>
 
         {/* 하단 전환 메시지 */}
-        {/* 참고: 6개월 내 전통 검색 트래픽 -23% 감소 전망 (Gartner) */}
         <FadeInSection delay={3} className="text-center mt-6">
           <p className="text-sm text-muted-foreground">
             하지만{" "}

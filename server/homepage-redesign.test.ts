@@ -10,107 +10,129 @@ function readPage(name: string): string {
   return readFileSync(resolve(__dirname, `../client/src/pages/${name}`), "utf-8");
 }
 
-describe("메인 페이지 전반 개편 검증", () => {
+describe("메인 페이지 Phase 2 전면 개편 검증", () => {
 
-  describe("ServicesSection — 12개 서비스 명확히 표시", () => {
+  describe("ServicesSection — 5개 핵심 서비스 카드", () => {
     let code: string;
     beforeAll(() => { code = readComponent("ServicesSection.tsx"); });
 
-    it("핵심 메시지: 모든 서비스는 매출 상승에 기여", () => {
-      expect(code).toContain("매출 상승");
-    });
-
-    it("3단계 구조: 발견 → 전환 → 유지·확장", () => {
-      expect(code).toContain("발견");
-      expect(code).toContain("전환");
-      expect(code).toContain("유지");
-    });
-
-    it("STEP 1 발견 — 5개 서비스 포함", () => {
-      expect(code).toContain("AI 검색 최적화");
-      expect(code).toContain("AI 블로그 제작");
-      expect(code).toContain("AI 콘텐츠 공장");
-      expect(code).toContain("브랜딩 마케팅");
-      expect(code).toContain("해외 환자 유입");
-    });
-
-    it("STEP 2 전환 — 3개 서비스 포함", () => {
-      expect(code).toContain("AI 환자 응대");
-      expect(code).toContain("웹사이트 개발");
-      expect(code).toContain("CRM");
-    });
-
-    it("STEP 3 유지·확장 — 4개 서비스 포함", () => {
-      expect(code).toContain("노쇼 방지");
-      expect(code).toContain("병원 관리 대시보드");
-      expect(code).toContain("전략 컨설팅");
-    });
-
-    it("각 서비스에 CTA 링크 또는 설명 포함", () => {
-      // 체험해보기 또는 자세히 보기 등 CTA 텍스트가 있어야 함
-      const ctaCount = (code.match(/체험해보기|자세히|상담|문의|해결|기여|줄여|늘어|찾아|연결/g) || []).length;
-      expect(ctaCount).toBeGreaterThanOrEqual(6);
+    it("5개 핵심 서비스 키워드 포함", () => {
+      expect(code).toContain("AI Visibility Engine");
+      expect(code).toContain("Reputation Defense");
+      expect(code).toContain("AI Learning Hub");
+      expect(code).toContain("Smart Website");
+      expect(code).toContain("Patient Communication");
     });
 
     it("서비스 카드에 href 또는 Link 연결 포함", () => {
-      // 체험 가능한 서비스에 링크가 있어야 함
       expect(code).toContain("href");
     });
   });
 
-  describe("Home.tsx — 섹션 배치 순서 최적화", () => {
+  describe("Home.tsx — Phase 2 섹션 배치 순서", () => {
     let code: string;
     beforeAll(() => { code = readPage("Home.tsx"); });
 
-    it("중복 섹션 삭제: WhyAINative 제거", () => {
+    it("불필요 섹션 삭제: WhyAINative, GlobalOpportunitySection, ReportSampleSection 제거", () => {
       expect(code).not.toContain("WhyAINative");
-    });
-
-    it("중복 섹션 삭제: GlobalOpportunitySection 제거", () => {
       expect(code).not.toContain("GlobalOpportunitySection");
-    });
-
-    it("중복 섹션 삭제: ReportSampleSection 제거", () => {
       expect(code).not.toContain("ReportSampleSection");
     });
 
-    it("StakesSection 포함", () => {
+    it("불필요 섹션 삭제: ProcessSection, ROICalculator, RoadmapSection, ContactSection, EmpathySection 제거", () => {
+      expect(code).not.toContain("ProcessSection");
+      expect(code).not.toContain("ROICalculator");
+      expect(code).not.toContain("RoadmapSection");
+      expect(code).not.toContain("ContactSection");
+      expect(code).not.toContain("EmpathySection");
+    });
+
+    it("핵심 섹션 포함: Stakes, Services, Timeline, PriceCompare, Tech, Results, Pricing, CEO, FAQ, FooterCTA", () => {
       expect(code).toContain("StakesSection");
-    });
-
-    it("EmpathySection 포함", () => {
-      expect(code).toContain("EmpathySection");
-    });
-
-    it("ServicesSection 포함", () => {
       expect(code).toContain("ServicesSection");
-    });
-
-    it("PriceCompareSection 포함", () => {
+      expect(code).toContain("TimelineSection");
       expect(code).toContain("PriceCompareSection");
-    });
-
-    it("TechSection 포함", () => {
       expect(code).toContain("TechSection");
+      expect(code).toContain("ResultsSection");
+      expect(code).toContain("PricingSection");
+      expect(code).toContain("CEOSection");
+      expect(code).toContain("FAQSection");
+      expect(code).toContain("FooterCTASection");
     });
   });
 
-  describe("PriceCompareSection — 12개 서비스 기준 비교표", () => {
+  describe("PriceCompareSection — 3카테고리 비교표", () => {
     let code: string;
     beforeAll(() => { code = readComponent("PriceCompareSection.tsx"); });
 
-    it("MY비서 vs 기존 대행사 비교 구조", () => {
+    it("MY비서 vs 일반 에이전시 vs 일반 검색 도구 3카테고리 비교", () => {
       expect(code).toContain("MY비서");
+      expect(code).toContain("일반 에이전시");
+      expect(code).toContain("일반 검색 도구");
     });
 
     it("핵심 서비스 항목 포함", () => {
       expect(code).toContain("AI 검색 최적화");
-      expect(code).toContain("블로그");
-      expect(code).toContain("콘텐츠");
+      expect(code).toContain("24시간 AI 환자 상담");
+      expect(code).toContain("의료법 컴플라이언스");
+    });
+
+    it("경쟁사 실명 없음", () => {
+      expect(code).not.toContain("세마포어");
+      expect(code).not.toContain("아이보스");
+      expect(code).not.toContain("리얼클릭");
     });
   });
 
-  describe("TechSection — 순수 기술력/차별화 강조", () => {
+  describe("TimelineSection — 원장의 한 달", () => {
+    let code: string;
+    beforeAll(() => { code = readComponent("TimelineSection.tsx"); });
+
+    it("매일/매주/매월/분기 4단계 타임라인", () => {
+      expect(code).toContain("매일");
+      expect(code).toContain("매주");
+      expect(code).toContain("매월");
+      expect(code).toContain("분기");
+    });
+
+    it("진료에만 집중 메시지 포함", () => {
+      expect(code).toContain("진료에만 집중");
+    });
+  });
+
+  describe("PricingSection — 맞춤 견적 CTA", () => {
+    let code: string;
+    beforeAll(() => { code = readComponent("PricingSection.tsx"); });
+
+    it("가격 비공개 + 맞춤 견적 CTA 구조", () => {
+      expect(code).toContain("맞춤 견적을 받아보세요");
+    });
+
+    it("3단계 프로세스: 진단 → 설계 → 확인", () => {
+      expect(code).toContain("무료 AI 가시성 진단");
+      expect(code).toContain("맞춤 전략 설계");
+      expect(code).toContain("성과 확인 후 결정");
+    });
+
+    it("왜 가격을 안내하지 않는지 설명 포함", () => {
+      expect(code).toContain("왜 가격을 바로 안내하지 않나요");
+    });
+  });
+
+  describe("FooterCTASection — 마지막 전환 기회", () => {
+    let code: string;
+    beforeAll(() => { code = readComponent("FooterCTASection.tsx"); });
+
+    it("무료 AI 가시성 진단 CTA 포함", () => {
+      expect(code).toContain("무료 AI 가시성 진단 받기");
+    });
+
+    it("30초 소요 안내 포함", () => {
+      expect(code).toContain("30초");
+    });
+  });
+
+  describe("TechSection — 기술력/차별화 강조", () => {
     let code: string;
     beforeAll(() => { code = readComponent("TechSection.tsx"); });
 
@@ -121,13 +143,17 @@ describe("메인 페이지 전반 개편 검증", () => {
     });
   });
 
-  describe("ContactSection — 12개 서비스 옵션 업데이트", () => {
+  describe("StakesSection — 위기/수혜 데이터", () => {
     let code: string;
-    beforeAll(() => { code = readComponent("ContactSection.tsx"); });
+    beforeAll(() => { code = readComponent("StakesSection.tsx"); });
 
-    it("서비스 옵션에 핵심 서비스 포함", () => {
-      expect(code).toContain("AI 검색 최적화");
-      expect(code).toContain("AI 환자 응대");
+    it("출처 명시 포함", () => {
+      const hasSource = code.includes("WebFX") || code.includes("Seer Interactive") || code.includes("Gartner");
+      expect(hasSource).toBe(true);
+    });
+
+    it("CTA 전환 메시지 포함", () => {
+      expect(code).toContain("시작하면");
     });
   });
 
@@ -137,41 +163,6 @@ describe("메인 페이지 전반 개편 검증", () => {
 
     it("AI 최적화 진단 텍스트 포함", () => {
       expect(code).toContain("AI 최적화 진단");
-    });
-
-    it("AI 최적화 진단 텍스트가 존재하고 단독 AI 진단은 없음", () => {
-      expect(code).toContain("AI 최적화 진단");
-      // 단독 "AI 진단" ("AI 최적화 진단"이 아닌)이 없어야 함
-      const cleaned = code.replace(/AI 최적화 진단/g, "");
-      expect(cleaned).not.toContain("AI 진단");
-    });
-  });
-
-  describe("StakesSection — 실패의 위험 섹션", () => {
-    let code: string;
-    beforeAll(() => { code = readComponent("StakesSection.tsx"); });
-
-    it("위험 통계 데이터 포함", () => {
-      expect(code).toContain("-23%");
-      expect(code).toContain("6개월");
-      expect(code).toContain("68%");
-    });
-
-    it("CTA 전환 메시지 포함", () => {
-      expect(code).toContain("시작하면");
-    });
-  });
-
-  describe("EmpathySection — 공감 섹션", () => {
-    let code: string;
-    beforeAll(() => { code = readComponent("EmpathySection.tsx"); });
-
-    it("공감 메시지 포함", () => {
-      expect(code).toContain("고민");
-    });
-
-    it("전환 메시지: 진료에만 집중", () => {
-      expect(code).toContain("진료");
     });
   });
 });

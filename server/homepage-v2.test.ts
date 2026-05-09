@@ -5,30 +5,28 @@ import { join } from "path";
 const clientDir = join(__dirname, "..", "client", "src");
 const componentsDir = join(clientDir, "components");
 
-describe("홈페이지 v2 개편 - 새 컴포넌트 존재 확인", () => {
-  const newComponents = [
+describe("홈페이지 v2 개편 - 레거시 컴포넌트 파일 존재 확인", () => {
+  const legacyComponents = [
     "ROICalculator.tsx",
     "WhyAINative.tsx",
   ];
 
-  newComponents.forEach((comp) => {
-    it(`${comp} 파일이 존재해야 한다`, () => {
+  legacyComponents.forEach((comp) => {
+    it(`${comp} 파일이 존재해야 한다 (레거시 보존)`, () => {
       expect(existsSync(join(componentsDir, comp))).toBe(true);
     });
   });
 });
 
-describe("홈페이지 v2 개편 - Home.tsx 구성 확인", () => {
+describe("홈페이지 v2 개편 - Home.tsx Phase 2 구성 확인", () => {
   const homeContent = readFileSync(join(clientDir, "pages", "Home.tsx"), "utf-8");
 
-  it("ROICalculator가 Home.tsx에 포함되어야 한다", () => {
-    expect(homeContent).toContain("ROICalculator");
+  it("ROICalculator가 Home.tsx에서 제거되어야 한다 (Phase 2 개편)", () => {
+    expect(homeContent).not.toContain("ROICalculator");
   });
 
-  it("WhyAINative가 Home.tsx에 포함되어야 한다", () => {
-    // WhyAINative는 독립 컴포넌트로 존재 (Home.tsx에서는 중복 제거됨)
-    const whyContent = readFileSync(join(componentsDir, "WhyAINative.tsx"), "utf-8");
-    expect(whyContent).toContain("WhyAINative");
+  it("WhyAINative가 Home.tsx에서 제거되어야 한다 (Phase 2 개편)", () => {
+    expect(homeContent).not.toContain("WhyAINative");
   });
 
   it("StickyCtaBar가 Home.tsx에서 제거되어야 한다 (하단 고정 바 삭제)", () => {
@@ -38,9 +36,17 @@ describe("홈페이지 v2 개편 - Home.tsx 구성 확인", () => {
   it("DemoSection이 Home.tsx에서 제거되어야 한다", () => {
     expect(homeContent).not.toContain("DemoSection");
   });
+
+  it("FooterCTASection이 Home.tsx에 포함되어야 한다 (Phase 2 신규)", () => {
+    expect(homeContent).toContain("FooterCTASection");
+  });
+
+  it("TimelineSection이 Home.tsx에 포함되어야 한다 (Phase 2 신규)", () => {
+    expect(homeContent).toContain("TimelineSection");
+  });
 });
 
-describe("홈페이지 v2 개편 - ROICalculator 내용 확인", () => {
+describe("홈페이지 v2 개편 - ROICalculator 내용 확인 (레거시)", () => {
   const roiContent = readFileSync(join(componentsDir, "ROICalculator.tsx"), "utf-8");
 
   it("진료과목 선택 옵션이 포함되어야 한다", () => {
@@ -55,13 +61,9 @@ describe("홈페이지 v2 개편 - ROICalculator 내용 확인", () => {
     expect(roiContent).toContain("additionalRevenue");
     expect(roiContent).toContain("roi");
   });
-
-  it("무료 맞춤 견적 CTA가 포함되어야 한다", () => {
-    expect(roiContent).toContain("무료 맞춤 견적 받기");
-  });
 });
 
-describe("홈페이지 v2 개편 - WhyAINative 내용 확인", () => {
+describe("홈페이지 v2 개편 - WhyAINative 내용 확인 (레거시)", () => {
   const whyContent = readFileSync(join(componentsDir, "WhyAINative.tsx"), "utf-8");
 
   it("AI 검색 시대 메시지가 포함되어야 한다", () => {
@@ -102,13 +104,11 @@ describe("홈페이지 v2 개편 - FAQSection CTA 연결 확인", () => {
   });
 });
 
-describe("홈페이지 v2 개편 - PricingSection 가격 투명성 확인", () => {
+describe("홈페이지 v2 개편 - PricingSection Phase 2 확인", () => {
   const pricingContent = readFileSync(join(componentsDir, "PricingSection.tsx"), "utf-8");
 
-  it("가치 중심 메시지가 포함되어야 한다", () => {
-    // v7: 3단계 영업 퍼널 + 성과기반 과금으로 리뉴얼
-    expect(pricingContent).toContain("무료 진단");
-    expect(pricingContent).toContain("초안 무료");
+  it("맞춤 견적 CTA가 포함되어야 한다", () => {
+    expect(pricingContent).toContain("맞춤 견적을 받아보세요");
   });
 
   it("200개 병원 한정 설명이 삭제되어야 한다", () => {
@@ -125,7 +125,7 @@ describe("홈페이지 v2 개편 - 블로그 카테고리 병원 특화 확인",
 
   const blogCatContent = readFileSync(join(clientDir, "pages", "BlogCategory.tsx"), "utf-8");
 
-  it("블로그 카테고리 페이지가 진료과 가이드로 변경되어야 한다", () => {
+  it("블로그 카테고리 페이지가 진료과 마케팅 가이드로 변경되어야 한다", () => {
     expect(blogCatContent).toContain("진료과 마케팅 가이드");
   });
 });

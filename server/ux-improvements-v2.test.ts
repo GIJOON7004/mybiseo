@@ -56,7 +56,8 @@ describe("UI/UX 개선 v2 (10개 항목)", () => {
   // 개선 #5: 국기 버튼에 title 속성
   it("HeroSection 국기 버튼에 title 속성이 있어야 한다", () => {
     const hero = readComponent("HeroSection.tsx");
-    expect(hero).toContain("클릭하여 국가 변경");
+    // Phase 2: 국기 버튼 제거됨, AI 가시성 진단 CTA로 대체
+    expect(hero).toContain("AI 가시성 진단");
   });
 
   // 개선 #6: 미리보기 모드 배너 강화

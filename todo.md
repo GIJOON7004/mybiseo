@@ -271,3 +271,38 @@
 - [x] 진단 완료 시 운영자 알림 발송 (notifyOwner)
 - [x] 진단 결과에서 "전문가 상담 예약" CTA 강화 (카카오톡 채널 연결)
 - [x] 리드 정보 확장 — 병원명, 지역을 seoLeads에 저장
+
+## Phase 2: 메인 페이지 전면 개편
+
+### 히어로 섹션 개편
+- [x] H1 카피 변경: "ChatGPT가 병원을 추천하는 시대, 우리 병원은 몇 번이나 언급되고 있을까요?"
+- [x] H2 카피 변경: "무료 AI 가시성 진단으로 30초 만에 확인하세요"
+- [x] CTA: "무료 진단 받기" (진단 페이지 연결) + 보조 CTA: "도입 사례 보기"
+- [x] 신뢰 신호 배지 추가 (도입 병원 127+, AI 심의 통과율 98%, 평균 온보딩 7일)
+
+### 서비스 카드 재구성 (3압도 + 2보조)
+- [x] 서비스 카드를 5개로 재구성 (AI Visibility Engine, Reputation Defense, AI Learning Hub = 대형 / Smart Website, Patient Communication = 소형)
+- [x] 기존 12개 서비스 → 5개 핵심 서비스로 통합
+
+### 위기/수혜 섹션 개선
+- [x] 모든 수치에 출처/측정방법 명시 (WebFX, Seer Interactive, Gartner — 측정방법 각 카드에 표기)
+- [x] "마이비서 자체 데이터"의 경우 "N개 병원 M개월 평균" 형태로 구체화 (현재 모든 수치는 외부 연구 출처)
+
+### "원장의 한 달" 타임라인 (신규)
+- [x] 매일/매주/매월/분기 받는 것 시각화 인터랙티브 타임라인 (TimelineSection.tsx 생성)
+
+### 비교표 개편
+- [x] "마이비서 vs 일반 마케팅 에이전시 vs 일반 SEO 도구" 3카테고리 비교
+- [x] 경쟁사 실명 완전 삭제 확인
+
+### 가격 섹션 개편
+- [x] 가격 비공개 → "맞춤 견적을 받아보세요" + 상담 신청 CTA
+
+### 푸터 CTA
+- [x] "지금 바로 무료 AI 가시성 진단 받기" — 페이지 최하단 마지막 전환 기회 (FooterCTASection.tsx 생성)
+
+### 전체 레이아웃 정리
+- [x] 섹션 순서 재배치 (기획안 기준 11개 섹션: Hero→Stakes→Services→Timeline→Compare→Tech→Results→Pricing→CEO→FAQ→FooterCTA)
+- [x] 불필요한 섹션 제거 (ProcessSection, ROICalculator, RoadmapSection, ContactSection, EmpathySection 제거)
+- [x] 컴플라이언스 시각화/신뢰 지표 → TechSection에 통합 (기술력 섹션이 의료법 감사 시스템 + 신뢰 지표 역할 수행)
+- [x] PriceCompareSection 데스크톱 테이블 DOM 구조 버그 수정 (tbody 중첩 → React.Fragment)

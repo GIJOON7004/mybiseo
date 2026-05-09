@@ -158,8 +158,8 @@ describe("AI Hub Sidebar Menu", () => {
 describe("Hero Section AI CTA", () => {
   const hero = readFileSync(resolve(__dirname, "../client/src/components/HeroSection.tsx"), "utf-8");
 
-  it("히어로 섹션에 AI 블로그 체험 버튼이 있어야 한다", () => {
-    expect(hero).toContain("AI 블로그 체험");
-    expect(hero).toContain("/ai-blog-trial");
+  it("히어로 섹션에 AI 가시성 진단 CTA가 있어야 한다", () => {
+    expect(hero).toContain("AI 가시성 진단");
+    expect(hero).toContain("/ai-check");
   });
 });

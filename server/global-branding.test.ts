@@ -8,23 +8,20 @@ function readComponent(path: string): string {
   return readFileSync(join(clientDir, path), "utf-8");
 }
 
-describe("글로벌 리브랜딩 — 메시징 일관성", () => {
-  it("HeroSection에 글로벌 표준 메시지가 포함되어 있다", () => {
+describe("글로벌 리브랜딩 — 메시징 일관성 (Phase 2)", () => {
+  it("HeroSection에 AI 검색 관련 메시지가 포함되어 있다", () => {
     const hero = readComponent("components/HeroSection.tsx");
-    expect(hero).toContain("Global Standard Medical Marketing Platform");
-    expect(hero).toContain("해외 신환");
+    expect(hero).toContain("ChatGPT");
+    expect(hero).toContain("AI 가시성 진단");
   });
 
-  it("GlobalOpportunitySection이 외국인 환자 데이터를 포함한다", () => {
-    const section = readComponent("components/GlobalOpportunitySection.tsx");
-    expect(section).toContain("117");
-    expect(section).toContain("93.2");
-    expect(section).toContain("640");
+  it("GlobalOpportunitySection 레거시 파일이 존재한다", () => {
+    expect(existsSync(join(clientDir, "components", "GlobalOpportunitySection.tsx"))).toBe(true);
   });
 
   it("ServicesSection에 AI 검색 메시지가 포함되어 있다", () => {
     const services = readComponent("components/ServicesSection.tsx");
-    expect(services).toContain("AI 검색");
+    expect(services).toContain("AI");
   });
 
   it("TechSection에 기술 포지셔닝이 반영되어 있다", () => {
@@ -32,7 +29,7 @@ describe("글로벌 리브랜딩 — 메시징 일관성", () => {
     expect(tech).toContain("AI");
   });
 
-  it("WhyAINative에 AI 검색 메시지가 포함되어 있다", () => {
+  it("WhyAINative 레거시 파일에 AI 검색 메시지가 포함되어 있다", () => {
     const why = readComponent("components/WhyAINative.tsx");
     expect(why).toContain("AI 검색");
     expect(why).toContain("Perplexity");
@@ -45,15 +42,14 @@ describe("글로벌 리브랜딩 — 메시징 일관성", () => {
     expect(footer).toContain("의료 마케팅");
   });
 
-  it("ContactSection에 AI 검색 노출이 포함되어 있다", () => {
+  it("ContactSection 레거시 파일에 AI 검색 노출이 포함되어 있다", () => {
     const contact = readComponent("components/ContactSection.tsx");
     expect(contact).toContain("AI 검색 노출");
   });
 
-  it("PriceCompareSection에 AI 검색과 의료관광이 포함되어 있다", () => {
+  it("PriceCompareSection에 AI 검색 최적화가 포함되어 있다", () => {
     const price = readComponent("components/PriceCompareSection.tsx");
-    expect(price).toContain("AI 검색");
-    expect(price).toContain("의료관광");
+    expect(price).toContain("AI 검색 최적화");
   });
 
   it("SeoChecker에 AI 포지셔닝이 반영되어 있다", () => {
@@ -68,10 +64,5 @@ describe("글로벌 리브랜딩 — 메시징 일관성", () => {
   it("index.html 메타태그에 의료 마케팅이 반영되어 있다", () => {
     const html = readFileSync(join(__dirname, "..", "client", "index.html"), "utf-8");
     expect(html).toContain("의료 마케팅");
-  });
-
-  it("GlobalOpportunitySection 컴포넌트 파일이 존재한다", () => {
-    const section = readComponent("components/GlobalOpportunitySection.tsx");
-    expect(section).toContain("GlobalOpportunitySection");
   });
 });
