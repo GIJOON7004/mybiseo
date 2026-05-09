@@ -191,7 +191,7 @@ async function fetchWithRetry(url: string, timeout = 15000, retries = 2, country
   throw lastError;
 }
 
-function normalizeUrl(input: string): string {
+export function normalizeUrl(input: string): string {
   // 1. URL 정규화: 불필요한 텍스트, 괄호, 공백 제거
   let url = input.trim();
   // 괄호 안의 텍스트 제거 (예: "namedps.com/ (https )" → "namedps.com/")
@@ -222,7 +222,7 @@ function normalizeUrl(input: string): string {
   return url;
 }
 
-function getGrade(percent: number): string {
+export function getGrade(percent: number): string {
   if (percent >= 90) return "A+";
   if (percent >= 80) return "A";
   if (percent >= 70) return "B";

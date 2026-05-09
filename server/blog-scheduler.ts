@@ -192,8 +192,8 @@ ${usedKeywords || "없음"}
           status: "pending",
         });
         savedCount++;
-      } catch {
-        // 중복 등 무시
+      } catch (e) {
+        console.warn(`[KeywordGen] 키워드 저장 실패 (중복 등):`, String(e));
       }
     }
 
@@ -519,7 +519,7 @@ export function startBlogScheduler() {
                 const emailHtml = buildRediagnosisEmail({ url: lead.url, totalScore: lead.totalScore ?? 0, grade: lead.grade ?? "" });
                 await sendEmailViaNaver({ to: lead.email, subject: `[MY비서] ${lead.url} AI 인용 점수가 변했을 수 있습니다`, html: emailHtml });
                 sent++;
-              } catch (e) { /* skip */ }
+              } catch (e) { console.warn(`[FollowupEmail] 개별 발송 실패 (${lead.email}):`, String(e)); }
             }
             addHistory("followup_email", true, `재진단 유도: ${sent}/${targets.length}건 발송`);
             if (sent > 0) {
@@ -598,7 +598,7 @@ export function startBlogScheduler() {
                 const parsed = JSON.parse(typeof content === "string" ? content : "{}");
                 await updateChatSessionInsight(session.id, parsed);
                 processed++;
-              } catch (e) { /* skip individual session */ }
+              } catch (e) { console.warn(`[ChatInsight] 세션 ${session.id} 처리 실패:`, String(e)); }
             }
             if (processed > 0) {
               addHistory("chat_insight", true, `${processed}개 세션 인사이트 추출 완료`);
@@ -638,6 +638,7 @@ export function startBlogScheduler() {
                 diagnosed++;
               } catch (e) {
                 failed++;
+                console.warn(`[AutoDiagnosis] ${profile.hospitalUrl} 진단 실패:`, String(e));
               }
               // 서버 부하 방지: 각 진단 사이 3초 대기
               await new Promise(r => setTimeout(r, 3000));

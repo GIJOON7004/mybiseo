@@ -7,7 +7,8 @@ import { adminProcedure, protectedProcedure, publicProcedure, router } from "../
 import {
   getActiveHospitalProfiles, getAdminChannelStats, getAdminHospitalOverview, getAllSeoLeads,
   getDailyDiagnosisCounts, getDiagnosisStats, getHospitalPerformanceRanking, getLeadFunnelStats,
-  getMonthlyReportById, getMonthlyReportByShareToken, getRecentDiagnoses, getRegionStats,
+  getHospitalProfileByUserId, getMonthlyReportById, getMonthlyReportByShareToken,
+  getRecentDiagnoses, getRegionStats,
   getScoreDistribution, getSpecialtyStats, getSubscriberCount, getTopDiagnosedUrls,
   saveDiagnosisHistory, setMonthlyReportShareToken, updateMonthlyReportPdfUrl,
 } from "../db";
@@ -96,12 +97,28 @@ export const monthlyReportRouter = router({
       return { token };
     }),
 
-  // 공유 링크로 리포트 조회 (공개)
+  // 공유 링크로 리포트 조회 (공개 + 소유권 검증)
+  // Rate Limit: IP당 1분 30회 (rate-limit.ts에서 등록)
+  // 소유권: 로그인 사용자라면 자신의 병원 리포트인지 확인
   getByShareToken: publicProcedure
     .input(z.object({ token: z.string().min(1) }))
-    .query(async ({ input }) => {
+    .query(async ({ input, ctx }) => {
       const report = await getMonthlyReportByShareToken(input.token);
       if (!report) throw new TRPCError({ code: "NOT_FOUND", message: "리포트를 찾을 수 없거나 링크가 만료되었습니다" });
+
+      // 소유권 검증: 로그인 사용자라면 자신의 병원 리포트인지 확인
+      // 비로그인 사용자(ctx.user === null)는 공개 접근 허용 (공유 링크 본래 목적)
+      if (ctx.user) {
+        const profile = await getHospitalProfileByUserId(ctx.user.id);
+        // 로그인 사용자이지만 병원 프로필이 없는 경우(admin 등) → 허용
+        if (profile && profile.id !== report.hospitalId) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "이 리포트에 대한 접근 권한이 없습니다",
+          });
+        }
+      }
+
       return report;
     }),
 });

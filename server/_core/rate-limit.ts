@@ -61,6 +61,18 @@ const authLimiter = rateLimit({
   },
 });
 
+/** 공유 토큰 조회 Rate Limiter — 열거 공격(enumeration) 방지 */
+const shareTokenLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1분
+  max: 30, // IP당 최대 30회
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    error: "리포트 조회 요청이 너무 많습니다. 잠시 후 다시 시도해주세요.",
+    retryAfter: "1분 후 재시도 가능합니다.",
+  },
+});
+
 /**
  * Rate Limiting 미들웨어를 Express 앱에 등록
  * - 전역 limiter는 /api/ 경로에만 적용 (정적 파일 제외)
@@ -81,4 +93,7 @@ export function registerRateLimiting(app: Express): void {
 
   // 인증 관련
   app.use("/api/oauth", authLimiter);
+
+  // 공유 토큰 조회 — 열거 공격 방지
+  app.use("/api/trpc/report.getByShareToken", shareTokenLimiter);
 }

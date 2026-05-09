@@ -435,8 +435,8 @@
 ## AI 피드백 의견5 반영 - 회피 없는 실제 코드 작업 (Phase 2)
 - [x] #1 의료법 출력 검증 연동: blog/sns/chat/engagement LLM 응답에 validateMedicalContent 적용
 - [x] #2 sections.ts 첫 3개 Plugin 실제 추출: buildCtaPage, buildServicePage, buildFinalAssessmentPage 별도 파일 이동
-- [ ] #3 db.ts content 도메인 실제 분리: Blog/Content 함수들을 server/db/content.ts로 이동 + re-export
-- [ ] #4 blog-scheduler.ts 분할: 유틸 함수들을 별도 파일로 추출
-- [ ] #5 소유권 검증 미들웨어: getByShareToken에 rate-limit + 생성자 확인 로직
-- [ ] #6 Silent Failure 제거: blog-scheduler.ts catch 빈 블록에 logger 추가
-- [ ] #7 Char Tests: seo-analyzer, blog-scheduler 핵심 함수 결정적 테스트 + LLM mock fixture
+- [x] #3 db.ts content 도메인 실제 분리: Blog/Content 함수들을 server/db/content.ts로 이동 + re-export (3698→ 3440줄)
+- [x] #4 blog-scheduler.ts 분할: 유틸/프롬프트 추출 (1284→937줄, scheduler/utils.ts 170줄 + prompts.ts 59줄)
+- [x] #5 소유권 검증 미들웨어: getByShareToken에 rate-limit + 생성자 확인 로직
+- [x] #6 Silent Failure 제거: blog-scheduler.ts catch 빈 블록에 logger 추가
+- [x] #7 Char Tests: seo-analyzer, blog-scheduler 핵심 함수 결정적 테스트 + LLM mock fixture
