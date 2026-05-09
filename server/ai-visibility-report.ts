@@ -1,3 +1,4 @@
+import { domainToUnicode } from "url";
 /**
  * AI 가시성 진단 보고서 PDF 생성 — 통합 디자인 시스템 v3.1 (최적화)
  * 참고: 시크릿에디션 CRM 보고서 수준의 완성도
@@ -123,7 +124,7 @@ export async function generateAiVisibilityReport(
   const displayUrl = (() => {
     try {
       if (rawDisplayUrl.includes("xn--")) {
-        const { domainToUnicode } = require("url");
+        
         const parts = rawDisplayUrl.split("/");
         parts[0] = domainToUnicode(parts[0]) || parts[0];
         return parts.join("/");

@@ -1,3 +1,4 @@
+import { domainToUnicode } from "url";
 /**
  * AI 가시성 진단 보고서 — PDF 유틸리티 함수
  */
@@ -171,7 +172,7 @@ export function drawPageHeader(doc: any, t: Record<string, string>, url: string)
   const displayUrl = (() => {
     try {
       if (rawUrl.includes("xn--")) {
-        const { domainToUnicode } = require("url");
+        
         const parts = rawUrl.split("/");
         parts[0] = domainToUnicode(parts[0]) || parts[0];
         return parts.join("/");

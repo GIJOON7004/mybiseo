@@ -1,3 +1,4 @@
+import { domainToUnicode } from "url";
 /**
  * AI 가시성 진단 보고서 — 텍스트 정제 유틸리티
  * 
@@ -80,7 +81,7 @@ export function sanitizeReportText(text: string): string {
 export function decodePunycodeDomain(rawUrl: string): string {
   try {
     if (rawUrl.includes("xn--")) {
-      const { domainToUnicode } = require("url");
+      
       const parts = rawUrl.split("/");
       parts[0] = domainToUnicode(parts[0]) || parts[0];
       return parts.join("/");

@@ -1,7 +1,0 @@
-# MY비서 — https://mybiseo.com
-User-agent: *
-Allow: /
-Disallow: /admin
-Disallow: /api/
-
-Sitemap: https://mybiseo.com/sitemap.xml
