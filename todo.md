@@ -395,3 +395,6 @@
 - [x] C-4-2: GEO 인프라 고도화 (DeepSeek/Grok/카카오봇/LinkedIn/Baidu 크롤러 추가 + robots.txt 업데이트 + llms-full.txt 상세버전 추가)
 - [x] C-4-3: 관리자 LLM 비용 대시보드 UI (AdminLLMMonitor.tsx — 비용요약/캐시상태/일별테이블/모듈별바/최근로그)
 - [x] C-4-4: llmMonitor 라우터 + llm-usage-logger 통합 테스트 (9개 테스트 통과)
+
+### Hotfix: 프로덕션 빈 화면
+- [ ] mybiseo.com 접속 시 빈 화면 (white screen) 문제 수정
