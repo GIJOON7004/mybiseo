@@ -1,6 +1,7 @@
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { Link } from "wouter";
-import { ArrowLeft, Clock, Eye, Tag, ChevronRight, BookOpen, Stethoscope, Sparkles, Search, Heart, Leaf, Smile } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Tag, ChevronRight, BookOpen, Stethoscope, Sparkles, Search, Heart, Leaf, Smile, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -22,9 +23,46 @@ const categoryColors: Record<string, string> = {
   "ai-marketing-trend": "from-cyan-500/20 to-teal-500/10 text-cyan-400 border-cyan-500/20",
 };
 
+const POSTS_PER_PAGE = 9;
+
 export default function Blog() {
-  const { data: postsData, isLoading: postsLoading } = trpc.blog.posts.useQuery();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data: postsData, isLoading: postsLoading } = trpc.blog.posts.useQuery({ limit: 200 });
   const { data: categories, isLoading: catsLoading } = trpc.blog.categories.useQuery();
+
+  // 필터링된 포스트
+  const filteredPosts = useMemo(() => {
+    if (!postsData?.posts) return [];
+    let posts = postsData.posts;
+
+    // 카테고리 필터
+    if (selectedCategory) {
+      const cat = categories?.find(c => c.slug === selectedCategory);
+      if (cat) posts = posts.filter(p => p.categoryId === cat.id);
+    }
+
+    // 검색 필터
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      posts = posts.filter(p =>
+        p.title.toLowerCase().includes(q) ||
+        p.excerpt.toLowerCase().includes(q) ||
+        (p.tags && p.tags.toLowerCase().includes(q))
+      );
+    }
+
+    return posts;
+  }, [postsData, selectedCategory, searchQuery, categories]);
+
+  // 페이지네이션
+  const totalPages = Math.ceil(filteredPosts.length / POSTS_PER_PAGE);
+  const paginatedPosts = filteredPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
+  );
 
   useSEO({
     title: "병원 마케팅 블로그 | MY비서 - 진료과별 AI 마케팅 가이드",
@@ -69,8 +107,50 @@ export default function Blog() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Category Hub Cards */}
-        {!catsLoading && categories && categories.length > 0 && (
+        {/* Search + Filter Bar */}
+        <div className="flex flex-col md:flex-row gap-4 mb-10">
+          {/* 검색 */}
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="키워드로 검색..."
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-border bg-card/50 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+            />
+          </div>
+
+          {/* 카테고리 필터 */}
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => { setSelectedCategory(null); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                !selectedCategory
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              }`}
+            >
+              전체
+            </button>
+            {categories?.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => { setSelectedCategory(cat.slug === selectedCategory ? null : cat.slug); setCurrentPage(1); }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  selectedCategory === cat.slug
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Hub Cards (only when no filter active) */}
+        {!selectedCategory && !searchQuery && !catsLoading && categories && categories.length > 0 && (
           <section className="mb-16">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
               <Tag className="w-5 h-5 text-primary" />
@@ -83,7 +163,6 @@ export default function Blog() {
                 return (
                   <Link key={cat.id} href={`/blog/category/${cat.slug}`}>
                     <div className="group relative rounded-xl border bg-card/50 hover:bg-card transition-all duration-300 p-6 cursor-pointer overflow-hidden">
-                      {/* Gradient background */}
                       <div className={`absolute inset-0 bg-gradient-to-br ${colorClass.split(" ").slice(0, 2).join(" ")} opacity-30 group-hover:opacity-50 transition-opacity`} />
                       <div className="relative">
                         <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorClass.split(" ").slice(0, 2).join(" ")} flex items-center justify-center mb-3 ${colorClass.split(" ").slice(2, 3).join(" ")}`}>
@@ -112,9 +191,20 @@ export default function Blog() {
           </section>
         )}
 
-        {/* All Posts */}
+        {/* Posts Grid */}
         <section>
-          <h2 className="text-xl font-semibold mb-6">최신 병원 마케팅 인사이트</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold">
+              {selectedCategory
+                ? `${categories?.find(c => c.slug === selectedCategory)?.name || ""} 글`
+                : searchQuery
+                  ? `"${searchQuery}" 검색 결과`
+                  : "최신 병원 마케팅 인사이트"
+              }
+            </h2>
+            <span className="text-sm text-muted-foreground">{filteredPosts.length}개 글</span>
+          </div>
+
           {postsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -126,44 +216,79 @@ export default function Blog() {
                 </div>
               ))}
             </div>
-          ) : postsData && postsData.posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {postsData.posts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`}>
-                  <article className="group rounded-xl border border-border/60 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 p-6 cursor-pointer h-full flex flex-col">
-                    {post.tags && (
-                      <div className="flex flex-wrap gap-1.5 mb-3">
-                        {post.tags.split(",").slice(0, 3).map((tag, i) => (
-                          <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                            {tag.trim()}
-                          </span>
-                        ))}
+          ) : paginatedPosts.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedPosts.map((post) => (
+                  <Link key={post.id} href={`/blog/${post.slug}`}>
+                    <article className="group rounded-xl border border-border/60 bg-card/50 hover:bg-card hover:border-primary/30 transition-all duration-300 p-6 cursor-pointer h-full flex flex-col">
+                      {post.tags && (
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {post.tags.split(",").slice(0, 3).map((tag, i) => (
+                            <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                              {tag.trim()}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <h3 className="font-semibold text-base mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {post.readingTime}분
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {post.viewCount}
+                        </span>
                       </div>
-                    )}
-                    <h3 className="font-semibold text-base mb-2 group-hover:text-primary transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-4 flex-1">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {post.readingTime}분
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
-                        {post.viewCount}
-                      </span>
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-10">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={page === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="w-8 h-8 p-0"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-20 text-muted-foreground">
               <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>아직 게시된 글이 없습니다.</p>
+              <p>{searchQuery ? `"${searchQuery}"에 대한 검색 결과가 없습니다.` : "아직 게시된 글이 없습니다."}</p>
             </div>
           )}
         </section>

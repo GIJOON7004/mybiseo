@@ -5,6 +5,7 @@
  * - 네이티브 select 제거 → 탭 버튼으로 교체
  */
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
+import { useABTest } from "@/hooks/useABTest";
 
 // Lazy load backgrounds — only mount the one matching screen size
 const HeroMobileBackground = lazy(() => import("@/components/HeroMobileBackground"));
@@ -266,12 +267,22 @@ export default function HeroSection() {
     setDisplayedPlaceholder("");
   }, [country]);
 
+  /* A/B 테스트 변형 */
+  const { variant: headlineVariant } = useABTest("hero_headline");
+  const { variant: ctaVariant, trackEvent: trackCtaEvent } = useABTest("hero_cta");
+
+  // A/B 변형 적용 (실험 활성화 시에만 오버라이드)
+  const heroHeadline = headlineVariant?.content?.headline || "신환은 쉬지 않고 옵니다";
+  const heroSubheadline = headlineVariant?.content?.subheadline || "AI 검색 최적화로 광고 없이 환자가 찾아옵니다";
+  const ctaText = ctaVariant?.content?.ctaText || "무료 진단";
+
   const handleScroll = (id: string) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleSeoCheck = (e: React.FormEvent) => {
+    trackCtaEvent("click");
     e.preventDefault();
     if (!checkUrl.trim()) return;
     navigate(`/ai-check?url=${encodeURIComponent(checkUrl.trim())}&country=${country}`);
@@ -398,9 +409,11 @@ export default function HeroSection() {
               background: "radial-gradient(ellipse 60% 80% at 30% 50%, oklch(0.72 0.14 200 / 0.6) 0%, transparent 70%)",
             }}
           />
-          <span className="relative">
-            <span className="text-brand">신환</span>은 쉬지 않고 옵니다
-          </span>
+          <span className="relative" dangerouslySetInnerHTML={{
+            __html: heroHeadline.includes("<")
+              ? heroHeadline
+              : heroHeadline.replace(/(신환|AI|환자)/g, '<span class="text-brand">$1</span>')
+          }} />
         </h1>
 
         {/* 서브 헤드라인 */}
@@ -412,7 +425,11 @@ export default function HeroSection() {
             animationDelay: "0.14s",
           }}
         >
-          <span className="text-brand">AI 검색 최적화</span>로 광고 없이 환자가 찾아옵니다
+          <span dangerouslySetInnerHTML={{
+            __html: heroSubheadline.includes("<")
+              ? heroSubheadline
+              : heroSubheadline.replace(/(AI 검색 최적화|AI|최적화)/g, '<span class="text-brand">$1</span>')
+          }} />
         </p>
 
         {/* 서브카피 */}
@@ -521,7 +538,7 @@ export default function HeroSection() {
                   }}
                 >
                   <Search className="w-4 h-4" />
-                  무료 진단
+                  {ctaText}
                 </button>
               </div>
             </form>

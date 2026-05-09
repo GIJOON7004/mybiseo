@@ -326,3 +326,36 @@
 - [x] ServicesSection.tsx의 CTA 링크를 내부 상세 페이지로 변경
 - [x] 각 서비스 페이지에 Service Schema JSON-LD 적용
 - [x] 각 페이지에 케이스 스터디 최소 1건 포함 (압도 3개 페이지)
+
+## Phase 4: 측정 + 최적화 + 자동화 고도화
+
+### A/B 테스트 인프라
+- [x] A/B 테스트 프레임워크 구축 (서버 사이드 변형 할당 + 쿠키 기반 일관성)
+- [x] Hero 헤드라인 A/B 변형 시스템 (targetElement 기반 다중 변형)
+- [x] CTA 문구 A/B 변형 시스템
+- [x] A/B 테스트 결과 추적 DB 테이블 (ab_experiments, ab_variants, ab_events) + 라우터
+
+### 블로그 허브 구축
+- [x] 블로그 목록 페이지 개편 (카테고리 필터, 검색, 페이지네이션)
+- [x] 블로그 첫 3편 콘텐츠 작성 (ChatGPT 병원 추천 기준 / 의료광고 자율심의 체크리스트 / 치과 마케팅 비용 가이드)
+- [x] 블로그 포스트 SEO 최적화 (Article Schema, 메타태그, OG) — 기존 BlogPost.tsx에 이미 적용됨
+
+### 진단 자동화 고도화
+- [x] 일일 진단 요청 카운터 + 임계값(10건) 기반 자동/수동 분기
+- [x] AI 리포트 품질 검증 로직 (점수 이상치 감지, 필수 섹션 누락 체크)
+- [x] 자동 발송 시 품질 검증 통과 조건 적용
+
+### 진료과별 랜딩페이지
+- [x] 치과 전용 랜딩페이지 (/dental) — Pain Points + 솔루션 + 케이스 스터디 + FAQ + CTA
+- [x] 피부과 전용 랜딩페이지 (/dermatology) — Pain Points + 솔루션 + 케이스 스터디 + FAQ + CTA
+- [x] App.tsx 라우팅 연결
+
+### 테스트
+- [x] Phase 4 전체 테스트 작성 및 통과 확인 (73개 파일, 1485개 테스트 통과)
+
+### Phase 4 갭 해결
+- [x] A/B 변형 할당 로직을 Hero/CTA 실제 렌더 경로에 연결 (useABTest 훅 + localStorage visitorId)
+- [x] HeroSection/CTA가 abtest 데이터로 실제 문구를 바꾸는 통합 코드 (heroHeadline/ctaText 동적 적용 + click 이벤트 추적)
+- [x] BlogPost.tsx의 Article Schema/메타태그/OG 적용 검증 (useSEO + Article JSON-LD + BreadcrumbList 확인)
+- [x] diagnosis-automation.ts를 email 발송 플로우에 연결 (sendReport 내부에서 checkDiagnosisAutomation 호출)
+- [x] 자동 발송 전 품질 검증 실패 시 차단 + 운영자 알림 (notifyOwner 호출)

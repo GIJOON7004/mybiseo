@@ -993,3 +993,62 @@ export const interviewVideos = mysqlTable("interview_videos", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 export type InterviewVideo = typeof interviewVideos.$inferSelect;
+
+
+/**
+ * A/B 테스트 실험 정의
+ */
+export const abExperiments = mysqlTable("ab_experiments", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  description: text("description"),
+  targetElement: varchar("target_element", { length: 100 }).notNull(), // "hero_headline", "hero_cta", "service_cta"
+  status: mysqlEnum("status", ["draft", "running", "paused", "completed"]).default("draft").notNull(),
+  startedAt: timestamp("started_at"),
+  endedAt: timestamp("ended_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type AbExperiment = typeof abExperiments.$inferSelect;
+export type InsertAbExperiment = typeof abExperiments.$inferInsert;
+
+/**
+ * A/B 테스트 변형 (각 실험에 2+ 변형)
+ */
+export const abVariants = mysqlTable("ab_variants", {
+  id: int("id").autoincrement().primaryKey(),
+  experimentId: int("experiment_id").notNull(),
+  name: varchar("name", { length: 100 }).notNull(), // "control", "variant_a", "variant_b"
+  content: text("content").notNull(), // JSON: { headline, subheadline, ctaText, ctaUrl }
+  weight: int("weight").default(50).notNull(), // 트래픽 비율 (%)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type AbVariant = typeof abVariants.$inferSelect;
+export type InsertAbVariant = typeof abVariants.$inferInsert;
+
+/**
+ * A/B 테스트 이벤트 추적
+ */
+export const abEvents = mysqlTable("ab_events", {
+  id: int("id").autoincrement().primaryKey(),
+  experimentId: int("experiment_id").notNull(),
+  variantId: int("variant_id").notNull(),
+  visitorId: varchar("visitor_id", { length: 64 }).notNull(), // 쿠키 기반 익명 ID
+  eventType: mysqlEnum("event_type", ["impression", "click", "conversion"]).notNull(),
+  metadata: text("metadata"), // JSON: 추가 정보
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+export type AbEvent = typeof abEvents.$inferSelect;
+export type InsertAbEvent = typeof abEvents.$inferInsert;
+
+/**
+ * 진단 자동화 설정
+ */
+export const diagnosisAutomationConfig = mysqlTable("diagnosis_automation_config", {
+  id: int("id").autoincrement().primaryKey(),
+  dailyThreshold: int("daily_threshold").default(10).notNull(),
+  autoSendEnabled: boolean("auto_send_enabled").default(false).notNull(),
+  qualityMinScore: int("quality_min_score").default(20).notNull(), // 최소 점수 (이하면 발송 차단)
+  qualityRequiredSections: text("quality_required_sections"), // JSON array of required section names
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+export type DiagnosisAutomationConfig = typeof diagnosisAutomationConfig.$inferSelect;

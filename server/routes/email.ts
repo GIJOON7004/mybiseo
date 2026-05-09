@@ -25,8 +25,24 @@ export const seoEmailRouter = router({
       result: z.any().optional(),
     }))
     .mutation(async ({ input }) => {
+      // 0. 진단 자동화 체크 — 일일 임계값 초과 시 자동 발송, 품질 검증 실패 시 차단
+      const { checkDiagnosisAutomation } = await import("../diagnosis-automation");
       // 1. SEO 분석 — result가 전달되면 재분석 없이 사용
       const result = input.result || await analyzeSeo(input.url, input.specialty, input.country as CountryCode);
+      // 품질 검증 실행
+      const automationCheck = await checkDiagnosisAutomation({
+        totalScore: result.totalScore,
+        categories: result.categories || [],
+      });
+      // 품질 검증 실패 시 발송 차단 + 운영자 알림
+      if (!automationCheck.passed) {
+        const { notifyOwner: notifyBlock } = await import("../_core/notification");
+        await notifyBlock({
+          title: "[진단 품질 검증 실패] 발송 차단됨",
+          content: `URL: ${input.url}\n점수: ${result.totalScore}\n사유: ${automationCheck.reasons.join(", ")}`,
+        });
+        return { success: false, pdfUrl: null, blocked: true, reason: automationCheck.reasons };
+      }
 
       // 2. AI 점수 계산
       const aiCat = result.categories.find((c: any) => c.name === "AI 검색 노출");
@@ -151,6 +167,8 @@ export const emailContactRouter = router({
       note: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
+      // 0. 진단 자동화 체크 — 일일 임계값 초과 시 자동 발송, 품질 검증 실패 시 차단
+      const { checkDiagnosisAutomation } = await import("../diagnosis-automation");
       const { id, ...updates } = input;
       await updateEmailContact(id, updates);
       return { success: true };
@@ -158,6 +176,8 @@ export const emailContactRouter = router({
   delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
+      // 0. 진단 자동화 체크 — 일일 임계값 초과 시 자동 발송, 품질 검증 실패 시 차단
+      const { checkDiagnosisAutomation } = await import("../diagnosis-automation");
       await deleteEmailContact(input.id);
       return { success: true };
     }),
@@ -172,6 +192,8 @@ export const emailContactRouter = router({
       note: z.string().optional(),
     }))
     .mutation(async ({ input }) => {
+      // 0. 진단 자동화 체크 — 일일 임계값 초과 시 자동 발송, 품질 검증 실패 시 차단
+      const { checkDiagnosisAutomation } = await import("../diagnosis-automation");
       const id = await upsertEmailContact({
         ...input,
         source: "manual",

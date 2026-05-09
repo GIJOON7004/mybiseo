@@ -1,6 +1,6 @@
 import { eq, desc, sql, and, lt, gte, lte, ne, isNotNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, inquiries, InsertInquiry, blogCategories, blogPosts, InsertBlogCategory, InsertBlogPost, snsContents, InsertSnsContent, seoKeywords, InsertSeoKeyword, chatSessions, chatMessages, InsertChatSession, InsertChatMessage, aiMonitorKeywords, aiMonitorResults, InsertAiMonitorKeyword, InsertAiMonitorResult, seoLeads, InsertSeoLead, diagnosisHistory, InsertDiagnosisHistory, newsletterSubscribers, InsertNewsletterSubscriber, benchmarkData, InsertBenchmarkData, monthlyAwards, InsertMonthlyAward, hospitalProfiles, InsertHospitalProfile, aiExposureScores, InsertAiExposureScore, aiMonitorCompetitors, InsertAiMonitorCompetitor, aiImprovementReports, InsertAiImprovementReport, userEvents, InsertUserEvent, seasonalCalendar, InsertSeasonalCalendar, siteVisits, InsertSiteVisit, consultationInquiries, InsertConsultationInquiry, monthlyReports, InsertMonthlyReport, adminNotifications, InsertAdminNotification, hospitalInfoItems, InsertHospitalInfoItem, aiBlogTrials, InsertAiBlogTrial, aiContentLogs, InsertAiContentLog, cardnewsTemplates, InsertCardnewsTemplate, benchmarkingReports, InsertBenchmarkingReport, emailContacts, InsertEmailContact, emailSendLogs, InsertEmailSendLog, treatmentPages, InsertTreatmentPage, automationRules, InsertAutomationRule, automationLogs, marketingContent, InsertMarketingContent, kakaoBookingSettings, InsertKakaoBookingSetting, bookingSlots, InsertBookingSlot, contentStyleGuides, ContentStyleGuide, contentIdeas, ContentIdea, contentHooks, ContentHook, contentScripts, ContentScript, contentCalendar, ContentCalendarItem, videoPrompts, VideoPrompt, adBrandProfiles, AdBrandProfile, adCreatives, AdCreative, interviewVideos, InterviewVideo } from "../drizzle/schema";
+import { InsertUser, users, inquiries, InsertInquiry, blogCategories, blogPosts, InsertBlogCategory, InsertBlogPost, snsContents, InsertSnsContent, seoKeywords, InsertSeoKeyword, chatSessions, chatMessages, InsertChatSession, InsertChatMessage, aiMonitorKeywords, aiMonitorResults, InsertAiMonitorKeyword, InsertAiMonitorResult, seoLeads, InsertSeoLead, diagnosisHistory, InsertDiagnosisHistory, newsletterSubscribers, InsertNewsletterSubscriber, benchmarkData, InsertBenchmarkData, monthlyAwards, InsertMonthlyAward, hospitalProfiles, InsertHospitalProfile, aiExposureScores, InsertAiExposureScore, aiMonitorCompetitors, InsertAiMonitorCompetitor, aiImprovementReports, InsertAiImprovementReport, userEvents, InsertUserEvent, seasonalCalendar, InsertSeasonalCalendar, siteVisits, InsertSiteVisit, consultationInquiries, InsertConsultationInquiry, monthlyReports, InsertMonthlyReport, adminNotifications, InsertAdminNotification, hospitalInfoItems, InsertHospitalInfoItem, aiBlogTrials, InsertAiBlogTrial, aiContentLogs, InsertAiContentLog, cardnewsTemplates, InsertCardnewsTemplate, benchmarkingReports, InsertBenchmarkingReport, emailContacts, InsertEmailContact, emailSendLogs, InsertEmailSendLog, treatmentPages, InsertTreatmentPage, automationRules, InsertAutomationRule, automationLogs, marketingContent, InsertMarketingContent, kakaoBookingSettings, InsertKakaoBookingSetting, bookingSlots, InsertBookingSlot, contentStyleGuides, ContentStyleGuide, contentIdeas, ContentIdea, contentHooks, ContentHook, contentScripts, ContentScript, contentCalendar, ContentCalendarItem, videoPrompts, VideoPrompt, adBrandProfiles, AdBrandProfile, adCreatives, AdCreative, interviewVideos, InterviewVideo, abExperiments, abVariants, abEvents, diagnosisAutomationConfig, InsertAbExperiment, InsertAbVariant, InsertAbEvent, DiagnosisAutomationConfig } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -3543,4 +3543,117 @@ export async function createCalendarItemExtended(data: {
   const db = await getDb(); if (!db) return null;
   const [result] = await db.insert(contentCalendar).values(data as any);
   return { id: result.insertId, ...data };
+}
+
+// ============================================================
+// A/B 테스트 DB 헬퍼
+// ============================================================
+// A/B 테스트 + 진단 자동화 헬퍼 (스키마는 상단 import에서 가져옴)
+
+export async function getAbExperiments() {
+  const db = await getDb(); if (!db) return [];
+  return db.select().from(abExperiments).orderBy(desc(abExperiments.createdAt));
+}
+
+export async function getAbExperimentById(id: number) {
+  const db = await getDb(); if (!db) return null;
+  const [exp] = await db.select().from(abExperiments).where(eq(abExperiments.id, id)).limit(1);
+  return exp || null;
+}
+
+export async function createAbExperiment(data: InsertAbExperiment) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(abExperiments).values(data).$returningId();
+  return result;
+}
+
+export async function updateAbExperiment(id: number, data: Partial<Omit<InsertAbExperiment, "id">>) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  await db.update(abExperiments).set(data).where(eq(abExperiments.id, id));
+}
+
+export async function getAbVariantsByExperiment(experimentId: number) {
+  const db = await getDb(); if (!db) return [];
+  return db.select().from(abVariants).where(eq(abVariants.experimentId, experimentId));
+}
+
+export async function createAbVariant(data: InsertAbVariant) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(abVariants).values(data).$returningId();
+  return result;
+}
+
+export async function updateAbVariant(id: number, data: Partial<Omit<InsertAbVariant, "id">>) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  await db.update(abVariants).set(data).where(eq(abVariants.id, id));
+}
+
+export async function deleteAbVariant(id: number) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  await db.delete(abVariants).where(eq(abVariants.id, id));
+}
+
+export async function getActiveExperimentForElement(targetElement: string) {
+  const db = await getDb(); if (!db) return null;
+  const [exp] = await db.select().from(abExperiments)
+    .where(and(eq(abExperiments.targetElement, targetElement), eq(abExperiments.status, "running")))
+    .limit(1);
+  return exp || null;
+}
+
+export async function recordAbEvent(data: InsertAbEvent) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  await db.insert(abEvents).values(data);
+}
+
+export async function getAbEventStats(experimentId: number) {
+  const db = await getDb(); if (!db) return [];
+  const variants = await getAbVariantsByExperiment(experimentId);
+  const stats = await Promise.all(variants.map(async (v) => {
+    const impressions = await db.select({ count: sql<number>`count(*)` }).from(abEvents)
+      .where(and(eq(abEvents.variantId, v.id), eq(abEvents.eventType, "impression")));
+    const clicks = await db.select({ count: sql<number>`count(*)` }).from(abEvents)
+      .where(and(eq(abEvents.variantId, v.id), eq(abEvents.eventType, "click")));
+    const conversions = await db.select({ count: sql<number>`count(*)` }).from(abEvents)
+      .where(and(eq(abEvents.variantId, v.id), eq(abEvents.eventType, "conversion")));
+    return {
+      variantId: v.id,
+      variantName: v.name,
+      impressions: impressions[0]?.count || 0,
+      clicks: clicks[0]?.count || 0,
+      conversions: conversions[0]?.count || 0,
+      ctr: impressions[0]?.count ? (clicks[0]?.count || 0) / impressions[0].count : 0,
+      conversionRate: clicks[0]?.count ? (conversions[0]?.count || 0) / clicks[0].count : 0,
+    };
+  }));
+  return stats;
+}
+
+// ============================================================
+// 진단 자동화 설정 DB 헬퍼
+// ============================================================
+
+export async function getDiagnosisAutomationConfig() {
+  const db = await getDb(); if (!db) return null;
+  const [config] = await db.select().from(diagnosisAutomationConfig).limit(1);
+  return config || null;
+}
+
+export async function upsertDiagnosisAutomationConfig(data: Partial<DiagnosisAutomationConfig>) {
+  const db = await getDb(); if (!db) throw new Error("Database not available");
+  const existing = await getDiagnosisAutomationConfig();
+  if (existing) {
+    await db.update(diagnosisAutomationConfig).set(data as any).where(eq(diagnosisAutomationConfig.id, existing.id));
+  } else {
+    await db.insert(diagnosisAutomationConfig).values(data as any);
+  }
+}
+
+export async function getDailyDiagnosisCount(): Promise<number> {
+  const db = await getDb(); if (!db) return 0;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const [result] = await db.select({ count: sql<number>`count(*)` }).from(seoLeads)
+    .where(gte(seoLeads.createdAt, today));
+  return result?.count || 0;
 }

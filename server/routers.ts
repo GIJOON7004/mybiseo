@@ -41,6 +41,7 @@ import { monthlyReportRouter, adminDashboardRouter } from "./routes/report";
 import { seoKeywordRouter, seoAnalyzerRouter } from "./routes/seo";
 import { snsRouter } from "./routes/sns";
 import { treatmentPageRouter } from "./routes/treatmentPage";
+import { abtestRouter, diagnosisAutomationRouter } from "./routes/abtest";
 
 export const appRouter = router({
   system: systemRouter,
@@ -109,6 +110,8 @@ export const appRouter = router({
     }),
   }),
   blogScheduler: blogSchedulerRouter,
+  abtest: abtestRouter,
+  diagnosisAutomation: diagnosisAutomationRouter,
   chat: chatRouter,
   seoAnalyzer: seoAnalyzerRouter,
   aiMonitor: aiMonitorRouter,

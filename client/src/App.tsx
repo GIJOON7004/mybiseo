@@ -62,6 +62,8 @@ const ServiceReputation = lazy(() => import("./pages/ServiceReputation"));
 const ServiceLearningHub = lazy(() => import("./pages/ServiceLearningHub"));
 const ServiceWebsite = lazy(() => import("./pages/ServiceWebsite"));
 const ServiceCommunication = lazy(() => import("./pages/ServiceCommunication"));
+const LandingDental = lazy(() => import("./pages/LandingDental"));
+const LandingDermatology = lazy(() => import("./pages/LandingDermatology"));
 
 // Minimal loading fallback — keeps layout stable during chunk load
 function PageLoader() {
@@ -152,6 +154,8 @@ function Router() {
         <Route path="/services/learning-hub" component={ServiceLearningHub} />
         <Route path="/services/website" component={ServiceWebsite} />
         <Route path="/services/communication" component={ServiceCommunication} />
+        <Route path="/dental" component={LandingDental} />
+        <Route path="/dermatology" component={LandingDermatology} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/report/:token" component={SharedReport} />
         <Route path={"/404"} component={NotFound} />

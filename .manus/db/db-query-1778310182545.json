@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE blog_posts \n  ADD COLUMN tags TEXT DEFAULT NULL,\n  ADD COLUMN reading_time INT NOT NULL DEFAULT 5,\n  ADD COLUMN view_count INT NOT NULL DEFAULT 0,\n  ADD COLUMN published ENUM('draft','published','scheduled') NOT NULL DEFAULT 'published',\n  ADD COLUMN scheduled_at TIMESTAMP NULL DEFAULT NULL;\n\nUPDATE blog_posts SET published = status WHERE status IN ('draft', 'published');\nUPDATE blog_posts SET published = 'published' WHERE status NOT IN ('draft', 'published', 'scheduled');",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute ALTER TABLE blog_posts \n  ADD COLUMN tags TEXT DEFAULT NULL,\n  ADD COLUMN reading_time INT NOT NULL DEFAULT 5,\n  ADD COLUMN view_count INT NOT NULL DEFAULT 0,\n  ADD COLUMN published ENUM('draft','published','scheduled') NOT NULL DEFAULT 'published',\n  ADD COLUMN scheduled_at TIMESTAMP NULL DEFAULT NULL;\n\nUPDATE blog_posts SET published = status WHERE status IN ('draft', 'published');\nUPDATE blog_posts SET published = 'published' WHERE status NOT IN ('draft', 'published', 'scheduled');",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 3141
+}
