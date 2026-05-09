@@ -1355,6 +1355,23 @@ export async function generateAiVisibilityReport(
     y += rowH;
   });
    y += 12;
+
+  // 가중치 산정 방식 설명
+  {
+    y = ensureSpace(doc, y, 40, hCtx);
+    const weightNote = rd?.specialty
+      ? (language === "ko"
+        ? `※ 점수 산정 방식: 각 카테고리는 진료과(${rd.specialty})별 가중치가 적용됩니다. 예를 들어 네이버 검색 최적화는 치과의 경우 1.5배, AI 검색 노출은 성형외과의 경우 1.5배로 반영됩니다. 가중치는 해당 진료과에서 환자 유입에 미치는 실질적 영향도를 기반으로 산정됩니다.`
+        : `※ Scoring: Each category has specialty-specific weights applied (${rd.specialty}). Weights reflect the real-world impact on patient acquisition for this specialty.`)
+      : (language === "ko"
+        ? `※ 점수 산정 방식: 각 카테고리 점수는 항목별 만점 대비 달성률로 산정됩니다. 진료과가 지정된 경우 해당 진료과의 환자 유입 영향도에 따라 카테고리별 가중치(0.5~2.0배)가 적용됩니다.`
+        : `※ Scoring: Each category score is calculated as achievement rate against maximum points. When a specialty is specified, category-specific weights (0.5–2.0x) are applied based on patient acquisition impact.`);
+    doc.font("KrRegular").fontSize(6.5).fillColor(C.textMid)
+      .text(weightNote, ML, y, { width: CW, lineGap: 2 });
+    const noteH = doc.heightOfString(weightNote, { width: CW, lineGap: 2 });
+    y += noteH + 8;
+  }
+
   // ═══════════════════════════════════════════════
   // 카테고리별 전체 항목 상세 (101개 항목 전체 포함)
   // 빈 여백 없이 이어서 배치 (ensureSpace가 필요시 페이지 넘김)
@@ -1400,8 +1417,8 @@ export async function generateAiVisibilityReport(
       if (a.status !== "fail" && b.status === "fail") return 1;
       return a.score - b.score;
     });
-    const problemItems = sorted; // v4: 전체 항목 표시 (slice 제거)
-    const hiddenCount = allProblems.length - problemItems.length;
+    const problemItems = sorted; // v4: PDF에서는 전체 항목 표시 (접힘 없음, slice 제거)
+    const hiddenCount = 0; // PDF에서는 항상 전체 노출 — 웹과 달리 접힘 없음
     y = ensureSpace(doc, y, 50, hCtx);
     const catName = language === "ko" ? (CAT_NAMES_KO[cat.name] || cat.name) : cat.name;
     const catPct = cat.maxScore > 0 ? Math.min(100, Math.round((cat.score / cat.maxScore) * 100)) : 0;
@@ -1464,15 +1481,49 @@ export async function generateAiVisibilityReport(
         .text(detailText, detCols[4].x + 4, y + 3, { width: detCols[4].w - 8, lineGap: 2 });
       y += rowH;
     });
-    // 숨겨진 항목 수 표시
-    if (hiddenCount > 0) {
-      y = ensureSpace(doc, y, 14, hCtx);
-      doc.font("KrRegular").fontSize(6).fillColor(C.textMuted)
-        .text(`  + ${hiddenCount}${language === "ko" ? "개 추가 항목 (전체 보고서에서 확인)" : " more items (see full report)"}`, ML + 10, y + 2);
-      y += 14;
-    }
     y += 4;
   });
+
+  // ═══════════════════════════════════════════════
+  // 부록: 통과 항목 전체 리스트 (PDF에서만 노출 — 웹에서는 접혀있던 항목)
+  // ═══════════════════════════════════════════════
+  const allPassItems = auditResult.categories.flatMap(cat =>
+    cat.items.filter(i => i.status === "pass").map(i => ({
+      ...i,
+      categoryName: language === "ko" ? (CAT_NAMES_KO[cat.name] || cat.name) : cat.name,
+    }))
+  );
+  if (allPassItems.length > 0) {
+    y = ensureSpace(doc, y, 60, hCtx);
+    const appendixTitle = language === "ko" ? "통과 항목 전체 목록" : "Passed Items (Complete List)";
+    const appendixDesc = language === "ko"
+      ? `총 ${allPassItems.length}개 항목이 정상적으로 통과되었습니다.`
+      : `${allPassItems.length} items passed successfully.`;
+    y = drawSubTitle(doc, y, appendixTitle);
+    doc.font("KrRegular").fontSize(7).fillColor(C.textMid)
+      .text(appendixDesc, ML, y, { width: CW });
+    y += 14;
+    // 카테고리별로 그룹핑하여 표시
+    const passGrouped: Record<string, typeof allPassItems> = {};
+    allPassItems.forEach(item => {
+      if (!passGrouped[item.categoryName]) passGrouped[item.categoryName] = [];
+      passGrouped[item.categoryName].push(item);
+    });
+    Object.entries(passGrouped).forEach(([catName, items]) => {
+      y = ensureSpace(doc, y, 20, hCtx);
+      doc.font("KrBold").fontSize(7).fillColor(C.tealDark)
+        .text(`✓ ${catName} (${items.length})`, ML + 4, y);
+      y += 12;
+      items.forEach((item, idx) => {
+        y = ensureSpace(doc, y, 12, hCtx);
+        const itemName = language === "ko" ? (ITEM_NAMES_KO[item.name] || item.name) : item.name;
+        doc.font("KrRegular").fontSize(6.5).fillColor(C.textMid)
+          .text(`  ${idx + 1}. ${itemName} — ${item.score}/${item.maxScore}`, ML + 8, y, { width: CW - 16 });
+        y += 11;
+      });
+      y += 4;
+    });
+  }
   // ═══════════════════════════════════════════════
   // SECTION: 키워드 노출 현황 (빈 여백 없이 이어서 배치)
   // ═══════════════════════════════════════════════
