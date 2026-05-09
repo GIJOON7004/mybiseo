@@ -444,7 +444,7 @@ export default function HeroSection() {
             환자가 AI나 포털에서 검색할 때 우리 병원이 먼저 보이면
           </p>
           <p className="text-foreground/80 text-[12px] sm:text-[15px] leading-relaxed font-medium">
-            광고비를 줄여도 해외 신환이 자연스럽게 늘어납니다
+            광고비를 줄여도 국내/해외 신환이 자연스럽게 늘어납니다
           </p>
         </div>
 
