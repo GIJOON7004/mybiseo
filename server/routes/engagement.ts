@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   createBookingSlot, createInquiry, deleteBookingSlot, deleteInquiry,
@@ -176,7 +177,7 @@ export const aiSnsTipsRouter = router({
       const failedItems = result.categories?.flatMap((c: any) => c.items?.filter((i: any) => i.status === "fail" || i.status === "warning").map((i: any) => `[${c.name}] ${i.name}: ${i.detail || i.message}`)) || [];
       const aiResponse = await invokeLLM({
         messages: [
-          { role: "system", content: `당신은 병원 SNS 마케팅 전략가 10년차입니다. 아래 SEO 진단 결과를 바탕으로 각 SNS 채널별 구체적이고 즉시 실행 가능한 마케팅 팁을 작성합니다.
+          { role: "system", content: injectMedicalGuard(`당신은 병원 SNS 마케팅 전략가 10년차입니다. 아래 SEO 진단 결과를 바탕으로 각 SNS 채널별 구체적이고 즉시 실행 가능한 마케팅 팁을 작성합니다.
 
 ## 진단 결과
 - URL: ${result.url || input.url}
@@ -193,7 +194,7 @@ ${failedItems.slice(0, 10).join("\n")}
 - frequency는 구체적인 요일과 시간대까지 제안 (예: '화/목 오전 10시')
 - 의료광고법 준수: 과장 표현 금지, 전후 사진 주의사항 안내
 
-JSON 형식으로 응답해주세요.` },
+JSON 형식으로 응답해주세요.`) },
           { role: "user", content: "각 SNS 채널별 구체적인 마케팅 팁을 생성해주세요." }
         ],
         response_format: {

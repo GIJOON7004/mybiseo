@@ -7,6 +7,8 @@ import * as QRCode from "qrcode";
 import type { RealityDiagnosis } from "./reality-diagnosis";
 import { translateResultToEnglish } from "./ai-visibility-translate";
 import { getMonthlyTrendByUrl, getScoreComparisonByUrl } from "./db";
+import { stripMarkdown as _modStripMarkdown, sanitizeHospitalName as _modSanitizeHospitalName } from "./ai-visibility/text-utils";
+import { getGradeColorHtml, getStatusColorHtml, getStatusBgHtml, getScoreRangeColorHtml } from "./ai-visibility/constants";
 
 // ── Types ──
 interface SeoAuditResult {
@@ -555,58 +557,25 @@ function esc(s: string): string {
   return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+// stripMarkdown: 모듈에서 import됨 (./ai-visibility/text-utils)
 function stripMarkdown(text: string): string {
-  if (!text) return "";
-  return text
-    .replace(/#{1,6}\s?/g, "")
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/^[-*+]\s/gm, "")
-    .replace(/^\d+\.\s/gm, "")
-    // HTML 태그 잔존 제거
-    .replace(/<\/?[a-zA-Z][^>]*>/g, "")
-    // LLM 메타 코멘트 제거
-    .replace(/\(왜 중요한가:[^)]*\)/g, "")
-    .replace(/\(Why this matters:[^)]*\)/g, "")
-    .replace(/\(참고:[^)]*\)/g, "")
-    .replace(/\(Note:[^)]*\)/g, "")
-    // "제로클릭" 표기 통일
-    .replace(/제로[\s-]*클릭/g, "제로클릭")
-    .trim();
+  return _modStripMarkdown(text);
 }
 
-export function sanitizeHospitalName(raw: string): string {
-  if (!raw) return raw;
-  const parts = raw.split(/[|\-·–—:「」\[\]()（）!！。,，~]/).map(s => s.trim()).filter(Boolean);
-  const medicalKeywords = /(?:병원|의원|치과|성형외과|피부과|안과|한의원|클리닉|센터|의료원|재활|정형|내과|외과|산부인과|비뇨기과|이비인후과|정신과|소아과|가정의학과|마취과|Clinic|Hospital|Center|Medical)/i;
-  const medPart = parts.find(p => medicalKeywords.test(p));
-  if (medPart) return medPart.trim();
-  if (parts.length > 1) {
-    const candidates = parts.filter(p => p.length >= 2);
-    if (candidates.length > 0) return candidates.sort((a, b) => a.length - b.length)[0];
-  }
-  return raw.trim();
-}
+// sanitizeHospitalName: 모듈에서 import됨 (./ai-visibility/text-utils)
+export const sanitizeHospitalName = _modSanitizeHospitalName;
 
+// getGradeColor: 모듈에서 import됨 (./ai-visibility/constants → getGradeColorHtml)
 function getGradeColor(grade: string): string {
-  if (grade === "A+" || grade === "A") return "#1A7F5A";
-  if (grade === "B") return "#1D6FBF";
-  if (grade === "C") return "#C47D0E";
-  return "#B83232";
+  return getGradeColorHtml(grade);
 }
 
 function getStatusColor(status: string): string {
-  if (status === "pass") return "#1A7F5A";
-  if (status === "warning") return "#C47D0E";
-  return "#B83232";
+  return getStatusColorHtml(status);
 }
 
 function getStatusBg(status: string): string {
-  if (status === "pass") return "#E6F7F0";
-  if (status === "warning") return "#FEF5E4";
-  return "#FDECEC";
+  return getStatusBgHtml(status);
 }
 
 function catName(name: string, lang: Lang): string {
@@ -726,10 +695,7 @@ function miniDonutSvg(value: number, total: number, color: string, size: number 
 }
 
 function getScoreRangeColor(pct: number): string {
-  if (pct >= 80) return "#1A7F5A";
-  if (pct >= 60) return "#1D6FBF";
-  if (pct >= 40) return "#C47D0E";
-  return "#B83232";
+  return getScoreRangeColorHtml(pct);
 }
 
 function progressBarHtml(ratio: number, color: string, height: number = 8): string {

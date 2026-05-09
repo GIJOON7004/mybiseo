@@ -31,6 +31,7 @@ export function sanitizeHospitalName(raw: string): string {
  * 마크다운 + HTML 잔존물 + LLM 메타 코멘트 제거
  */
 export function stripMarkdown(text: string): string {
+  if (!text) return "";
   return text
     .replace(/#{1,6}\s?/g, "")
     .replace(/\*\*([^*]+)\*\*/g, "$1")

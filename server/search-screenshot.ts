@@ -11,6 +11,7 @@
  * - 브라우저 크래시 안전 처리
  */
 import puppeteer, { type Browser, type Page } from "puppeteer";
+import { getBrowser, releasePage } from "./lib/browser-pool";
 import { storagePut } from "./storage";
 
 export interface SearchScreenshot {
@@ -370,7 +371,7 @@ export async function captureSearchScreenshots(
   let browser: Browser | null = null;
 
   try {
-    browser = await launchBrowser();
+    browser = await getBrowser();
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`브라우저 실행 실패: ${msg}`);
@@ -410,7 +411,7 @@ export async function captureSearchScreenshots(
   } finally {
     if (browser) {
       try {
-        await browser.close();
+        // browser managed by pool
       } catch {
         // 브라우저 종료 실패 무시
       }

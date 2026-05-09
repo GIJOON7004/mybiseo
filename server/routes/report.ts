@@ -90,8 +90,8 @@ export const monthlyReportRouter = router({
     .mutation(async ({ input }) => {
       const report = await getMonthlyReportById(input.reportId);
       if (!report) throw new TRPCError({ code: "NOT_FOUND", message: "리포트를 찾을 수 없습니다" });
-      const crypto = await import("crypto");
-      const token = crypto.randomBytes(16).toString("hex");
+      const { nanoid } = await import("nanoid");
+      const token = nanoid(21);
       await setMonthlyReportShareToken(report.id, token);
       return { token };
     }),

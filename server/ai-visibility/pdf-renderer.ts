@@ -6,6 +6,7 @@
  */
 import puppeteer from "puppeteer";
 import * as fs from "fs";
+import { getBrowser, releasePage } from "../lib/browser-pool";
 
 // ── Types ──
 export interface PdfRenderOptions {
@@ -66,10 +67,10 @@ export async function renderHtmlToPdf(
     launchOptions.executablePath = chromiumPath;
   }
 
-  const browser = await puppeteer.launch(launchOptions);
+  // Browser Pool 싱글톤 사용
+  const browser = await getBrowser();
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
-
     await page.setContent(html, {
       waitUntil: "networkidle0",
       timeout: opts.timeout,
@@ -92,7 +93,8 @@ export async function renderHtmlToPdf(
 
     return Buffer.from(pdfBuffer);
   } finally {
-    await browser.close();
+    await page.close();
+    await releasePage();
   }
 }
 
@@ -106,20 +108,16 @@ export async function renderHtmlToScreenshot(
   const { width = 1200, height = 1600, timeout = 30000 } = options;
   const chromiumPath = findChromiumPath();
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-    ...(chromiumPath ? { executablePath: chromiumPath } : {}),
-    timeout,
-  });
-
+  // Browser Pool 싱글톤 사용
+  const browser = await getBrowser();
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
     await page.setViewport({ width, height });
     await page.setContent(html, { waitUntil: "networkidle0", timeout });
     const screenshot = await page.screenshot({ fullPage: true, type: "png" });
     return Buffer.from(screenshot);
   } finally {
-    await browser.close();
+    await page.close();
+    await releasePage();
   }
 }

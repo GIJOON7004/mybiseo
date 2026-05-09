@@ -89,3 +89,30 @@ export function getCategoryName(name: string, lang: "ko" | "en" | "th"): string 
 
 // ── AI category English constant ──
 export const AI_CATEGORY_EN = "AI Search Visibility";
+
+// ── HTML Report 전용 색상 (PDF와 다른 팔레트) ──
+export function getGradeColorHtml(grade: string): string {
+  if (grade === "A+" || grade === "A") return "#1A7F5A";
+  if (grade === "B") return "#1D6FBF";
+  if (grade === "C") return "#C47D0E";
+  return "#B83232";
+}
+
+export function getStatusColorHtml(status: string): string {
+  if (status === "pass") return "#1A7F5A";
+  if (status === "warning") return "#C47D0E";
+  return "#B83232";
+}
+
+export function getStatusBgHtml(status: string): string {
+  if (status === "pass") return "#E6F7F0";
+  if (status === "warning") return "#FEF5E4";
+  return "#FDECEC";
+}
+
+export function getScoreRangeColorHtml(pct: number): string {
+  if (pct >= 80) return "#1A7F5A";
+  if (pct >= 60) return "#1D6FBF";
+  if (pct >= 40) return "#C47D0E";
+  return "#B83232";
+}

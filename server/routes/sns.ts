@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import { adminProcedure, router } from "../_core/trpc";
 import { createSnsContent, deleteSnsContent, getAllSnsContents } from "../db";
 import { z } from "zod";
@@ -25,7 +26,7 @@ ${input.tone ? `톤: ${input.tone}` : "톤: 친근하고 전문적인"}
 
       const result = await invokeLLM({
         messages: [
-          { role: "system", content: SNS_CAPTION_PROMPT },
+          { role: "system", content: injectMedicalGuard(SNS_CAPTION_PROMPT) },
           { role: "user", content: userMessage },
         ],
         response_format: {
@@ -72,7 +73,7 @@ ${input.tone ? `톤: ${input.tone}` : "톤: 친근하고 전문적인"}
 
       const result = await invokeLLM({
         messages: [
-          { role: "system", content: SNS_PROMOTION_PROMPT },
+          { role: "system", content: injectMedicalGuard(SNS_PROMOTION_PROMPT) },
           { role: "user", content: userMessage },
         ],
         response_format: {
@@ -120,7 +121,7 @@ ${input.focus ? `특별 포커스: ${input.focus}` : ""}
 
       const result = await invokeLLM({
         messages: [
-          { role: "system", content: SNS_GUIDE_PROMPT },
+          { role: "system", content: injectMedicalGuard(SNS_GUIDE_PROMPT) },
           { role: "user", content: userMessage },
         ],
         response_format: {

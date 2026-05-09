@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { getHospitalProfileByUserId } from "../db";
 import { TRPCError } from "@trpc/server";
@@ -180,7 +181,7 @@ ${input.additionalContext ? `추가 맥락: ${input.additionalContext}` : ""}
 
       const result = await invokeLLM({
         messages: [
-          { role: "system", content: BLOG_GENERATOR_PROMPT },
+          { role: "system", content: injectMedicalGuard(BLOG_GENERATOR_PROMPT) },
           { role: "user", content: userMessage },
         ],
         response_format: {

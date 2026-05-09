@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   deleteChatSession, getAllChatSessions, getChatInsightStats, getChatMessagesBySession,
@@ -39,7 +40,7 @@ export const chatRouter = router({
       // 최근 10개 메시지만 LLM에 전달 (토큰 초과 방지)
       const recentMessages = input.messages.slice(-10);
       const llmMessages = [
-        { role: "system" as const, content: CHATBOT_SYSTEM_PROMPT },
+        { role: "system" as const, content: injectMedicalGuard(CHATBOT_SYSTEM_PROMPT) },
         ...recentMessages.map((m) => ({
           role: m.role as "user" | "assistant",
           content: m.content,

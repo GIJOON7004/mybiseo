@@ -4,6 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import { protectedProcedure, router } from "../_core/trpc";
 import {
   createMarketingContent, createVideoPrompt, deleteMarketingContent, deleteVideoPrompt,

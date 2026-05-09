@@ -9,6 +9,7 @@
  * - 섹션 번호 순차 정리 (01~10)
  */
 import puppeteer from "puppeteer";
+import { getBrowser, releasePage } from "./lib/browser-pool";
 import * as QRCode from "qrcode";
 import type { RealityDiagnosis } from "./reality-diagnosis";
 import { translateResultToEnglish } from "./ai-visibility-translate";
@@ -190,34 +191,10 @@ export async function generateHtmlPdfReport(
 </body>
 </html>`;
 
-  // ── Puppeteer PDF conversion ──
-  // Detect Chromium path: use system chromium if available, otherwise fall back to Puppeteer's bundled browser
-  const fs = await import("fs");
-  const systemChromium = ["/usr/bin/chromium", "/usr/bin/chromium-browser", "/usr/bin/google-chrome"];
-  const foundPath = systemChromium.find(p => fs.existsSync(p));
-  
-  const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--disable-extensions",
-      "--disable-background-networking",
-      "--font-render-hinting=none",
-    ],
-    timeout: 30000,
-  };
-  if (foundPath) {
-    launchOptions.executablePath = foundPath;
-  }
-  // If no system chromium found, Puppeteer will use its bundled browser
-  const browser = await puppeteer.launch(launchOptions);
-
+  // ── Puppeteer PDF conversion (Browser Pool 싱글톤) ──
+  const browser = await getBrowser();
+  const page = await browser.newPage();
   try {
-    const page = await browser.newPage();
-    
     await page.setContent(fullHtml, {
       waitUntil: "networkidle0",
       timeout: 30000,
@@ -235,7 +212,8 @@ export async function generateHtmlPdfReport(
 
     return Buffer.from(pdfBuffer);
   } finally {
-    await browser.close();
+    await page.close();
+    await releasePage();
   }
 }
 
