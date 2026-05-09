@@ -15,6 +15,11 @@ const routePrefetchMap: Record<string, () => Promise<unknown>> = {
   "/ai-check": () => import("@/pages/SeoChecker"),
   "/ai-blog-trial": () => import("@/pages/AiBlogTrial"),
   "/content-factory": () => import("../pages/ContentFactoryLanding"),
+  "/services/visibility": () => import("@/pages/ServiceVisibility"),
+  "/services/reputation": () => import("@/pages/ServiceReputation"),
+  "/services/learning-hub": () => import("@/pages/ServiceLearningHub"),
+  "/services/website": () => import("@/pages/ServiceWebsite"),
+  "/services/communication": () => import("@/pages/ServiceCommunication"),
   "/admin": () => import("@/pages/Admin"),
 };
 function prefetchRoute(href: string) {
@@ -29,7 +34,6 @@ function prefetchRoute(href: string) {
 const navLinks = [
   { label: "서비스", href: "#services" },
   { label: "기술력", href: "#tech" },
-  { label: "진행 방식", href: "#process" },
   { label: "가격 안내", href: "#pricing" },
   { label: "AI 최적화 진단", href: "/ai-check", isRoute: true },
   { label: "AI 블로그", href: "/ai-blog-trial", isRoute: true },

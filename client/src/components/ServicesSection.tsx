@@ -4,6 +4,7 @@
  * 기존 12개 서비스를 5개 영역으로 통합
  */
 import { FadeInSection } from "@/components/FadeInSection";
+import { Link } from "wouter";
 import {
   Search,
   Shield,
@@ -33,8 +34,8 @@ const coreServices = [
     ],
     metric: { value: "AI 노출 3배", desc: "AI 검색 결과에서 병원 추천 빈도 증가" },
     color: "brand",
-    href: "/ai-check",
-    ctaLabel: "무료 진단 받기",
+    href: "/services/visibility",
+    ctaLabel: "자세히 보기",
   },
   {
     id: "reputation",
@@ -52,8 +53,8 @@ const coreServices = [
     ],
     metric: { value: "리스크 -90%", desc: "부정 리뷰 미대응으로 인한 환자 이탈 방지" },
     color: "emerald",
-    href: "https://pf.kakao.com/_KYjGn",
-    ctaLabel: "상담 신청",
+    href: "/services/reputation",
+    ctaLabel: "자세히 보기",
   },
   {
     id: "learning",
@@ -71,8 +72,8 @@ const coreServices = [
     ],
     metric: { value: "정확도 95%+", desc: "AI가 병원 정보를 정확하게 답변하는 비율" },
     color: "violet",
-    href: "https://pf.kakao.com/_KYjGn",
-    ctaLabel: "상담 신청",
+    href: "/services/learning-hub",
+    ctaLabel: "자세히 보기",
   },
 ];
 
@@ -86,6 +87,7 @@ const supportServices = [
     desc: "AI 검색에 최적화된 병원 홈페이지. 전환율 최적화(CRO) 설계, 다국어 지원, 모바일 앱, 전후사진 갤러리까지.",
     features: ["AI 크롤러 최적화 구조", "전환율 최적화 설계", "다국어·모바일 앱"],
     color: "sky",
+    href: "/services/website",
   },
   {
     id: "communication",
@@ -95,6 +97,7 @@ const supportServices = [
     desc: "AI 챗봇이 24시간 환자 문의 응대 + 예약 관리. 노쇼 방지 리마인더, CRM, 맞춤형 팔로업까지 자동화.",
     features: ["24시간 AI 상담 챗봇", "노쇼 방지 시스템", "환자 CRM + 팔로업"],
     color: "amber",
+    href: "/services/communication",
   },
 ];
 
@@ -242,7 +245,7 @@ export default function ServicesSection() {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-3">{svc.desc}</p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 mb-3">
                     {svc.features.map((feat, fi) => (
                       <span
                         key={fi}
@@ -253,6 +256,13 @@ export default function ServicesSection() {
                       </span>
                     ))}
                   </div>
+                  <Link
+                    href={svc.href}
+                    className={`inline-flex items-center gap-1.5 text-xs font-semibold ${colors.text} hover:underline`}
+                  >
+                    자세히 보기
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               );
             })}

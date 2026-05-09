@@ -309,3 +309,20 @@
 
 ## 히어로 섹션 복원
 - [x] HeroSection.tsx를 Phase 2 개편 이전 원래 상태로 복원 (v27: 국가 선택 탭 버튼 + AI 검색 최적화 메시지)
+
+## Phase 3: 압도 3개 + 보조 2개 서비스 상세 페이지
+
+### 압도 서비스 상세 페이지
+- [x] AI Visibility Engine 상세 페이지 (/services/visibility) — Hero + 문제 정의 + 솔루션 + 작동 방식 + 케이스 스터디 + 포함 항목 + CTA
+- [x] Reputation Defense 상세 페이지 (/services/reputation) — Hero + 문제 정의 + 솔루션 + 작동 방식 + 케이스 스터디 + 포함 항목 + CTA
+- [x] AI Learning Hub 상세 페이지 (/services/learning-hub) — Hero + 문제 정의 + 솔루션 + 작동 방식 + 케이스 스터디 + 포함 항목 + CTA
+
+### 보조 서비스 상세 페이지
+- [x] Smart Website Platform 상세 페이지 (/services/website) — 간략 버전
+- [x] Patient Communication Hub 상세 페이지 (/services/communication) — 간략 버전
+
+### 라우팅 및 Schema
+- [x] App.tsx에 5개 서비스 상세 페이지 라우트 추가
+- [x] ServicesSection.tsx의 CTA 링크를 내부 상세 페이지로 변경
+- [x] 각 서비스 페이지에 Service Schema JSON-LD 적용
+- [x] 각 페이지에 케이스 스터디 최소 1건 포함 (압도 3개 페이지)

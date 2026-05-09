@@ -57,6 +57,11 @@ const InterviewDashboard = lazy(() => import("./pages/InterviewDashboard"));
 const InterviewCalendar = lazy(() => import("./pages/InterviewCalendar"));
 const ContentFactoryLanding = lazy(() => import("./pages/ContentFactoryLanding"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const ServiceVisibility = lazy(() => import("./pages/ServiceVisibility"));
+const ServiceReputation = lazy(() => import("./pages/ServiceReputation"));
+const ServiceLearningHub = lazy(() => import("./pages/ServiceLearningHub"));
+const ServiceWebsite = lazy(() => import("./pages/ServiceWebsite"));
+const ServiceCommunication = lazy(() => import("./pages/ServiceCommunication"));
 
 // Minimal loading fallback — keeps layout stable during chunk load
 function PageLoader() {
@@ -142,6 +147,11 @@ function Router() {
         <Route path="/content-factory" component={ContentFactoryLanding} />
         <Route path="/ai-hub" component={AiHub} />
         <Route path="/ai-hub/cardnews" component={AiCardnews} />
+        <Route path="/services/visibility" component={ServiceVisibility} />
+        <Route path="/services/reputation" component={ServiceReputation} />
+        <Route path="/services/learning-hub" component={ServiceLearningHub} />
+        <Route path="/services/website" component={ServiceWebsite} />
+        <Route path="/services/communication" component={ServiceCommunication} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/report/:token" component={SharedReport} />
         <Route path={"/404"} component={NotFound} />
