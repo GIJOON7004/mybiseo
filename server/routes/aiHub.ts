@@ -158,7 +158,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
               },
             },
           },
-        });
+        }, { caller: "aiHub.checkAdLaw" });
         const rawReview = reviewResult.choices[0].message.content;
         review = JSON.parse(typeof rawReview === "string" ? rawReview : "{}");
       } catch (e) {
@@ -921,7 +921,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
             content: `제목: ${content.generatedTitle}\n\n${content.revisedContent || content.generatedContent}`,
           },
         ],
-      });
+      }, { caller: "aiHub.naverHtml" });
       const html = typeof htmlResult.choices[0].message.content === "string"
         ? htmlResult.choices[0].message.content
         : "";

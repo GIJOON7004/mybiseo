@@ -51,6 +51,7 @@ const SeoHistory = lazy(() => import("./pages/SeoHistory"));
 const AdminAgenticDashboard = lazy(() => import("./pages/AdminAgenticDashboard"));
 const AdminAgentBuilder = lazy(() => import("./pages/AdminAgentBuilder"));
 const AdminPlatformSettings = lazy(() => import("./pages/AdminPlatformSettings"));
+const AdminLLMMonitor = lazy(() => import("./pages/AdminLLMMonitor"));
 const AdminBatchReports = lazy(() => import("./pages/AdminBatchReports"));
 const InterviewContentFactory = lazy(() => import("./pages/InterviewContentFactory"));
 const InterviewDashboard = lazy(() => import("./pages/InterviewDashboard"));
@@ -138,6 +139,7 @@ function Router() {
         <Route path="/admin/agentic" component={AdminAgenticDashboard} />
         <Route path="/admin/agent-builder" component={AdminAgentBuilder} />
         <Route path="/admin/platform-settings" component={AdminPlatformSettings} />
+        <Route path="/admin/llm-monitor" component={AdminLLMMonitor} />
         <Route path="/admin/interview-content" component={InterviewContentFactory} />
         <Route path="/admin/interview-dashboard" component={InterviewDashboard} />
         <Route path="/admin/interview-calendar" component={InterviewCalendar} />

@@ -25,6 +25,7 @@ import { z } from "zod";
 // === 분할된 라우터 import ===
 import { adFactoryRouter } from "./routes/adFactory";
 import { interviewContentRouter } from "./routes/interviewContent";
+import { llmMonitorRouter } from "./routes/llmMonitor";
 import { aiHubRouter } from "./routes/aiHub";
 import { aiMonitorRouter } from "./routes/aiMonitor";
 import { analyticsRouter } from "./routes/analytics";
@@ -524,5 +525,6 @@ URL: ${input.url}`,
   marketingDashboard: marketingDashboardRouter,
   adFactory: adFactoryRouter,
   interviewContent: interviewContentRouter,
+  llmMonitor: llmMonitorRouter,
 });
 export type AppRouter = typeof appRouter;

@@ -56,6 +56,10 @@ vi.mock("./db", () => {
     getAllBlogPostsAdmin: vi.fn().mockImplementation(async () => _mockBlogPosts),
     getBlogPostCount: vi.fn().mockResolvedValue(0),
     getBlogPostCountByCategory: vi.fn().mockResolvedValue(0),
+    getAllCategoriesWithPostCount: vi.fn().mockResolvedValue([
+      { id: 1, name: "치과", slug: "dental", description: "치과 마케팅", postCount: 0 },
+      { id: 2, name: "피부과", slug: "dermatology", description: "피부과 마케팅", postCount: 0 },
+    ]),
     incrementBlogPostView: vi.fn().mockResolvedValue(undefined),
     updateBlogPost: vi.fn().mockResolvedValue(undefined),
     deleteBlogPost: vi.fn().mockResolvedValue(undefined),

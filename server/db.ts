@@ -263,6 +263,24 @@ export async function getBlogPostCountByCategory(categoryId: number) {
   return result[0]?.count ?? 0;
 }
 
+/** 카테고리별 게시글 수를 단일 GROUP BY 쿼리로 조회 (N+1 해소) */
+export async function getAllCategoriesWithPostCount() {
+  const db = await getDb();
+  if (!db) return [];
+  const categories = await db.select().from(blogCategories).orderBy(blogCategories.sortOrder);
+  const counts = await db.select({
+    categoryId: blogPosts.categoryId,
+    count: sql<number>`count(*)`,
+  }).from(blogPosts)
+    .where(eq(blogPosts.published, "published"))
+    .groupBy(blogPosts.categoryId);
+  const countMap = new Map(counts.map(c => [c.categoryId, c.count]));
+  return categories.map(cat => ({
+    ...cat,
+    postCount: countMap.get(cat.id) ?? 0,
+  }));
+}
+
 // ── SNS Content helpers ──
 
 export async function createSnsContent(data: InsertSnsContent) {

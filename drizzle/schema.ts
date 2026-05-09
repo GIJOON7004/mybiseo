@@ -1067,3 +1067,18 @@ export const aiCrawlerVisits = mysqlTable("ai_crawler_visits", {
 
 export type AiCrawlerVisit = typeof aiCrawlerVisits.$inferSelect;
 export type InsertAiCrawlerVisit = typeof aiCrawlerVisits.$inferInsert;
+
+// ── LLM 사용량 로그 ──
+export const llmUsageLogs = mysqlTable("llm_usage_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  caller: varchar("caller", { length: 100 }).notNull(),
+  promptTokens: int("prompt_tokens").notNull().default(0),
+  completionTokens: int("completion_tokens").notNull().default(0),
+  totalTokens: int("total_tokens").notNull().default(0),
+  cached: boolean("cached").notNull().default(false),
+  durationMs: int("duration_ms").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export type LlmUsageLog = typeof llmUsageLogs.$inferSelect;
+export type InsertLlmUsageLog = typeof llmUsageLogs.$inferInsert;

@@ -375,3 +375,23 @@
 - [x] B-4: 핵심 비즈니스 로직 통합 테스트 작성 (phase-b-integration.test.ts — 32개 테스트)
 - [x] B-5: AI 크롤러 감지 미들웨어 강화 (DB 로깅 + 서비스 페이지 메타 + llms.txt 업데이트)
 - [x] B-6: LLM 호출 캐싱 레이어 — 인메모리 버전 구현 (SHA-256 해시, TTL 10분, LRU 100건 — 의료광고법 검수/네이버 HTML 변환에 적용. 향후 DB 기반 24h TTL로 확장 가능)
+
+### Phase C: 구조적 기술 부채 해소 (4개 AI 2차 피드백 종합)
+- [x] C-1-1: 백업 파일(.bak2, .bak3) 제거 + .gitignore 패턴 추가
+- [x] C-1-2: vite.config.ts 디버그 콜렉터 프로덕션 보안 가드
+- [x] C-1-3: PDF 라이브러리 감사 — jspdf, jspdf-autotable, pdf-lib, html2canvas 4개 제거 (미사용 확인)
+- [x] C-1-4: 인증/인가 전수 조사 — public 60개 중 진단 관련은 의도적 공개 (Rate Limit + 토큰 기반 보호 확인)
+- [x] C-2-1: ai-visibility-report.ts 4단계 분할 (types+상수 86줄, i18n 481줄, pdf-utils 196줄 분리 → 메인 2595→1759줄)
+- [x] C-2-2: LLM 캐싱 v2 (L1 인메모리 10분 + L2 24h, LRU 1000건, reality-diagnosis + aiHub 적용, 토큰 추적)
+- [x] C-2-3: N+1 쿼리 수정 (blog categories — N개 개별 COUNT → 2쿼리 병합으로 개선)
+- [x] C-2-4: PDF 비동기 큐 (p-queue concurrency:2, seo-report-pdf.ts 적용)
+- [x] C-2-5: manualChunks 확장 (admin/services 분리 — Phase B에서 이미 적용)
+- [x] C-2-6: 자동 발송 품질 게이트 fail-close 5룰 (최소점수/필수섹션/분석실패/카테고리수/이상치)
+- [x] C-3-1: 가짜 테스트 29개 파일 삭제 (readFileSync+toContain 패턴 — 실제 로직 검증 0건)
+- [x] C-3-2: 골든 테스트 5종 구축 (revenue, grade-formatters, diagnosis-gates, llm-cache, crawler-detection) — 17개 테스트
+- [~] C-3-3: 공개 식별자 NanoID 전환 — 보류 (URL 노출 ID는 admin 전용 1건만, 블로그/리포트는 이미 slug/shareToken 사용)
+- [~] C-3-4: db.ts 점진적 분리 — 보류 (31개 파일 import 경로 변경 리스크 대비 실익 부족, 향후 단계적 마이그레이션)
+- [x] C-4-1: LLM 비용 모니터링 (llm_usage_logs 테이블 + 비동기 배치 로거 + llmMonitor 라우터 4개 API — 일별/caller별/요약/캐시통계)
+- [x] C-4-2: GEO 인프라 고도화 (DeepSeek/Grok/카카오봇/LinkedIn/Baidu 크롤러 추가 + robots.txt 업데이트 + llms-full.txt 상세버전 추가)
+- [x] C-4-3: 관리자 LLM 비용 대시보드 UI (AdminLLMMonitor.tsx — 비용요약/캐시상태/일별테이블/모듈별바/최근로그)
+- [x] C-4-4: llmMonitor 라우터 + llm-usage-logger 통합 테스트 (9개 테스트 통과)

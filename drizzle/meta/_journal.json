@@ -36,6 +36,13 @@
       "when": 1778316449301,
       "tag": "0004_dizzy_brood",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1778321000489,
+      "tag": "0005_skinny_stardust",
+      "breakpoints": true
     }
   ]
 }

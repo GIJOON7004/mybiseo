@@ -151,11 +151,11 @@ describe("B-6: LLM 캐싱 레이어 통합", () => {
 
   it("TTL 기반 만료를 지원한다", () => {
     expect(cacheSrc).toContain("expiresAt");
-    expect(cacheSrc).toContain("DEFAULT_TTL_MS");
+    expect(cacheSrc).toContain("L1_TTL_MS");
   });
 
   it("최대 캐시 항목 수를 제한한다 (LRU)", () => {
-    expect(cacheSrc).toContain("MAX_CACHE_ENTRIES");
+    expect(cacheSrc).toContain("L1_MAX_ENTRIES");
     expect(cacheSrc).toContain("evictOldest");
   });
 

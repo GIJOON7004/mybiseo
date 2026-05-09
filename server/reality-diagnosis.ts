@@ -14,7 +14,7 @@
  * - 독립적 fallback으로 부분 실패 시 graceful degradation
  * - SimilarWeb + LLM 병렬 실행
  */
-import { invokeLLM } from "./_core/llm";
+import { invokeLLMCached } from "./llm-cache";
 import { callDataApi } from "./_core/dataApi";
 import { resolveSpecialty, type SpecialtyType } from "./specialty-weights";
 import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-summary-template";
@@ -394,7 +394,7 @@ actionItems: 9개 (각 단계별 3개씩). 각각:
 
 closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요약 2)주요 강점 3)핵심 개선 과제 4)실행 우선순위 5)종합 전망. 각 단락 사이에 빈 줄(\\n\\n)로 구분. 마크다운 서식 사용하지 않기.`;
 
-  const result = await invokeLLM({
+  const result = await invokeLLMCached({
     temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -495,7 +495,7 @@ closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요
         },
       },
     },
-    });
+    }, { caller: "diagnosis.core" });
   // #25 LLM 응답 검증 + #27 통계 기록
   const coreContent = result.choices[0]?.message?.content as string || "{}";
   const coreValidation = validateJsonResponse(coreContent, ["headline", "executiveSummary", "keyFindings", "riskScore"]);
@@ -558,7 +558,7 @@ answerCapsule: 답변 캡슐 품질 진단.
   issues: 3개 문제점
   recommendations: 3개 개선 권장사항`;
 
-  const result = await invokeLLM({
+  const result = await invokeLLMCached({
     temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -632,7 +632,7 @@ answerCapsule: 답변 캡슐 품질 진단.
         },
       },
     },
-  });
+  }, { caller: "diagnosis.ai" });
   // #25/#27 GEO/AI 응답 검증 + 통계
   const geoContent = result.choices[0]?.message?.content as string || "{}";
   const geoValidation = validateJsonResponse(geoContent, ["geoTriAxis", "aiCitationThreshold"]);
@@ -682,7 +682,7 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
     recommendation: 개선 권장사항 (1-2문장)
   verdict: 종합 판정 (1-2문장)`;
 
-  const result = await invokeLLM({
+  const result = await invokeLLMCached({
     temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -754,7 +754,7 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
         },
       },
     },
-  });
+  }, { caller: "diagnosis.technical" });
     // #25/#27 Channel 응답 검증 + 통계
   const channelContent = result.choices[0]?.message?.content as string || "{}";
   const channelValidation = validateJsonResponse(channelContent, ["crossChannelTrust", "aiSimulator"]);
@@ -814,7 +814,7 @@ mybiseoServices: mybiseo 서비스 소개.
     relevanceToHospital: 이 병원에 특히 필요한 이유 (1문장). 진단 결과를 반영.
   ctaMessage: CTA 메시지 (1문장).`;
 
-  const result = await invokeLLM({
+  const result = await invokeLLMCached({
     temperature: 0.1,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -903,7 +903,7 @@ mybiseoServices: mybiseo 서비스 소개.
         },
       },
     },
-  });
+  }, { caller: "diagnosis.competitor" });
    // #25/#27 Strategy 응답 검증 + 통계
   const strategyContent = result.choices[0]?.message?.content as string || "{}";
   const strategyValidation = validateJsonResponse(strategyContent, ["websiteTransformGuide", "contentStrategy"]);

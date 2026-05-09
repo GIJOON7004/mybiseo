@@ -25,6 +25,10 @@ vi.mock("./db", async () => {
     ]),
     getBlogPostCount: vi.fn().mockResolvedValue(1),
     getBlogPostCountByCategory: vi.fn().mockResolvedValue(1),
+    getAllCategoriesWithPostCount: vi.fn().mockResolvedValue([
+      { id: 1, slug: "beauty-salon", name: "미용실 · 네일샵", description: "미용실 AI 자동화 가이드", metaTitle: null, metaDescription: null, createdAt: new Date(), postCount: 1 },
+      { id: 2, slug: "clinic", name: "병원 · 의원", description: "병원 AI 자동화 가이드", metaTitle: null, metaDescription: null, createdAt: new Date(), postCount: 0 },
+    ]),
     getBlogPostBySlug: vi.fn().mockImplementation(async (slug: string) => {
       if (slug === "test-post-1") {
         return { id: 1, slug: "test-post-1", title: "테스트 글 1", excerpt: "테스트 발췌", content: "테스트 내용", tags: "AI,미용실", readingTime: 5, viewCount: 10, categoryId: 1, metaTitle: null, metaDescription: null, createdAt: new Date(), updatedAt: new Date() };

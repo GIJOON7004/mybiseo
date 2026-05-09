@@ -1,5 +1,5 @@
 /**
- * LLM 캐싱 레이어 테스트
+ * LLM 캐싱 레이어 v2 테스트
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -28,7 +28,7 @@ beforeEach(() => {
   mockInvokeLLM.mockClear();
 });
 
-describe("LLM Cache", () => {
+describe("LLM Cache v2", () => {
   const testParams = {
     messages: [
       { role: "system" as const, content: "You are helpful." },
@@ -41,10 +41,12 @@ describe("LLM Cache", () => {
     expect(mockInvokeLLM).toHaveBeenCalledTimes(1);
   });
 
-  it("동일 프롬프트 두 번째 호출은 캐시에서 반환한다", async () => {
+  it("동일 프롬프트 두 번째 호출은 L1 캐시에서 반환한다", async () => {
     await invokeLLMCached(testParams);
     await invokeLLMCached(testParams);
     expect(mockInvokeLLM).toHaveBeenCalledTimes(1);
+    const stats = getLLMCacheStats();
+    expect(stats.l1Hits).toBe(1);
   });
 
   it("다른 프롬프트는 별도로 호출한다", async () => {
@@ -55,15 +57,16 @@ describe("LLM Cache", () => {
     expect(mockInvokeLLM).toHaveBeenCalledTimes(2);
   });
 
-  it("캐시 통계가 정확하다", async () => {
+  it("캐시 통계가 정확하다 (2계층)", async () => {
     await invokeLLMCached(testParams);
     await invokeLLMCached(testParams);
     await invokeLLMCached(testParams);
 
     const stats = getLLMCacheStats();
-    expect(stats.hits).toBe(2);
+    expect(stats.l1Hits).toBe(2);
     expect(stats.misses).toBe(1);
-    expect(stats.size).toBe(1);
+    expect(stats.l1Size).toBe(1);
+    expect(stats.l2Size).toBe(1);
     expect(stats.hitRate).toBe(67); // 2/3 = 66.67% → 67%
   });
 
@@ -72,17 +75,19 @@ describe("LLM Cache", () => {
     clearLLMCache();
 
     const stats = getLLMCacheStats();
-    expect(stats.hits).toBe(0);
+    expect(stats.l1Hits).toBe(0);
+    expect(stats.l2Hits).toBe(0);
     expect(stats.misses).toBe(0);
-    expect(stats.size).toBe(0);
+    expect(stats.l1Size).toBe(0);
+    expect(stats.l2Size).toBe(0);
   });
 
   it("TTL 만료 후에는 다시 호출한다", async () => {
     // TTL 1ms로 설정
-    await invokeLLMCached(testParams, 1);
+    await invokeLLMCached(testParams, { ttlMs: 1 });
     // 약간 대기
-    await new Promise(resolve => setTimeout(resolve, 5));
-    await invokeLLMCached(testParams, 1);
+    await new Promise(resolve => setTimeout(resolve, 10));
+    await invokeLLMCached(testParams, { ttlMs: 1 });
     expect(mockInvokeLLM).toHaveBeenCalledTimes(2);
   });
 
@@ -93,5 +98,25 @@ describe("LLM Cache", () => {
       response_format: { type: "json_object" },
     });
     expect(mockInvokeLLM).toHaveBeenCalledTimes(2);
+  });
+
+  it("skipCache 옵션으로 캐시를 우회한다", async () => {
+    await invokeLLMCached(testParams);
+    await invokeLLMCached(testParams, { skipCache: true });
+    expect(mockInvokeLLM).toHaveBeenCalledTimes(2);
+  });
+
+  it("토큰 사용량을 추적한다", async () => {
+    await invokeLLMCached(testParams);
+    const stats = getLLMCacheStats();
+    expect(stats.totalTokens).toBe(15);
+    expect(stats.totalCalls).toBe(1);
+  });
+
+  it("tier l1만 사용 시 L2에 저장하지 않는다", async () => {
+    await invokeLLMCached(testParams, { tier: "l1" });
+    const stats = getLLMCacheStats();
+    expect(stats.l1Size).toBe(1);
+    expect(stats.l2Size).toBe(0);
   });
 });

@@ -10,8 +10,8 @@ import { TRPCError } from "@trpc/server";
 import { generateAndPublishBlogPost, generateMonthlyKeywords, getSchedulerStatus, sendWeeklyBriefingNow } from "../blog-scheduler";
 import {
   createBlogCategory, createBlogPost, deleteBlogCategory, deleteBlogPost,
-  getAllBlogCategories, getAllBlogPosts, getAllBlogPostsAdmin, getBlogCategoryBySlug,
-  getBlogPostBySlug, getBlogPostCount, getBlogPostCountByCategory, getBlogPostsByCategory,
+  getAllBlogCategories, getAllCategoriesWithPostCount, getAllBlogPosts, getAllBlogPostsAdmin, getBlogCategoryBySlug,
+  getBlogPostBySlug, getBlogPostCount, getBlogPostsByCategory,
   getScheduledPosts, incrementBlogPostView, publishScheduledPosts, updateBlogCategory,
   updateBlogPost,
 } from "../db";
@@ -20,14 +20,8 @@ import { BLOG_GENERATOR_PROMPT, formatBlogContent } from "./_shared";
 
 export const blogRouter = router({
   categories: publicProcedure.query(async () => {
-    const categories = await getAllBlogCategories();
-    const categoriesWithCount = await Promise.all(
-      categories.map(async (cat) => ({
-        ...cat,
-        postCount: await getBlogPostCountByCategory(cat.id),
-      }))
-    );
-    return categoriesWithCount;
+    // N+1 해소: 단일 GROUP BY 쿼리로 카테고리+게시글 수 조회
+    return getAllCategoriesWithPostCount();
   }),
 
   categoryBySlug: publicProcedure

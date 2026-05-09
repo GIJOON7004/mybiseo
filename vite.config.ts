@@ -98,6 +98,8 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
+      // Security: disable debug collector in production
+      if (process.env.NODE_ENV === "production") return;
       // POST /__manus__/logs: Browser sends logs (written directly to files)
       server.middlewares.use("/__manus__/logs", (req, res, next) => {
         if (req.method !== "POST") {
@@ -174,7 +176,14 @@ export default defineConfig({
             if (id.includes('react-dom') || id.includes('react/') || id.includes('scheduler')) {
               return 'vendor-react';
             }
+            if (/@radix-ui/.test(id)) return 'vendor-radix';
+            if (/recharts|d3-/.test(id)) return 'vendor-charts';
+            if (/framer-motion/.test(id)) return 'vendor-motion';
+            if (/lucide-react/.test(id)) return 'vendor-icons';
+            return 'vendor-misc';
           }
+          if (id.includes('/pages/Admin')) return 'chunk-admin';
+          if (id.includes('/pages/Service')) return 'chunk-services';
         },
       },
     },

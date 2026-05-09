@@ -24,6 +24,19 @@ const AI_CRAWLER_PATTERNS = [
   "Meta-ExternalAgent",
   "Applebot-Extended",
   "YouBot",
+  // 2025 추가 AI 크롤러
+  "DeepSeekBot",
+  "GrokBot",
+  "Kakaotalk-Bot",
+  "kakaotalk-scrap",
+  "NaverBot",
+  "AdsBot-Naver",
+  // 소셜 미디어 크롤러 (링크 프리뷰)
+  "Twitterbot",
+  "facebookexternalhit",
+  "Slackbot",
+  "Discordbot",
+  "LinkedInBot",
 ];
 
 // 일반 검색 크롤러
@@ -32,6 +45,8 @@ const SEARCH_CRAWLER_PATTERNS = [
   "Yeti", // Naver
   "bingbot",
   "DuckDuckBot",
+  "Baiduspider",
+  "Sogou",
 ];
 
 function isAICrawler(userAgent: string): boolean {
@@ -346,7 +361,19 @@ Allow: /
 User-agent: Applebot-Extended
 Allow: /
 
+User-agent: DeepSeekBot
+Allow: /
+
+User-agent: GrokBot
+Allow: /
+
+User-agent: Kakaotalk-Bot
+Allow: /
+
 Sitemap: https://mybiseo.com/sitemap.xml
+
+# AI-readable structured content
+# See: https://mybiseo.com/llms.txt
 `);
   });
 
