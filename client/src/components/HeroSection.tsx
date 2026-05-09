@@ -568,7 +568,7 @@ export default function HeroSection() {
         >
           {/* 신뢰 배지 */}
           <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-            {["상담 0원", "초안 0원", "위약금 0원"].map(
+            {["무료 진단 제공", "맞춤 전략 수립", "데이터 기반 분석"].map(
               (text, i) => (
                 <span
                   key={i}

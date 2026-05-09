@@ -77,7 +77,7 @@ const allServices = [
     stage: "discover",
     icon: FileText,
     title: "AI 블로그 제작",
-    desc: "데이터 기반 키워드 전략 + AI 가시성 최적화 블로그 자동 생성. 다국어 번역, 의료법 준수 필터링, 콘텐츠 소유권 100% 보장.",
+    desc: "데이터 기반 키워드 전략 + AI 가시성 최적화 블로그 자동 생성. 다국어 번역, 의료법 준수 필터링, 콘텐츠 소유권 병원 귀속.",
     impact: "AI 답변 1페이지를 점령합니다",
     href: "/ai-blog-trial",
   },
@@ -87,7 +87,7 @@ const allServices = [
     title: "AI 콘텐츠 공장",
     tagline: "릴스 · 숏폼 · 카드뉴스 · 블로그",
     desc: "인터뷰 영상 1개 → 블로그 3개 + 카드뉴스 5세트 + 숏폼 5개 자동 생산. 바이럴 벤치마킹 + 의료법 준수 최종 점검.",
-    impact: "콘텐츠 생산 비용을 1/10로 줄입니다",
+    impact: "콘텐츠 생산 효율을 크게 높입니다",
     href: "/content-factory",
   },
   {
@@ -136,7 +136,7 @@ const allServices = [
     stage: "retain",
     icon: CalendarCheck,
     title: "노쇼 방지 시스템",
-    desc: "다단계 스마트 리마인더, AI 노쇼 예측, 자동 대기자 관리, 시술 후 팔로업. 노쇼율 40~60% 감소.",
+    desc: "다단계 스마트 리마인더, AI 노쇼 예측, 자동 대기자 관리, 시술 후 팔로업으로 노쇼율을 줄여드립니다.",
     impact: "연간 수억 원의 매출 손실을 회복합니다",
   },
   {

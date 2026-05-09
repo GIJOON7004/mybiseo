@@ -41,18 +41,18 @@ const funnelSteps = [
     step: 2,
     icon: Palette,
     title: "맞춤 초안 설계",
-    subtitle: "마음에 안 드시면 비용 없음",
-    desc: "진단 결과를 바탕으로 병원에 최적화된 웹사이트 + AI 챗봇 + 콘텐츠 전략 초안을 무료로 제작합니다.",
-    badge: "초안 무료",
+    subtitle: "병원 맞춤 전략 설계",
+    desc: "진단 결과를 바탕으로 병원에 최적화된 웹사이트 + AI 챗봇 + 콘텐츠 전략 초안을 설계합니다.",
+    badge: "맞춤 설계",
     badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
   },
   {
     step: 3,
     icon: TrendingUp,
     title: "성과 확인 후 결정",
-    subtitle: "결과로 증명, 언제든 해지 가능",
-    desc: "초안 확인 후 진행 여부를 결정하세요. 런칭 후에도 성과가 없으면 언제든 해지 가능합니다. 위약금 0원.",
-    badge: "위약금 0원",
+    subtitle: "결과로 증명, 유연한 계약 조건",
+    desc: "초안 확인 후 진행 여부를 결정하세요. 런칭 후에도 월 단위 계약으로 부담 없이 운영할 수 있습니다.",
+    badge: "유연한 계약",
     badgeColor: "bg-amber-400/15 text-amber-400 border-amber-400/30",
   },
 ];
@@ -187,9 +187,9 @@ export default function PricingSection() {
             <span className="text-brand">3단계</span>로 시작하세요
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-lg mx-auto">
-            매출의 30%를 광고비로 쓰고 계신가요?<br />
+            광고비 의존도를 줄이고 싶으신가요?<br />
             <span className="text-brand font-medium">AI 가시성 최적화로 자연유입을 늘리면</span> 광고비를 줄여도 환자가 찾아옵니다.<br />
-            무료 진단 → 초안 무료 → 성과 확인 후 결정. 리스크 없이 시작하세요.
+            무료 진단 → 맞춤 설계 → 성과 확인 후 결정. 단계별로 진행합니다.
           </p>
         </FadeInSection>
 

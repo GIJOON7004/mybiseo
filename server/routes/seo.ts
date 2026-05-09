@@ -9,6 +9,7 @@ import {
   createBlogPost, createSeoKeyword, deleteSeoKeyword, getAllBlogCategories,
   getAllSeoKeywords, saveBenchmarkData, saveDiagnosisHistory, updateSeoKeyword,
   getMonthlyTrendByUrl, getCategoryTrendByUrl, getPublicHistoryByUrl, getScoreComparisonByUrl,
+  createSeoLead,
 } from "../db";
 import { analyzeSeo, type CountryCode } from "../seo-analyzer";
 import { generateRealityDiagnosis } from "../reality-diagnosis";
@@ -126,7 +127,17 @@ export const seoKeywordRouter = router({
 
 export const seoAnalyzerRouter = router({
   analyze: publicProcedure
-    .input(z.object({ url: z.string().min(1, "URL을 입력해주세요"), specialty: z.string().optional(), country: z.enum(["kr", "th"]).optional().default("kr") }))
+    .input(z.object({
+      url: z.string().min(1, "URL을 입력해주세요"),
+      specialty: z.string().optional(),
+      country: z.enum(["kr", "th"]).optional().default("kr"),
+      hospitalName: z.string().optional(),
+      region: z.string().optional(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      privacyConsent: z.boolean().optional(),
+      marketingConsent: z.boolean().optional(),
+    }))
     .mutation(async ({ input }) => {
       const result = await analyzeSeo(input.url, input.specialty, input.country as CountryCode);
       // 데이터 축적: 모든 진단 결과를 자동으로 이력에 저장
@@ -147,13 +158,36 @@ export const seoAnalyzerRouter = router({
           const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
           await saveBenchmarkData({
             specialty: input.specialty,
-            region: "전국",
+            region: input.region || "전국",
             avgTotalScore: result.totalScore,
             avgAiScore: aiScore,
             sampleCount: 1,
             period,
           });
         }
+        // 리드 자동 생성 (이메일이 있는 경우)
+        if (input.email) {
+          await createSeoLead({
+            email: input.email,
+            url: input.url,
+            hospitalName: input.hospitalName || null,
+            specialty: input.specialty || null,
+            region: input.region || null,
+            phone: input.phone || null,
+            totalScore: result.totalScore,
+            grade: result.grade,
+            aiScore,
+            privacyConsent: input.privacyConsent ?? false,
+            marketingConsent: input.marketingConsent ?? false,
+            source: "seo_checker",
+          });
+        }
+        // 운영자 알림 발송
+        const { notifyOwner } = await import("../_core/notification");
+        await notifyOwner({
+          title: `[진단 완료] ${input.hospitalName || input.url}`,
+          content: `병원명: ${input.hospitalName || '-'}\n진료과: ${input.specialty || '-'}\n지역: ${input.region || '-'}\nURL: ${input.url}\n점수: ${result.totalScore}점 (${result.grade})\nAI 노출: ${aiScore}%\n이메일: ${input.email || '-'}\n전화: ${input.phone || '-'}`,
+        });
       } catch (e) {
         console.error("[DataAccumulation] 진단 이력 저장 실패:", e);
       }

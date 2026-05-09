@@ -202,7 +202,7 @@ export default function ROICalculator() {
     const rawAdditionalPatients = Math.round(baseAdditional * saturationFactor * aiMultiplier * budgetEfficiency);
     const rawAdditionalRevenue = rawAdditionalPatients * spec.avgRevenue;
     const rawRoi = Math.round(((rawAdditionalRevenue - monthlyBudget) / monthlyBudget) * 100);
-    // ROI 최소 400% (매출 대비 광고비 25% 이내 보장), 최대 800%
+    // ROI 최소 400%, 최대 800% (시뮬레이션 범위 제한)
     const roi = Math.min(Math.max(rawRoi, 400), 800);
     // ROI floor/cap 적용 시 매출과 환자 수도 역산
     const additionalRevenue = roi !== rawRoi ? monthlyBudget * (roi / 100 + 1) : rawAdditionalRevenue;

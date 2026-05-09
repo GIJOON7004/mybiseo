@@ -1012,6 +1012,12 @@ function AutoOptimizationPlan({ url, specialty, result, country = "kr" }: { url:
   );
 }
 
+const REGIONS_LIST = [
+  "서울 강남", "서울 서초", "서울 송파", "서울 마포", "서울 강서", "서울 강동", "서울 영등포", "서울 종로",
+  "경기 성남", "경기 수원", "경기 고양", "경기 용인", "경기 부천",
+  "부산", "대구", "인천", "대전", "광주", "제주", "기타",
+];
+
 export default function SeoChecker() {
   const [url, setUrl] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -1020,6 +1026,14 @@ export default function SeoChecker() {
   const resultRef = useRef<HTMLDivElement>(null);
   const [autoStarted, setAutoStarted] = useState(false);
   const { logEvent } = useEventLogger();
+  // Phase 1: 스텝 폼 상태
+  const [formStep, setFormStep] = useState<1 | 2>(1);
+  const [hospitalName, setHospitalName] = useState("");
+  const [region, setRegion] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [privacyConsent, setPrivacyConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   const saveDiagnosisMutation = trpc.diagnosis.save.useMutation();
   const analyzeMutation = trpc.seoAnalyzer.analyze.useMutation({
@@ -1063,8 +1077,30 @@ export default function SeoChecker() {
     }
   }, [autoStarted]);
 
+  const handleStep1Next = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!url.trim()) return;
+    setFormStep(2);
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!url.trim() || !privacyConsent) return;
+    setResult(null);
+    analyzeMutation.mutate({
+      url: url.trim(),
+      specialty: specialty || undefined,
+      country,
+      hospitalName: hospitalName || undefined,
+      region: region || undefined,
+      email: email || undefined,
+      phone: phone || undefined,
+      privacyConsent,
+      marketingConsent,
+    });
+  };
+  // URL만으로 빠른 진단 (기존 호환)
+  const handleQuickSubmit = (e?: React.FormEvent | React.MouseEvent) => {
+    e?.preventDefault();
     if (!url.trim()) return;
     setResult(null);
     analyzeMutation.mutate({ url: url.trim(), specialty: specialty || undefined, country });
@@ -1102,8 +1138,8 @@ export default function SeoChecker() {
             {t(country, <>우리 병원 홈페이지<br /><span className="text-brand">AI와 포털에 노출되고 있나요?</span></>, <>Is Your Clinic Website<br /><span className="text-brand">Visible on AI & Search Engines?</span></>)}
           </h1>
 
-          {/* URL 입력 폼 */}
-          <form onSubmit={handleSubmit} className="relative max-w-2xl mx-auto">
+          {/* 스텝 폼 */}
+          <div className="relative max-w-2xl mx-auto">
             {/* 국가 선택 배지 */}
             {country === "th" && (
               <div className="flex justify-center mb-3">
@@ -1112,49 +1148,162 @@ export default function SeoChecker() {
                 </span>
               </div>
             )}
-            <div className="flex items-center gap-2 p-2 rounded-2xl bg-card border border-border shadow-lg shadow-brand/5">
-              {/* 국가 선택 버튼 */}
-              <div className="shrink-0 flex items-center">
-                <button
-                  type="button"
-                  onClick={() => setCountry(country === "kr" ? "th" : "kr")}
-                  className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl hover:bg-accent/50 transition-colors group relative"
-                  title={country === "kr" ? "한국 기준 진단" : "태국 기준 진단"}
-                >
-                  <span className="leading-none">{country === "kr" ? <FlagKR size={24} /> : <FlagTH size={24} />}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" />
-                </button>
-                <div className="w-px h-6 bg-border" />
-              </div>
-              <div className="flex items-center gap-2 flex-1 px-1 min-w-0 overflow-hidden">
-                <Globe className="w-5 h-5 text-muted-foreground shrink-0" />
-                <input
-                  type="text"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder={country === "kr" ? "https://우리병원.com" : "https://your-clinic.com"}
-                  className="flex-1 min-w-0 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/60 py-3 text-base truncate"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={analyzeMutation.isPending || !url.trim()}
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand text-background font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {analyzeMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t(country, "분석 중...", "Analyzing...")}
-                  </>
-                ) : (
-                  <>
-                    {t(country, "진단 시작", "Start Audit")}
+
+            {/* Step 1: URL + 병원명 + 진료과 + 지역 */}
+            {formStep === 1 && (
+              <form onSubmit={handleStep1Next} className="space-y-3">
+                {/* URL 입력 바 */}
+                <div className="flex items-center gap-2 p-2 rounded-2xl bg-card border border-border shadow-lg shadow-brand/5">
+                  <div className="shrink-0 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setCountry(country === "kr" ? "th" : "kr")}
+                      className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl hover:bg-accent/50 transition-colors"
+                      title={country === "kr" ? "한국 기준 진단" : "태국 기준 진단"}
+                    >
+                      <span className="leading-none">{country === "kr" ? <FlagKR size={24} /> : <FlagTH size={24} />}</span>
+                      <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    </button>
+                    <div className="w-px h-6 bg-border" />
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 px-1 min-w-0 overflow-hidden">
+                    <Globe className="w-5 h-5 text-muted-foreground shrink-0" />
+                    <input
+                      type="text"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder={country === "kr" ? "https://우리병원.com" : "https://your-clinic.com"}
+                      className="flex-1 min-w-0 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground/60 py-3 text-base truncate"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!url.trim()}
+                    className="shrink-0 inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-brand text-background font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {t(country, "다음", "Next")}
                     <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+                  </button>
+                </div>
+                {/* 병원명 + 진료과 + 지역 (선택사항) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <input
+                    type="text"
+                    value={hospitalName}
+                    onChange={(e) => setHospitalName(e.target.value)}
+                    placeholder="병원명 (선택)"
+                    className="px-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-brand/50 transition-colors"
+                  />
+                  <select
+                    value={specialty}
+                    onChange={(e) => setSpecialty(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground outline-none focus:border-brand/50 transition-colors appearance-none cursor-pointer"
+                  >
+                    {SPECIALTIES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </select>
+                  <select
+                    value={region}
+                    onChange={(e) => setRegion(e.target.value)}
+                    className="px-4 py-2.5 rounded-xl bg-card border border-border text-sm text-foreground outline-none focus:border-brand/50 transition-colors appearance-none cursor-pointer"
+                  >
+                    <option value="">지역 선택</option>
+                    {REGIONS_LIST.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </div>
+                {/* 빠른 진단 링크 */}
+                <p className="text-xs text-muted-foreground">
+                  <button type="button" onClick={handleQuickSubmit} className="text-brand hover:underline">
+                    {t(country, "URL만으로 바로 진단하기 →", "Quick audit with URL only →")}
+                  </button>
+                </p>
+              </form>
+            )}
+
+            {/* Step 2: 이메일 + 전화번호 + 동의 */}
+            {formStep === 2 && !analyzeMutation.isPending && !result && (
+              <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+                <div className="bg-card border border-border rounded-2xl p-6 shadow-lg shadow-brand/5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="p-2 rounded-lg bg-brand/10">
+                      <Mail className="w-4 h-4 text-brand" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground">{t(country, "진단 결과를 받으실 정보를 입력해주세요", "Enter your contact info")}</h3>
+                      <p className="text-xs text-muted-foreground">{t(country, "상세 리포트를 이메일로 받아보세요", "Get detailed report via email")}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="이메일 주소 *"
+                        required
+                        className="px-4 py-3 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-brand/50 transition-colors"
+                      />
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="전화번호 (선택)"
+                        className="px-4 py-3 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground/60 outline-none focus:border-brand/50 transition-colors"
+                      />
+                    </div>
+                    {/* 동의 체크박스 */}
+                    <div className="space-y-2 text-left">
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={privacyConsent}
+                          onChange={(e) => setPrivacyConsent(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded border-border text-brand focus:ring-brand/50"
+                          required
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          <Link href="/privacy" className="text-brand hover:underline">개인정보처리방침</Link>에 동의합니다 <span className="text-red-400">*</span>
+                        </span>
+                      </label>
+                      <label className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={marketingConsent}
+                          onChange={(e) => setMarketingConsent(e.target.checked)}
+                          className="mt-0.5 w-4 h-4 rounded border-border text-brand focus:ring-brand/50"
+                        />
+                        <span className="text-xs text-muted-foreground">마케팅 정보 수신에 동의합니다 (선택)</span>
+                      </label>
+                    </div>
+                  </div>
+                  {/* 버튼 */}
+                  <div className="flex items-center gap-3 mt-5">
+                    <button
+                      type="button"
+                      onClick={() => setFormStep(1)}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground hover:border-brand/30 transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      {t(country, "이전", "Back")}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!privacyConsent || !email.trim()}
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-brand text-background font-semibold text-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Search className="w-4 h-4" />
+                      {t(country, "진단 시작", "Start Audit")}
+                    </button>
+                  </div>
+                  {/* 빠른 진단 */}
+                  <p className="text-xs text-muted-foreground mt-3 text-center">
+                    <button type="button" onClick={handleQuickSubmit} className="text-brand hover:underline">
+                      {t(country, "연락처 없이 진단만 하기 →", "Skip and audit without contact →")}
+                    </button>
+                  </p>
+                </div>
+              </form>
+            )}
+          </div>
 
           {/* 로딩 상태 — 단계별 프로그레스 */}
           {analyzeMutation.isPending && <AnalysisProgress country={country} />}
@@ -1292,13 +1441,15 @@ export default function SeoChecker() {
                     ))}
                   </div>
                   <div className="mt-4 text-center">
-                      <Link
-                      href="/#contact"
+                      <a
+                      href="https://pf.kakao.com/_KxmnZn/chat"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline"
                     >
                       {t(country, "이 문제들을 한번에 해결하기", "Fix all issues at once")}
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    </a>
                   </div>
                 </div>
               );
@@ -1410,21 +1561,52 @@ export default function SeoChecker() {
             {/* ── SNS 마케팅 팁 섹션 ── */}
             <SnsMarketingTipsSection result={result} specialty={specialty} country={country} />
 
-            {/* CTA — 배경 강화 */}
+            {/* CTA — 점수별 긴급성 강조 + 상담 유도 */}
             <div
-              className="text-center space-y-4 animate-fade-in-up p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-brand/5 via-purple-500/5 to-transparent border border-brand/10"
+              className={`text-center space-y-4 animate-fade-in-up p-6 sm:p-8 rounded-2xl border ${
+                result.totalScore < 40 ? "bg-gradient-to-br from-red-500/10 via-red-400/5 to-transparent border-red-400/30" :
+                result.totalScore < 60 ? "bg-gradient-to-br from-amber-500/10 via-amber-400/5 to-transparent border-amber-400/30" :
+                "bg-gradient-to-br from-brand/5 via-purple-500/5 to-transparent border-brand/10"
+              }`}
             >
-              <p className="text-muted-foreground">
-                {t(country, "광고비에 의존하지 않는 건강한 매출 구조를 만들어 드리겠습니다.", "Build a healthy revenue structure without relying on ad spend.")}
-              </p>
+              {/* 점수별 메시지 */}
+              {result.totalScore < 40 ? (
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-red-400">
+                    {t(country, "시급한 개선이 필요합니다", "Urgent improvement needed")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t(country, `현재 ${result.summary.failed}개의 심각한 문제가 발견되었습니다. AI 검색에서 병원이 노출되지 않을 가능성이 높습니다.`, `${result.summary.failed} critical issues found. Your clinic may not appear in AI search results.`)}
+                  </p>
+                </div>
+              ) : result.totalScore < 60 ? (
+                <div className="space-y-2">
+                  <p className="text-lg font-bold text-amber-400">
+                    {t(country, "개선 여지가 큽니다", "Significant room for improvement")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t(country, "경쟁 병원 대비 AI 노출에서 뒤처지고 있을 수 있습니다. 전문가와 함께 개선 전략을 세워보세요.", "You may be falling behind competitors in AI visibility. Let's build an improvement strategy.")}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-muted-foreground">
+                  {t(country, "광고비에 의존하지 않는 건강한 매출 구조를 만들어 드리겠습니다.", "Build a healthy revenue structure without relying on ad spend.")}
+                </p>
+              )}
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 flex-wrap">
-                <Link
-                  href="/#contact"
-                  className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-full bg-brand text-background hover:brightness-110 transition-all"
+                <a
+                  href="https://pf.kakao.com/_KxmnZn/chat"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center gap-2 px-8 py-3.5 text-sm font-semibold rounded-full text-background hover:brightness-110 transition-all ${
+                    result.totalScore < 40 ? "bg-red-500 animate-pulse" :
+                    result.totalScore < 60 ? "bg-amber-500" :
+                    "bg-brand"
+                  }`}
                 >
-                  {t(country, "무료 상담 신청", "Free Consultation")}
+                  {t(country, result.totalScore < 60 ? "긴급 상담 신청" : "무료 상담 신청", result.totalScore < 60 ? "Urgent Consultation" : "Free Consultation")}
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </a>
                 <Link
                   href={`/seo-compare`}
                   className="inline-flex items-center gap-2 px-8 py-3.5 text-sm font-medium rounded-full border border-border text-foreground hover:bg-accent transition-all"
@@ -1467,13 +1649,15 @@ export default function SeoChecker() {
                       <BarChart3 className="w-3 h-3" />
                       {t(country, "경쟁사 비교", "Compare")}
                     </Link>
-                    <Link
-                      href="/#contact"
+                    <a
+                      href="https://pf.kakao.com/_KxmnZn/chat"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-full bg-brand text-background hover:brightness-110 transition-all"
                     >
                       {t(country, "무료 상담", "Consult")}
                       <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    </a>
                   </div>
                 </div>
               </div>

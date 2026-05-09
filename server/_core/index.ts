@@ -5,6 +5,7 @@ import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
+import { registerSeoMiddleware } from "../seo-middleware";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
@@ -44,6 +45,8 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  // Phase 0: SEO 미들웨어 (sitemap, robots.txt, AI 크롤러 대응)
+  registerSeoMiddleware(app);
   // tRPC API
   app.use(
     "/api/trpc",
