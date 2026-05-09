@@ -85,22 +85,20 @@ export default function InterviewCalendar() {
   const calendarItems = viewMode === "month" ? (monthlyQuery.data || []) : (weeklyQuery.data || []);
 
   // 뮤테이션
-  const createMut = trpc.interviewContent.calendarCreate.useMutation({
-    onSuccess: () => {
+  const createMut = trpc.interviewContent.calendarCreate.useMutation({ onSuccess: () => {
       toast.success("일정이 추가되었습니다");
       setShowAddDialog(false);
       monthlyQuery.refetch();
       weeklyQuery.refetch();
     },
-  });
-  const deleteMut = trpc.interviewContent.calendarDelete.useMutation({
-    onSuccess: () => {
+  onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.interviewContent.calendarDelete.useMutation({ onSuccess: () => {
       toast.success("일정이 삭제되었습니다");
       monthlyQuery.refetch();
       weeklyQuery.refetch();
     },
-  });
-  const suggestMut = trpc.interviewContent.suggestWeeklySchedule.useMutation();
+  onError: (err) => toast.error(err.message) });
+  const suggestMut = trpc.interviewContent.suggestWeeklySchedule.useMutation({ onError: (err) => toast.error(err.message) });
   const applyMut = trpc.interviewContent.applySchedule.useMutation({
     onSuccess: (data) => {
       toast.success(`${data.created}개 일정이 캘린더에 등록되었습니다`);

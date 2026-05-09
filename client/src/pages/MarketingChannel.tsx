@@ -35,12 +35,10 @@ export default function MarketingChannel() {
     },
     onError: (e: any) => toast.error("생성 실패: " + e.message),
   });
-  const updateStatusMut = trpc.marketingChannel.update.useMutation({
-    onSuccess: () => { contents.refetch(); toast.success("상태 업데이트 완료"); },
-  });
-  const deleteMut = trpc.marketingChannel.delete.useMutation({
-    onSuccess: () => { contents.refetch(); toast.success("삭제 완료"); },
-  });
+  const updateStatusMut = trpc.marketingChannel.update.useMutation({ onSuccess: () => { contents.refetch(); toast.success("상태 업데이트 완료"); },
+  onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.marketingChannel.delete.useMutation({ onSuccess: () => { contents.refetch(); toast.success("삭제 완료"); },
+  onError: (err) => toast.error(err.message) });
 
   const toggleChannel = (ch: string) => {
     setSelectedChannels(prev => prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]);

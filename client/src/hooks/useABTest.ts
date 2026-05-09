@@ -34,7 +34,7 @@ export function useABTest(targetElement: string) {
     { staleTime: Infinity, refetchOnWindowFocus: false }
   );
 
-  const trackMutation = trpc.abtest.trackEvent.useMutation();
+  const trackMutation = trpc.abtest.trackEvent.useMutation({ onError: () => {} });
 
   // impression 자동 기록
   useEffect(() => {

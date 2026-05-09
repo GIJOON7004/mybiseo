@@ -27,12 +27,10 @@ export default function KakaoBooking() {
     onSuccess: () => { utils.kakaoBooking.getSlots.invalidate(); toast.success("시술 항목이 추가되었습니다."); setShowSlotDialog(false); },
     onError: (e) => toast.error(e.message),
   });
-  const updateSlot = trpc.kakaoBooking.updateSlot.useMutation({
-    onSuccess: () => { utils.kakaoBooking.getSlots.invalidate(); toast.success("수정되었습니다."); },
-  });
-  const deleteSlot = trpc.kakaoBooking.deleteSlot.useMutation({
-    onSuccess: () => { utils.kakaoBooking.getSlots.invalidate(); toast.success("삭제되었습니다."); },
-  });
+  const updateSlot = trpc.kakaoBooking.updateSlot.useMutation({ onSuccess: () => { utils.kakaoBooking.getSlots.invalidate(); toast.success("수정되었습니다."); },
+  onError: (err) => toast.error(err.message) });
+  const deleteSlot = trpc.kakaoBooking.deleteSlot.useMutation({ onSuccess: () => { utils.kakaoBooking.getSlots.invalidate(); toast.success("삭제되었습니다."); },
+  onError: (err) => toast.error(err.message) });
 
   const [channelId, setChannelId] = useState("");
   const [channelName, setChannelName] = useState("");

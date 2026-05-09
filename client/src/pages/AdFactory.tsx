@@ -39,18 +39,16 @@ export default function AdFactory() {
 
   // 브랜드 프로필 목록
   const profilesQuery = trpc.adFactory.listProfiles.useQuery();
-  const extractMutation = trpc.adFactory.extractBrandDna.useMutation({
-    onSuccess: () => {
-      toast.success("브랜드 DNA 추출 완료!", { description: "병원 웹사이트에서 브랜드 정보를 분석했습니다." });
+  const extractMutation = trpc.adFactory.extractBrandDna.useMutation({ onSuccess: () => {
+      toast.success("브랜드 DNA 추출 완료!", { description: "병원 웹사이트에서 브랜드 정보를 분석했습니다."});
       profilesQuery.refetch();
       setUrlInput("");
       setActiveTab("profiles");
     },
     onError: (err) => toast.error("추출 실패", { description: err.message }),
   });
-  const deleteProfileMutation = trpc.adFactory.deleteProfile.useMutation({
-    onSuccess: () => { profilesQuery.refetch(); toast.success("프로필 삭제됨"); },
-  });
+  const deleteProfileMutation = trpc.adFactory.deleteProfile.useMutation({ onSuccess: () => { profilesQuery.refetch(); toast.success("프로필 삭제됨"); },
+  onError: (err) => toast.error(err.message) });
 
   // 광고 생성
   const [selectedProfileId, setSelectedProfileId] = useState<number | null>(null);
@@ -61,9 +59,8 @@ export default function AdFactory() {
   const [adCount, setAdCount] = useState(4);
   const [generateImages, setGenerateImages] = useState(true);
 
-  const generateMutation = trpc.adFactory.generateAds.useMutation({
-    onSuccess: (data) => {
-      toast.success(`${data.count}개 광고 생성 완료!`, { description: "광고 갤러리에서 확인하세요." });
+  const generateMutation = trpc.adFactory.generateAds.useMutation({ onSuccess: (data) => {
+      toast.success(`${data.count}개 광고 생성 완료!`, { description: "광고 갤러리에서 확인하세요."});
       creativesQuery.refetch();
       statsQuery.refetch();
       setActiveTab("gallery");
@@ -82,17 +79,14 @@ export default function AdFactory() {
           favoriteOnly: favoriteOnly || undefined,
         }
   );
-  const updateCreativeMutation = trpc.adFactory.updateCreative.useMutation({
-    onSuccess: () => creativesQuery.refetch(),
-  });
-  const deleteCreativeMutation = trpc.adFactory.deleteCreative.useMutation({
-    onSuccess: () => { creativesQuery.refetch(); statsQuery.refetch(); toast.success("광고 삭제됨"); },
-  });
-  const complianceMutation = trpc.adFactory.checkCompliance.useMutation({
-    onSuccess: (data) => {
+  const updateCreativeMutation = trpc.adFactory.updateCreative.useMutation({ onSuccess: () => creativesQuery.refetch(),
+  onError: (err) => toast.error(err.message) });
+  const deleteCreativeMutation = trpc.adFactory.deleteCreative.useMutation({ onSuccess: () => { creativesQuery.refetch(); statsQuery.refetch(); toast.success("광고 삭제됨"); },
+  onError: (err) => toast.error(err.message) });
+  const complianceMutation = trpc.adFactory.checkCompliance.useMutation({ onSuccess: (data) => {
       creativesQuery.refetch();
       if (data.status === "passed") {
-        toast.success("의료광고법 검수 통과", { description: data.summary });
+        toast.success("의료광고법 검수 통과", { description: data.summary});
       } else if (data.status === "failed") {
         toast.error("검수 결과 확인 필요", { description: data.summary });
       } else {

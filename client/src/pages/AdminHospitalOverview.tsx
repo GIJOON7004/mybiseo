@@ -90,9 +90,8 @@ export default function AdminHospitalOverview() {
   const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [isMonthlyDiag, setIsMonthlyDiag] = useState(false);
   const [isSendingBriefing, setIsSendingBriefing] = useState(false);
-  const sendBriefingNow = trpc.blogScheduler.sendBriefingNow.useMutation({
-    onSuccess: () => utils.blogScheduler.status.invalidate(),
-  });
+  const sendBriefingNow = trpc.blogScheduler.sendBriefingNow.useMutation({ onSuccess: () => utils.blogScheduler.status.invalidate(),
+  onError: (err) => toast.error(err.message) });
 
   const runDiagnosisMutation = trpc.adminDashboard.runAutoDiagnosis.useMutation({
     onMutate: () => setIsDiagnosing(true),

@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * AI 가시성 진단 도구 — URL 입력 시 AI 가시성 문제점을 상세 분석하여 보여주는 공개 페이지
  * Pomelli / SEOptimer 스타일의 전문적인 리포트 UI
@@ -866,7 +867,7 @@ function AutoOptimizationPlan({ url, specialty, result, country = "kr" }: { url:
   const cc = country as CountryCode;
   const [showPlan, setShowPlan] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
-  const optimizeMutation = trpc.autoOptimizer.generatePlan.useMutation();
+  const optimizeMutation = trpc.autoOptimizer.generatePlan.useMutation({ onError: (err) => toast.error(err.message) });
 
   const failedItems = result.categories.flatMap(c => c.items).filter(i => i.status === "fail");
   const warningItems = result.categories.flatMap(c => c.items).filter(i => i.status === "warning");
@@ -1035,9 +1036,8 @@ export default function SeoChecker() {
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [marketingConsent, setMarketingConsent] = useState(false);
 
-  const saveDiagnosisMutation = trpc.diagnosis.save.useMutation();
-  const analyzeMutation = trpc.seoAnalyzer.analyze.useMutation({
-    onSuccess: (data) => {
+  const saveDiagnosisMutation = trpc.diagnosis.save.useMutation({ onError: (err) => toast.error(err.message) });
+  const analyzeMutation = trpc.seoAnalyzer.analyze.useMutation({ onSuccess: (data) => {
       const r = data as SeoResult;
       setResult(r);
       // 진단 이력 저장

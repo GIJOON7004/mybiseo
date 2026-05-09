@@ -112,8 +112,8 @@ export default function ChatBot() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const chatMutation = trpc.chat.send.useMutation();
-  const inquiryMutation = trpc.inquiry.submit.useMutation();
+  const chatMutation = trpc.chat.send.useMutation({ onError: (err) => toast.error(err.message) });
+  const inquiryMutation = trpc.inquiry.submit.useMutation({ onError: (err) => toast.error(err.message) });
   const { logEvent } = useEventLogger();
 
   // 채팅 시작 이벤트 로깅

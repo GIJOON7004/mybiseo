@@ -1,3 +1,5 @@
+import { createLogger } from "./lib/logger";
+const logger = createLogger("notifier");
 import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import nodemailer from "nodemailer";
@@ -25,7 +27,7 @@ let _transporter: nodemailer.Transporter | null = null;
 
 function getNaverTransporter(): nodemailer.Transporter | null {
   if (!ENV.naverSmtpUser || !ENV.naverSmtpPass) {
-    console.warn("[Notifier:email] NAVER_SMTP_USER or NAVER_SMTP_PASS not configured");
+    logger.warn("[email] NAVER_SMTP_USER or NAVER_SMTP_PASS not configured");
     return null;
   }
   if (!_transporter) {
@@ -55,24 +57,33 @@ export async function sendEmailViaNaver(options: {
   subject: string;
   html: string;
   text?: string;
+  maxRetries?: number;
 }): Promise<boolean> {
   const transporter = getNaverTransporter();
   if (!transporter) return false;
 
-  try {
-    const info = await transporter.sendMail({
-      from: `"MY비서 알림" <${ENV.naverSmtpUser}>`,
-      to: options.to,
-      subject: options.subject,
-      html: options.html,
-      text: options.text,
-    });
-    console.log(`[Notifier:email] Sent successfully: ${info.messageId}`);
-    return true;
-  } catch (error) {
-    console.error("[Notifier:email] Failed to send:", error);
-    return false;
+  const maxRetries = options.maxRetries ?? 3;
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const info = await transporter.sendMail({
+        from: `"MY비서 알림" <${ENV.naverSmtpUser}>`,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        text: options.text,
+      });
+      logger.info(`[email] Sent successfully (attempt ${attempt}): ${info.messageId}`);
+      return true;
+    } catch (error) {
+      logger.error(`[email] Attempt ${attempt}/${maxRetries} failed`, { error: String(error) });
+      if (attempt < maxRetries) {
+        const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000); // 1s, 2s, 4s...
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
   }
+  logger.error(`[email] All ${maxRetries} attempts exhausted for: ${options.to}`);
+  return false;
 }
 
 // ─── SOLAPI SMS 클라이언트 (싱글턴) ───
@@ -80,7 +91,7 @@ let _solapiClient: SolapiMessageService | null = null;
 
 function getSolapiClient(): SolapiMessageService | null {
   if (!ENV.solapiApiKey || !ENV.solapiApiSecret) {
-    console.warn("[Notifier:sms] SOLAPI_API_KEY or SOLAPI_API_SECRET not configured");
+    logger.warn("[sms] SOLAPI_API_KEY or SOLAPI_API_SECRET not configured");
     return null;
   }
   if (!_solapiClient) {
@@ -107,7 +118,7 @@ export async function sendSmsViaSolapi(options: {
       from: options.from,
       text: options.text,
     });
-    console.log(`[Notifier:sms] Sent successfully:`, result);
+    logger.info(`[sms] Sent successfully:`, result);
     return true;
   } catch (error) {
     console.error("[Notifier:sms] Failed to send:", error);
@@ -154,7 +165,7 @@ const emailChannel: NotificationChannel = {
   async send(payload) {
     const toEmail = ENV.notifyEmail || ENV.naverSmtpUser;
     if (!toEmail) {
-      console.warn("[Notifier:email] No recipient email configured");
+      logger.warn("[email] No recipient email configured");
       return false;
     }
 
@@ -233,7 +244,7 @@ const smsChannel: NotificationChannel = {
   async send(payload) {
     const toPhone = ENV.notifyPhone;
     if (!toPhone) {
-      console.warn("[Notifier:sms] NOTIFY_PHONE not configured");
+      logger.warn("[sms] NOTIFY_PHONE not configured");
       return false;
     }
 

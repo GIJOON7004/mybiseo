@@ -13,10 +13,9 @@ import { Video, Sparkles, Copy, Loader2, Film, Clapperboard, Eye, Trash2, Refres
 export default function VideoPromptGenerator() {
   const { data: prompts = [] } = trpc.videoMarketing.list.useQuery();
   const utils = trpc.useUtils();
-  const generateMut = trpc.videoMarketing.generate.useMutation({
-    onSuccess: () => { toast.success("AI 영상 프롬프트 생성 완료"); utils.videoMarketing.list.invalidate(); setShowGen(false); },
-  });
-  const deleteMut = trpc.videoMarketing.delete.useMutation({ onSuccess: () => utils.videoMarketing.list.invalidate() });
+  const generateMut = trpc.videoMarketing.generate.useMutation({ onSuccess: () => { toast.success("AI 영상 프롬프트 생성 완료"); utils.videoMarketing.list.invalidate(); setShowGen(false); },
+  onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.videoMarketing.delete.useMutation({ onSuccess: () => utils.videoMarketing.list.invalidate()});
   const [showGen, setShowGen] = useState(false);
   const [selected, setSelected] = useState<any>(null);
   const [form, setForm] = useState({

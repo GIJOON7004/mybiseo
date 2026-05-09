@@ -1,3 +1,5 @@
+import { createLogger } from "./lib/logger";
+const logger = createLogger("pagespeed");
 import { ENV } from "./_core/env";
 /**
  * Google PageSpeed Insights API Client
@@ -131,14 +133,14 @@ export async function fetchPageSpeedMetrics(
   // 1) 캐시 확인
   const cached = _psCache.get(cacheKey);
   if (cached && Date.now() - cached.ts < PS_CACHE_TTL) {
-    console.log(`[PageSpeed] Cache hit for ${url} (${strategy})`);
+    logger.info(`[PageSpeed] Cache hit for ${url} (${strategy})`);
     return cached.data;
   }
 
   // 2) in-flight 중복 방지
   const inflight = _psInflight.get(cacheKey);
   if (inflight) {
-    console.log(`[PageSpeed] Deduplicating in-flight request for ${url}`);
+    logger.info(`[PageSpeed] Deduplicating in-flight request for ${url}`);
     return inflight;
   }
 
@@ -158,7 +160,7 @@ export async function fetchPageSpeedMetrics(
     // 중앙값 선택: performanceScore 기준으로 정렬 후 중간 값
     results.sort((a, b) => a.performanceScore - b.performanceScore);
     const median = results[Math.floor(results.length / 2)];
-    console.log(`[PageSpeed] ${numRuns}회 측정 중앙값 선택: performance=${median.performanceScore}`);
+    logger.info(`[PageSpeed] ${numRuns}회 측정 중앙값 선택: performance=${median.performanceScore}`);
     return median;
   })();
 
@@ -177,7 +179,7 @@ async function _fetchPageSpeedMetricsInternal(
 ): Promise<PageSpeedMetrics | null> {
   const apiKey = ENV.GOOGLE_PAGESPEED_API_KEY;
   if (!apiKey) {
-    console.warn("[PageSpeed] GOOGLE_PAGESPEED_API_KEY not set, skipping PageSpeed analysis");
+    logger.warn("[PageSpeed] GOOGLE_PAGESPEED_API_KEY not set, skipping PageSpeed analysis");
     return null;
   }
 
@@ -200,14 +202,14 @@ async function _fetchPageSpeedMetricsInternal(
 
     if (!response.ok) {
       const errorBody = await response.text().catch(() => "");
-      console.warn(`[PageSpeed] API returned ${response.status}: ${errorBody.slice(0, 200)}`);
+      logger.warn(`[PageSpeed] API returned ${response.status}: ${errorBody.slice(0, 200)}`);
       return null;
     }
 
     const data = await response.json();
     const lighthouse = data.lighthouseResult;
     if (!lighthouse) {
-      console.warn("[PageSpeed] No lighthouseResult in response");
+      logger.warn("[PageSpeed] No lighthouseResult in response");
       return null;
     }
 
@@ -240,7 +242,7 @@ async function _fetchPageSpeedMetricsInternal(
     _psCache.set(cacheKey, { data: result, ts: Date.now() });
     return result;
   } catch (error: any) {
-    console.warn(`[PageSpeed] Failed to fetch metrics: ${error.message}`);
+    logger.warn(`[PageSpeed] Failed to fetch metrics: ${error.message}`);
     return null;
   }
 }

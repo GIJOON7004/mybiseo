@@ -25,15 +25,12 @@ export default function TreatmentPageBuilder() {
     onSuccess: () => { pages.refetch(); setShowForm(false); resetForm(); toast.success("시술 상세페이지가 생성되었습니다"); },
     onError: (e) => toast.error("생성 실패: " + e.message),
   });
-  const updateMut = trpc.treatmentPage.update.useMutation({
-    onSuccess: () => { pages.refetch(); setEditingId(null); toast.success("수정 완료"); },
-  });
-  const publishMut = trpc.treatmentPage.publish.useMutation({
-    onSuccess: () => { pages.refetch(); toast.success("페이지가 퍼블리시되었습니다"); },
-  });
-  const deleteMut = trpc.treatmentPage.delete.useMutation({
-    onSuccess: () => { pages.refetch(); toast.success("삭제 완료"); },
-  });
+  const updateMut = trpc.treatmentPage.update.useMutation({ onSuccess: () => { pages.refetch(); setEditingId(null); toast.success("수정 완료"); },
+  onError: (err) => toast.error(err.message) });
+  const publishMut = trpc.treatmentPage.publish.useMutation({ onSuccess: () => { pages.refetch(); toast.success("페이지가 퍼블리시되었습니다"); },
+  onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.treatmentPage.delete.useMutation({ onSuccess: () => { pages.refetch(); toast.success("삭제 완료"); },
+  onError: (err) => toast.error(err.message) });
 
   const resetForm = () => setForm({ treatmentName: "", treatmentCategory: "", hospitalName: "", hospitalInfo: "", doctorName: "", doctorTitle: "", targetAudience: "", keyBenefits: "", language: "ko" });
 

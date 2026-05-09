@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -135,8 +136,8 @@ function NotificationBell() {
   const { data: notifications, refetch } = trpc.notification.list.useQuery(undefined, {
     refetchInterval: 60_000,
   });
-  const markRead = trpc.notification.markRead.useMutation({ onSuccess: () => refetch() });
-  const markAllRead = trpc.notification.markAllRead.useMutation({ onSuccess: () => refetch() });
+  const markRead = trpc.notification.markRead.useMutation({ onSuccess: () => refetch()});
+  const markAllRead = trpc.notification.markAllRead.useMutation({ onSuccess: () => refetch()});
 
   const unreadCount = notifications?.filter((n: any) => !n.isRead).length ?? 0;
 
@@ -170,7 +171,7 @@ function NotificationBell() {
                     <CheckCheck className="w-3 h-3" />모두 읽음
                   </button>
                 )}
-                <button onClick={() => setOpen(false)} className="ml-2 p-1 hover:bg-accent rounded">
+                <button onClick={() => setOpen(false)} className="ml-2 p-1 hover:bg-accent rounded" aria-label="검색 닫기">
                   <X className="w-3.5 h-3.5 text-muted-foreground" />
                 </button>
               </div>

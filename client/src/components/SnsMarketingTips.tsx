@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * SNS 마케팅 팁 섹션 - 진단서 결과에 경쟁사 키워드 기반 SNS 마케팅 팁 추가
  * AI(LLM) 기반 고도화 + 로컬 폴백
@@ -65,7 +66,7 @@ export default function SnsMarketingTipsSection({ result, specialty, country = "
   const [loading, setLoading] = useState(false);
   const [isAiGenerated, setIsAiGenerated] = useState(false);
 
-  const aiSnsTipsMutation = trpc.aiSnsTips.generate.useMutation();
+  const aiSnsTipsMutation = trpc.aiSnsTips.generate.useMutation({ onError: (err) => toast.error(err.message) });
 
   const failedItems = result.categories.flatMap(c => c.items).filter(i => i.status === "fail" || i.status === "warning");
   const siteName = result.url.replace(/^https?:\/\//, "").replace(/\/.*$/, "");

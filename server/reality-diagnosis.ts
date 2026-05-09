@@ -1,3 +1,5 @@
+import { createLogger } from "./lib/logger";
+const logger = createLogger("reality-diagnosis");
 /**
  * 현실 진단 요약 (Reality Diagnosis Summary) — v2 최적화
  * 
@@ -299,7 +301,7 @@ async function fetchTrafficData(domain: string): Promise<TrafficInsight | null> 
 
     return { monthlyVisits, globalRank, bounceRate, organicSearchShare, directShare, topCountries: [] };
   } catch (err) {
-    console.error("[RealityDiagnosis] SimilarWeb 데이터 조회 실패:", err);
+    logger.error("[RealityDiagnosis] SimilarWeb 데이터 조회 실패", { error: String(err) });
     return null;
   }
 }
@@ -1053,10 +1055,10 @@ export async function generateRealityDiagnosis(
   const strategy = strategyResult.status === "fulfilled" ? strategyResult.value : FALLBACK_STRATEGY;
 
   // 실패한 스트림 로깅
-  if (coreResult.status === "rejected") console.error("[RealityDiagnosis] Core diagnosis failed:", coreResult.reason);
-  if (geoAiResult.status === "rejected") console.error("[RealityDiagnosis] GEO/AI diagnosis failed:", geoAiResult.reason);
-  if (channelResult.status === "rejected") console.error("[RealityDiagnosis] Channel diagnosis failed:", channelResult.reason);
-  if (strategyResult.status === "rejected") console.error("[RealityDiagnosis] Strategy guide failed:", strategyResult.reason);
+  if (coreResult.status === "rejected") logger.error("[RealityDiagnosis] Core diagnosis failed:", coreResult.reason);
+  if (geoAiResult.status === "rejected") logger.error("[RealityDiagnosis] GEO/AI diagnosis failed:", geoAiResult.reason);
+  if (channelResult.status === "rejected") logger.error("[RealityDiagnosis] Channel diagnosis failed:", channelResult.reason);
+  if (strategyResult.status === "rejected") logger.error("[RealityDiagnosis] Strategy guide failed:", strategyResult.reason);
 
   // #33/#34 AI 가시성 점수 코드 기반 계산 (진단 플로우 통합)
   const aiVisibility = estimateAIVisibility({
@@ -1082,14 +1084,14 @@ export async function generateRealityDiagnosis(
     if (naverResult.success && naverResult.keywords.length > 0) {
       naverKeywordData = naverResult.keywords[0];
       organicShareAnalysis = estimateOrganicShare(naverKeywordData);
-      console.log(`[RealityDiagnosis] 네이버 API: "${naverKeywordData.keyword}" 월간검색량=${naverKeywordData.totalMonthlySearches} 경쟁도=${naverKeywordData.competitionLevel}`);
+      logger.info(`[RealityDiagnosis] 네이버 API: "${naverKeywordData.keyword}" 월간검색량=${naverKeywordData.totalMonthlySearches} 경쟁도=${naverKeywordData.competitionLevel}`);
     }
   } catch (e) {
     console.warn("[RealityDiagnosis] 네이버 API 호출 실패 (fallback 사용):", (e as Error).message);
   }
 
   const elapsed = Date.now() - startTime;
-  console.log(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status} | AI가시성:${aiVisibility.score} 마케팅가치:${marketingValue.seoInvestmentScore}`);
+  logger.info(`[RealityDiagnosis] Completed in ${elapsed}ms (${Math.round(elapsed / 1000)}s) — Core:${coreResult.status} GeoAI:${geoAiResult.status} Channel:${channelResult.status} Strategy:${strategyResult.status} | AI가시성:${aiVisibility.score} 마케팅가치:${marketingValue.seoInvestmentScore}`);
   return {
     hospitalName: siteName || domain,
     specialty: revenueSpecialty || "일반",

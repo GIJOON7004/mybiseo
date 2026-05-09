@@ -45,13 +45,11 @@ export default function EmailContacts() {
   const { data: sendStats } = trpc.emailContact.sendStats.useQuery();
   const { data: sendLogs } = trpc.emailContact.sendLogs.useQuery({ limit: 30 });
 
-  const addMutation = trpc.emailContact.addManual.useMutation({
-    onSuccess: () => { toast.success("연락처가 추가되었습니다."); setAddOpen(false); setNewContact({ email: "", name: "", hospitalName: "", specialty: "", phone: "", note: "" }); utils.emailContact.list.invalidate(); utils.emailContact.stats.invalidate(); },
+  const addMutation = trpc.emailContact.addManual.useMutation({ onSuccess: () => { toast.success("연락처가 추가되었습니다."); setAddOpen(false); setNewContact({ email: "", name: "", hospitalName: "", specialty: "", phone: "", note: ""}); utils.emailContact.list.invalidate(); utils.emailContact.stats.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
-  const deleteMutation = trpc.emailContact.delete.useMutation({
-    onSuccess: () => { toast.success("삭제되었습니다."); utils.emailContact.list.invalidate(); utils.emailContact.stats.invalidate(); },
-  });
+  const deleteMutation = trpc.emailContact.delete.useMutation({ onSuccess: () => { toast.success("삭제되었습니다."); utils.emailContact.list.invalidate(); utils.emailContact.stats.invalidate(); },
+  onError: (err) => toast.error(err.message) });
 
   return (
     <DashboardLayout>

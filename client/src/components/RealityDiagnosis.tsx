@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * 현실 진단 요약 (Reality Diagnosis Summary) — McKinsey-grade
  * AI 가시성 진단 결과 최상단에 표시
@@ -148,7 +149,7 @@ export default function RealityDiagnosisSection({ url, specialty, seoScore, seoG
   const [showDetails, setShowDetails] = useState(false);
   const [showKeywordDetails, setShowKeywordDetails] = useState(false);
   const triggeredRef = useRef(false);
-  const realityMutation = trpc.seoAnalyzer.realityDiagnosis.useMutation();
+  const realityMutation = trpc.seoAnalyzer.realityDiagnosis.useMutation({ onError: (err) => toast.error(err.message) });
 
   useEffect(() => {
     if (!triggeredRef.current) {

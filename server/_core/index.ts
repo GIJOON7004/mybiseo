@@ -1,11 +1,13 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import net from "net";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { registerStorageProxy } from "./storageProxy";
 import { registerSeoMiddleware } from "../seo-middleware";
+import { registerScheduledRoutes } from "../routes/scheduled";
 import { registerRateLimiting } from "./rate-limit";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -42,9 +44,25 @@ async function startServer() {
     next();
   });
   const server = createServer(app);
-  // Configure body parser with larger size limit for file uploads
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ limit: "50mb", extended: true }));
+  // CORS — 프로덕션 도메인 + 개발 환경 허용
+  const allowedOrigins = [
+    "https://mybiseo.com",
+    "https://www.mybiseo.com",
+    "https://mybiseo-ynrsyg5s.manus.space",
+  ];
+  app.use(cors({
+    origin: process.env.NODE_ENV === "production"
+      ? (origin, cb) => {
+          if (!origin || allowedOrigins.includes(origin)) cb(null, true);
+          else cb(new Error("CORS not allowed"));
+        }
+      : true,
+    credentials: true,
+  }));
+
+  // Body parser (1MB 제한 — DoS 방지)
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ limit: "1mb", extended: true }));
   // Rate Limiting (보안 + LLM 비용 보호)
   registerRateLimiting(app);
 
@@ -52,6 +70,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Phase 0: SEO 미들웨어 (sitemap, robots.txt, AI 크롤러 대응)
   registerSeoMiddleware(app);
+  // Heartbeat cron 콜백 라우트
+  registerScheduledRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",

@@ -75,7 +75,7 @@ describe("Notifier - Email Channel", () => {
   });
 
   it("sendEmailViaNaver returns false on error", async () => {
-    mockSendMail.mockRejectedValueOnce(new Error("SMTP error"));
+    mockSendMail.mockRejectedValue(new Error("SMTP error"));
     const { sendEmailViaNaver } = await import("./notifier");
 
     const result = await sendEmailViaNaver({

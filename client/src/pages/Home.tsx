@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense, useRef, useState } from "react";
+import { useSEO } from "@/hooks/useSEO";
 import { useEventLogger } from "@/hooks/useEventLogger";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
@@ -90,10 +91,11 @@ function usePrefetchSections() {
 
 export default function Home() {
   useEventLogger();
-
-  useEffect(() => {
-    document.title = "마이비서(MY비서) | AI 의료 마케팅 플랫폼 — AI 검색 최적화 · 의료관광 · 환자 유치";
-  }, []);
+  useSEO({
+    title: "마이비서(MY비서) | AI 의료 마케팅 플랫폼 — AI 검색 최적화 · 의료관광 · 환자 유치",
+    description: "병원 전용 AI 마케팅 에이전시. ChatGPT·Gemini·Claude 등 5대 AI 엔진 검색 최적화, 다국어 의료관광 환자 유치, 24시간 AI 환자 응대.",
+    ogType: "website",
+  });
 
   usePrefetchSections();
 

@@ -102,12 +102,11 @@ function SchedulerContent() {
     onError: (err) => toast.error("생성 실패: " + err.message),
   });
 
-  const deleteMutation = trpc.seoKeyword.delete.useMutation({
-    onSuccess: () => {
+  const deleteMutation = trpc.seoKeyword.delete.useMutation({ onSuccess: () => {
       toast.success("삭제 완료!");
       utils.seoKeyword.list.invalidate();
     },
-  });
+  onError: (err) => toast.error(err.message) });
 
   const publishScheduledMutation = trpc.blog.publishScheduled.useMutation({
     onSuccess: (data) => {
@@ -115,6 +114,7 @@ function SchedulerContent() {
       utils.blog.scheduledList.invalidate();
       utils.blog.adminList.invalidate();
     },
+    onError: (err) => toast.error("발행 실패: " + err.message),
   });
 
   const runNowMutation = trpc.blogScheduler.runNow.useMutation({

@@ -83,13 +83,12 @@ export default function AdminSeasonalCalendar() {
     onError: () => toast.error("키워드 추가에 실패했습니다"),
   });
   
-  const deleteMutation = trpc.seasonalCalendar.delete.useMutation({
-    onSuccess: () => {
+  const deleteMutation = trpc.seasonalCalendar.delete.useMutation({ onSuccess: () => {
       toast.success("키워드가 삭제되었습니다");
       utils.seasonalCalendar.getAll.invalidate();
       utils.seasonalCalendar.getRecommendations.invalidate();
     },
-  });
+  onError: (err) => toast.error(err.message) });
   
   function resetForm() {
     setNewKeyword(""); setNewSpecialty(""); setNewCategory("시술");

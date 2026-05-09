@@ -15,9 +15,8 @@ import RequireHospital from "@/components/RequireHospital";
 // ── 1단계: 스타일 가이드 ──
 function StyleGuideTab() {
   const { data: guide, isLoading } = trpc.contentFactory.getStyleGuide.useQuery();
-  const saveMut = trpc.contentFactory.saveStyleGuide.useMutation({
-    onSuccess: () => { toast.success("스타일 가이드 저장 완료"); utils.contentFactory.getStyleGuide.invalidate(); },
-  });
+  const saveMut = trpc.contentFactory.saveStyleGuide.useMutation({ onSuccess: () => { toast.success("스타일 가이드 저장 완료"); utils.contentFactory.getStyleGuide.invalidate(); },
+  onError: (err) => toast.error(err.message) });
   const utils = trpc.useUtils();
   const [form, setForm] = useState<Record<string, string>>({});
 
@@ -65,9 +64,9 @@ function StyleGuideTab() {
 function IdeasTab() {
   const { data: ideas = [], isLoading } = trpc.contentFactory.listIdeas.useQuery();
   const utils = trpc.useUtils();
-  const addMut = trpc.contentFactory.addIdea.useMutation({ onSuccess: () => { toast.success("아이디어 추가 완료"); utils.contentFactory.listIdeas.invalidate(); setShowAdd(false); } });
-  const deleteMut = trpc.contentFactory.deleteIdea.useMutation({ onSuccess: () => { utils.contentFactory.listIdeas.invalidate(); } });
-  const analyzeMut = trpc.contentFactory.analyzeIdea.useMutation();
+  const addMut = trpc.contentFactory.addIdea.useMutation({ onSuccess: () => { toast.success("아이디어 추가 완료"); utils.contentFactory.listIdeas.invalidate(); setShowAdd(false); }, onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.contentFactory.deleteIdea.useMutation({ onSuccess: () => { utils.contentFactory.listIdeas.invalidate(); }, onError: (err) => toast.error(err.message) });
+  const analyzeMut = trpc.contentFactory.analyzeIdea.useMutation({ onError: (err) => toast.error(err.message) });
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: "", sourceUrl: "", platform: "", category: "", notes: "" });
   const [analysis, setAnalysis] = useState<any>(null);
@@ -164,9 +163,9 @@ function IdeasTab() {
 function HooksTab() {
   const { data: hooks = [] } = trpc.contentFactory.listHooks.useQuery();
   const utils = trpc.useUtils();
-  const addMut = trpc.contentFactory.addHook.useMutation({ onSuccess: () => { toast.success("훅 추가 완료"); utils.contentFactory.listHooks.invalidate(); } });
-  const deleteMut = trpc.contentFactory.deleteHook.useMutation({ onSuccess: () => { utils.contentFactory.listHooks.invalidate(); } });
-  const generateMut = trpc.contentFactory.generateHooks.useMutation();
+  const addMut = trpc.contentFactory.addHook.useMutation({ onSuccess: () => { toast.success("훅 추가 완료"); utils.contentFactory.listHooks.invalidate(); }, onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.contentFactory.deleteHook.useMutation({ onSuccess: () => { utils.contentFactory.listHooks.invalidate(); }, onError: (err) => toast.error(err.message) });
+  const generateMut = trpc.contentFactory.generateHooks.useMutation({ onError: (err) => toast.error(err.message) });
   const [newHook, setNewHook] = useState("");
   const [genTopic, setGenTopic] = useState("");
   const [genResult, setGenResult] = useState<any>(null);
@@ -238,9 +237,8 @@ function HooksTab() {
 function ScriptsTab() {
   const { data: scripts = [] } = trpc.contentFactory.listScripts.useQuery();
   const utils = trpc.useUtils();
-  const generateMut = trpc.contentFactory.generateScript.useMutation({
-    onSuccess: () => { toast.success("대본 생성 완료"); utils.contentFactory.listScripts.invalidate(); setShowGen(false); },
-  });
+  const generateMut = trpc.contentFactory.generateScript.useMutation({ onSuccess: () => { toast.success("대본 생성 완료"); utils.contentFactory.listScripts.invalidate(); setShowGen(false); },
+  onError: (err) => toast.error(err.message) });
   const [showGen, setShowGen] = useState(false);
   const [genForm, setGenForm] = useState({ topic: "", hookText: "", platform: "instagram", scriptType: "정보 전달", duration: "60초" });
   const [selectedScript, setSelectedScript] = useState<any>(null);
@@ -354,9 +352,9 @@ function ScriptsTab() {
 function CalendarTab() {
   const { data: items = [] } = trpc.contentFactory.listCalendar.useQuery();
   const utils = trpc.useUtils();
-  const addMut = trpc.contentFactory.addCalendarItem.useMutation({ onSuccess: () => { toast.success("일정 추가 완료"); utils.contentFactory.listCalendar.invalidate(); setShowAdd(false); } });
-  const updateMut = trpc.contentFactory.updateCalendarItem.useMutation({ onSuccess: () => { utils.contentFactory.listCalendar.invalidate(); } });
-  const deleteMut = trpc.contentFactory.deleteCalendarItem.useMutation({ onSuccess: () => { utils.contentFactory.listCalendar.invalidate(); } });
+  const addMut = trpc.contentFactory.addCalendarItem.useMutation({ onSuccess: () => { toast.success("일정 추가 완료"); utils.contentFactory.listCalendar.invalidate(); setShowAdd(false); }, onError: (err) => toast.error(err.message) });
+  const updateMut = trpc.contentFactory.updateCalendarItem.useMutation({ onSuccess: () => { utils.contentFactory.listCalendar.invalidate(); }, onError: (err) => toast.error(err.message) });
+  const deleteMut = trpc.contentFactory.deleteCalendarItem.useMutation({ onSuccess: () => { utils.contentFactory.listCalendar.invalidate(); }, onError: (err) => toast.error(err.message) });
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState({ title: "", platform: "instagram", scheduledDate: "", scheduledTime: "", notes: "" });
 

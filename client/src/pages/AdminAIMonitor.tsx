@@ -313,9 +313,8 @@ function CompetitorSection({ keywordId }: { keywordId: number }) {
     onSuccess: () => { toast.success("경쟁사가 추가되었습니다"); setNewName(""); setNewUrl(""); utils.aiMonitor.getCompetitors.invalidate(); },
     onError: () => toast.error("경쟁사 추가에 실패했습니다"),
   });
-  const deleteMutation = trpc.aiMonitor.deleteCompetitor.useMutation({
-    onSuccess: () => { toast.success("경쟁사가 삭제되었습니다"); utils.aiMonitor.getCompetitors.invalidate(); },
-  });
+  const deleteMutation = trpc.aiMonitor.deleteCompetitor.useMutation({ onSuccess: () => { toast.success("경쟁사가 삭제되었습니다"); utils.aiMonitor.getCompetitors.invalidate(); },
+  onError: (err) => toast.error(err.message) });
 
   return (
     <div className="space-y-2.5">
@@ -407,12 +406,10 @@ export default function AdminAIMonitor() {
     onSuccess: () => { toast.success("키워드가 추가되었습니다"); setNewKeyword(""); setNewHospital(""); setNewSpecialty(""); utils.aiMonitor.getKeywords.invalidate(); utils.aiMonitor.getStats.invalidate(); },
     onError: () => toast.error("키워드 추가에 실패했습니다"),
   });
-  const toggleMutation = trpc.aiMonitor.toggleKeyword.useMutation({
-    onSuccess: () => { utils.aiMonitor.getKeywords.invalidate(); utils.aiMonitor.getStats.invalidate(); },
-  });
-  const deleteMutation = trpc.aiMonitor.deleteKeyword.useMutation({
-    onSuccess: () => { toast.success("키워드가 삭제되었습니다"); utils.aiMonitor.getKeywords.invalidate(); utils.aiMonitor.getStats.invalidate(); utils.aiMonitor.getResults.invalidate(); },
-  });
+  const toggleMutation = trpc.aiMonitor.toggleKeyword.useMutation({ onSuccess: () => { utils.aiMonitor.getKeywords.invalidate(); utils.aiMonitor.getStats.invalidate(); },
+  onError: (err) => toast.error(err.message) });
+  const deleteMutation = trpc.aiMonitor.deleteKeyword.useMutation({ onSuccess: () => { toast.success("키워드가 삭제되었습니다"); utils.aiMonitor.getKeywords.invalidate(); utils.aiMonitor.getStats.invalidate(); utils.aiMonitor.getResults.invalidate(); },
+  onError: (err) => toast.error(err.message) });
   const runCheckMutation = trpc.aiMonitor.runCheck.useMutation({
     onSuccess: (data: any) => {
       const mentioned = data.results?.filter((r: any) => r.mentioned).length ?? 0;

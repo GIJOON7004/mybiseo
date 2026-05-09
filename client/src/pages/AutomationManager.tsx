@@ -26,24 +26,18 @@ export default function AutomationManager() {
   const rules = trpc.automation.listRules.useQuery();
   const logs = trpc.automation.getLogs.useQuery({ limit: 50 });
 
-  const createRuleMut = trpc.automation.createRule.useMutation({
-    onSuccess: () => { rules.refetch(); setShowCreate(false); toast.success("자동화 규칙이 생성되었습니다"); },
-  });
-  const toggleRuleMut = trpc.automation.toggleRule.useMutation({
-    onSuccess: () => { rules.refetch(); },
-  });
-  const deleteRuleMut = trpc.automation.deleteRule.useMutation({
-    onSuccess: () => { rules.refetch(); toast.success("삭제 완료"); },
-  });
-  const bookingMut = trpc.automation.sendBookingConfirm.useMutation({
-    onSuccess: (r) => { logs.refetch(); r.success ? toast.success("예약 확인 이메일 발송 완료") : toast.error("발송 실패: " + r.error); },
-  });
-  const reminderMut = trpc.automation.sendReminder.useMutation({
-    onSuccess: (r) => { logs.refetch(); r.success ? toast.success("리마인더 발송 완료") : toast.error("발송 실패: " + r.error); },
-  });
-  const reviewMut = trpc.automation.sendReviewRequest.useMutation({
-    onSuccess: (r) => { logs.refetch(); r.success ? toast.success("후기 요청 발송 완료") : toast.error("발송 실패: " + r.error); },
-  });
+  const createRuleMut = trpc.automation.createRule.useMutation({ onSuccess: () => { rules.refetch(); setShowCreate(false); toast.success("자동화 규칙이 생성되었습니다"); },
+  onError: (err) => toast.error(err.message) });
+  const toggleRuleMut = trpc.automation.toggleRule.useMutation({ onSuccess: () => { rules.refetch(); },
+  onError: (err) => toast.error(err.message) });
+  const deleteRuleMut = trpc.automation.deleteRule.useMutation({ onSuccess: () => { rules.refetch(); toast.success("삭제 완료"); },
+  onError: (err) => toast.error(err.message) });
+  const bookingMut = trpc.automation.sendBookingConfirm.useMutation({ onSuccess: (r) => { logs.refetch(); r.success ? toast.success("예약 확인 이메일 발송 완료") : toast.error("발송 실패: " + r.error); },
+  onError: (err) => toast.error(err.message) });
+  const reminderMut = trpc.automation.sendReminder.useMutation({ onSuccess: (r) => { logs.refetch(); r.success ? toast.success("리마인더 발송 완료") : toast.error("발송 실패: " + r.error); },
+  onError: (err) => toast.error(err.message) });
+  const reviewMut = trpc.automation.sendReviewRequest.useMutation({ onSuccess: (r) => { logs.refetch(); r.success ? toast.success("후기 요청 발송 완료") : toast.error("발송 실패: " + r.error); },
+  onError: (err) => toast.error(err.message) });
 
   const handleSend = () => {
     if (!sendForm.patientEmail || !sendForm.patientName) { toast.error("환자 정보를 입력해주세요"); return; }

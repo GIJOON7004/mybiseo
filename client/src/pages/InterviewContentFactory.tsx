@@ -162,9 +162,8 @@ function VideoList({
   onSelect: (id: number) => void;
   onRefresh: () => void;
 }) {
-  const deleteMut = trpc.interviewContent.delete.useMutation({
-    onSuccess: () => { toast.success("삭제되었습니다"); onRefresh(); },
-  });
+  const deleteMut = trpc.interviewContent.delete.useMutation({ onSuccess: () => { toast.success("삭제되었습니다"); onRefresh(); },
+  onError: (err) => toast.error(err.message) });
 
   return (
     <div className="grid gap-4">
@@ -264,7 +263,7 @@ function UploadDialog({
   const [progress, setProgress] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const uploadMut = trpc.interviewContent.upload.useMutation();
+  const uploadMut = trpc.interviewContent.upload.useMutation({ onError: (err) => toast.error(err.message) });
 
   const handleUpload = useCallback(async () => {
     if (!file) return;
@@ -426,26 +425,23 @@ function VideoDetail({ videoId, onBack }: { videoId: number; onBack: () => void 
   const { data: video, isLoading } = trpc.interviewContent.getById.useQuery({ id: videoId });
   const utils = trpc.useUtils();
 
-  const transcribeMut = trpc.interviewContent.transcribe.useMutation({
-    onSuccess: () => {
+  const transcribeMut = trpc.interviewContent.transcribe.useMutation({ onSuccess: () => {
       toast.success("음성 추출이 완료되었습니다!");
-      utils.interviewContent.getById.invalidate({ id: videoId });
+      utils.interviewContent.getById.invalidate({ id: videoId});
     },
     onError: (err) => toast.error(err.message),
   });
 
-  const generateMut = trpc.interviewContent.generateContents.useMutation({
-    onSuccess: () => {
+  const generateMut = trpc.interviewContent.generateContents.useMutation({ onSuccess: () => {
       toast.success("콘텐츠가 생성되었습니다!");
-      utils.interviewContent.getById.invalidate({ id: videoId });
+      utils.interviewContent.getById.invalidate({ id: videoId});
     },
     onError: (err) => toast.error(err.message),
   });
 
-  const regenerateMut = trpc.interviewContent.regenerateContent.useMutation({
-    onSuccess: () => {
+  const regenerateMut = trpc.interviewContent.regenerateContent.useMutation({ onSuccess: () => {
       toast.success("콘텐츠가 재생성되었습니다!");
-      utils.interviewContent.getById.invalidate({ id: videoId });
+      utils.interviewContent.getById.invalidate({ id: videoId});
     },
     onError: (err) => toast.error(err.message),
   });
@@ -625,9 +621,8 @@ function TranscriptCard({ transcript, videoId }: { transcript: string; videoId: 
   const [expanded, setExpanded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState(transcript);
-  const updateMut = trpc.interviewContent.updateTranscript.useMutation({
-    onSuccess: () => { toast.success("트랜스크립트가 수정되었습니다"); setEditing(false); },
-  });
+  const updateMut = trpc.interviewContent.updateTranscript.useMutation({ onSuccess: () => { toast.success("트랜스크립트가 수정되었습니다"); setEditing(false); },
+  onError: (err) => toast.error(err.message) });
   const utils = trpc.useUtils();
 
   return (
@@ -977,10 +972,9 @@ function CardnewsResults({
     },
   });
 
-  const generateCardImageMut = trpc.interviewContent.generateCardImage.useMutation({
-    onSuccess: (result, variables) => {
+  const generateCardImageMut = trpc.interviewContent.generateCardImage.useMutation({ onSuccess: (result, variables) => {
       toast.success(`카드 ${variables.cardIndex + 1} 이미지가 생성되었습니다!`);
-      setGeneratingImages((prev) => ({ ...prev, [`${variables.setIndex}-${variables.cardIndex}`]: false }));
+      setGeneratingImages((prev) => ({ ...prev, [`${variables.setIndex}-${variables.cardIndex}`]: false}));
       utils.interviewContent.getById.invalidate({ id: videoId });
     },
     onError: (err, variables) => {
@@ -988,7 +982,6 @@ function CardnewsResults({
       setGeneratingImages((prev) => ({ ...prev, [`${variables.setIndex}-${variables.cardIndex}`]: false }));
     },
   });
-
   const generateSetImagesMut = trpc.interviewContent.generateCardSetImages.useMutation({
     onSuccess: (result) => {
       toast.success(`${result.generated}/${result.total}개 이미지가 생성되었습니다!`);
@@ -1535,8 +1528,7 @@ function ShortformResults({
   const [subtitlePreview, setSubtitlePreview] = useState<{ index: number; content: string; format: string } | null>(null);
 
   // 개별 자막 생성
-  const generateSubtitleMut = trpc.interviewContent.generateSubtitle.useMutation({
-    onSuccess: (result, variables) => {
+  const generateSubtitleMut = trpc.interviewContent.generateSubtitle.useMutation({ onSuccess: (result, variables) => {
       triggerDownload(result.downloadUrl, result.fileName);
       toast.success(`${result.cueCount}개 자막이 생성되었습니다 (${variables.format.toUpperCase()})`);
       setSubtitlePreview({ index: variables.shortformIndex, content: result.content, format: variables.format });
@@ -1549,8 +1541,7 @@ function ShortformResults({
   });
 
   // 전체 자막 일괄 생성
-  const generateAllSubtitlesMut = trpc.interviewContent.generateAllSubtitles.useMutation({
-    onSuccess: (result) => {
+  const generateAllSubtitlesMut = trpc.interviewContent.generateAllSubtitles.useMutation({ onSuccess: (result) => {
       result.results.forEach((r: any) => {
         triggerDownload(r.downloadUrl, r.fileName);
       });

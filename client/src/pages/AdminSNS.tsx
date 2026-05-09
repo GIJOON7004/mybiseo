@@ -275,12 +275,11 @@ function GuideTab() {
 /* ─── 생성 이력 탭 ─── */
 function HistoryTab() {
   const historyQuery = trpc.sns.history.useQuery();
-  const deleteMutation = trpc.sns.delete.useMutation({
-    onSuccess: () => {
+  const deleteMutation = trpc.sns.delete.useMutation({ onSuccess: () => {
       toast.success("삭제 완료!");
       historyQuery.refetch();
     },
-  });
+  onError: (err) => toast.error(err.message) });
 
   const items = historyQuery.data ?? [];
   const typeConfig: Record<string, { label: string; color: string; icon: any }> = {

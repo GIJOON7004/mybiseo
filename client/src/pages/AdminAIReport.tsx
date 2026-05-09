@@ -302,9 +302,8 @@ function ReportList() {
     onSuccess: (data: any) => { toast.success("종합 리포트 생성 완료"); utils.aiMonitor.getReports.invalidate(); if (data.id) setLocation(`/admin/ai-report/${data.id}`); },
     onError: (err: any) => toast.error(err.message || "종합 리포트 생성에 실패했습니다"),
   });
-  const deleteMutation = trpc.aiMonitor.deleteReport.useMutation({
-    onSuccess: () => { toast.success("리포트가 삭제되었습니다"); utils.aiMonitor.getReports.invalidate(); },
-  });
+  const deleteMutation = trpc.aiMonitor.deleteReport.useMutation({ onSuccess: () => { toast.success("리포트가 삭제되었습니다"); utils.aiMonitor.getReports.invalidate(); },
+  onError: (err) => toast.error(err.message) });
 
   const keywords = keywordsQuery.data || [];
   const reports = reportsQuery.data || [];

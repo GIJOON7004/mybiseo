@@ -1,3 +1,5 @@
+import { createLogger } from "./lib/logger";
+const logger = createLogger("blog-scheduler");
 /**
  * 블로그 자동 발행 스케줄러 v2
  * 
@@ -220,7 +222,7 @@ ${usedKeywords || "없음"}
     return genResult;
   } catch (error: any) {
     const errorMsg = error?.message || "알 수 없는 오류";
-    console.error(`[BlogScheduler] 월간 키워드 선정 실패:`, errorMsg);
+    logger.error("월간 키워드 선정 실패", { detail: errorMsg });
     state.lastKeywordGenResult = { success: false, error: errorMsg };
     addHistory("keyword_gen", false, errorMsg);
     return { success: false, error: errorMsg };
@@ -405,7 +407,7 @@ ${seasonalContext}
     return runResult;
   } catch (error: any) {
     const errorMsg = error?.message || "알 수 없는 오류";
-    console.error(`[BlogScheduler] 자동 발행 실패:`, errorMsg);
+    logger.error("자동 발행 실패", { detail: errorMsg });
 
     if (retryCount < MAX_RETRIES) {
       console.log(`[BlogScheduler] 오류 발생 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
@@ -422,8 +424,10 @@ ${seasonalContext}
 /**
  * 스케줄러 시작 — 10분마다 체크
  */
+/** @deprecated Heartbeat cron으로 전환 완료. /api/scheduled/* 엔드포인트 사용. 이 함수는 하위 호환성을 위해 유지되지만 더 이상 호출되지 않음. */
 export function startBlogScheduler() {
   if (state.schedulerInterval) {
+  console.warn("[BlogScheduler] ⚠️ startBlogScheduler는 deprecated. Heartbeat cron(/api/scheduled/*)으로 전환 완료.");
     console.log("[BlogScheduler] 이미 실행 중입니다");
     return;
   }
@@ -752,7 +756,7 @@ export function startBlogScheduler() {
         }
       }
     } catch (error) {
-      console.error("[BlogScheduler] 스케줄 체크 오류:", error);
+      logger.error("스케줄 체크 오류", { error: String(error) });
     }
   }, CHECK_INTERVAL);
   // 서버 시작 시 즉시 예약 발행 처리

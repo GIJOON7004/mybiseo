@@ -594,13 +594,12 @@ function NaverPublishDialog({ open, onClose, data, isLoading, contentId }: {
   const [postUrl, setPostUrl] = useState("");
   const [currentStep, setCurrentStep] = useState(1);
   const [copiedField, setCopiedField] = useState<string | null>(null);
-  const markMutation = trpc.aiHub.markNaverPublished.useMutation({
-    onSuccess: () => {
+  const markMutation = trpc.aiHub.markNaverPublished.useMutation({ onSuccess: () => {
       toast.success("발행 완료로 기록되었습니다.");
       onClose();
       setCurrentStep(1);
     },
-  });
+  onError: (err) => toast.error(err.message) });
 
   const handleCopyField = async (field: string, value: string) => {
     await navigator.clipboard.writeText(value);

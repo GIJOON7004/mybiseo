@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /**
  * 경쟁사 AI 인용 비교 분석 페이지
  * 내 사이트 vs 경쟁사 최대 3개 동시 비교
@@ -92,6 +93,7 @@ export default function SeoCompare() {
 
   const compareMutation = trpc.seoAnalyzer.compareAnalyze.useMutation({
     onSuccess: (data) => setResults(data as CompareResult[]),
+    onError: (err) => toast.error(err.message),
   });
 
   const addCompetitor = () => {

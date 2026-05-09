@@ -13,24 +13,32 @@ interface LogEntry {
   [key: string]: unknown;
 }
 
+function normalizeMeta(meta: unknown): Record<string, unknown> {
+  if (!meta) return {};
+  if (typeof meta === "object" && meta !== null && !Array.isArray(meta)) {
+    return meta as Record<string, unknown>;
+  }
+  return { data: meta };
+}
+
 function formatEntry(entry: LogEntry): string {
   return JSON.stringify(entry);
 }
 
 export function createLogger(module: string) {
   return {
-    info(message: string, meta?: Record<string, unknown>) {
-      console.log(formatEntry({ level: "info", module, message, timestamp: new Date().toISOString(), ...meta }));
+    info(message: string, meta?: unknown) {
+      console.log(formatEntry({ level: "info", module, message, timestamp: new Date().toISOString(), ...normalizeMeta(meta) }));
     },
-    warn(message: string, meta?: Record<string, unknown>) {
-      console.warn(formatEntry({ level: "warn", module, message, timestamp: new Date().toISOString(), ...meta }));
+    warn(message: string, meta?: unknown) {
+      console.warn(formatEntry({ level: "warn", module, message, timestamp: new Date().toISOString(), ...normalizeMeta(meta) }));
     },
-    error(message: string, meta?: Record<string, unknown>) {
-      console.error(formatEntry({ level: "error", module, message, timestamp: new Date().toISOString(), ...meta }));
+    error(message: string, meta?: unknown) {
+      console.error(formatEntry({ level: "error", module, message, timestamp: new Date().toISOString(), ...normalizeMeta(meta) }));
     },
-    debug(message: string, meta?: Record<string, unknown>) {
+    debug(message: string, meta?: unknown) {
       if (process.env.NODE_ENV !== "production") {
-        console.log(formatEntry({ level: "debug", module, message, timestamp: new Date().toISOString(), ...meta }));
+        console.log(formatEntry({ level: "debug", module, message, timestamp: new Date().toISOString(), ...normalizeMeta(meta) }));
       }
     },
   };

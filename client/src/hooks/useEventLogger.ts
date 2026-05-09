@@ -23,7 +23,7 @@ function getSessionId(): string {
 }
 
 export function useEventLogger() {
-  const logMutation = trpc.userEvent.log.useMutation();
+  const logMutation = trpc.userEvent.log.useMutation({ onError: () => {} });
   const visitorId = useRef(getVisitorId());
   const sessionId = useRef(getSessionId());
 
