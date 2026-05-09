@@ -169,24 +169,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('react-dom') || id.includes('react/') || id.includes('scheduler')) {
-              return 'vendor-react';
-            }
-            if (/@radix-ui/.test(id)) return 'vendor-radix';
-            if (/recharts|d3-/.test(id)) return 'vendor-charts';
-            if (/framer-motion/.test(id)) return 'vendor-motion';
-            if (/lucide-react/.test(id)) return 'vendor-icons';
-            return 'vendor-misc';
-          }
-          if (id.includes('/pages/Admin')) return 'chunk-admin';
-          if (id.includes('/pages/Service')) return 'chunk-services';
-        },
-      },
-    },
+    // No manualChunks — let Vite handle code splitting automatically
+    // to avoid circular dependency issues with React 19 CJS modules
   },
   server: {
     host: true,

@@ -397,4 +397,4 @@
 - [x] C-4-4: llmMonitor 라우터 + llm-usage-logger 통합 테스트 (9개 테스트 통과)
 
 ### Hotfix: 프로덕션 빈 화면
-- [ ] mybiseo.com 접속 시 빈 화면 (white screen) 문제 수정
+- [x] mybiseo.com 접속 시 빈 화면 (white screen) 문제 수정 — 근본 원인: manualChunks가 React 19 CJS 모듈 순환 의존성 유발. 해결: manualChunks 제거 + NODE_ENV=production 빌드 명시적 설정
