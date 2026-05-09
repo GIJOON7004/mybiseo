@@ -1556,7 +1556,7 @@ export async function getCompetitorComparison(keywordId?: number) {
               competitorMentionCounts[name] = (competitorMentionCounts[name] || 0) + 1;
             }
           }
-        } catch {}
+        } catch (e) { console.warn("[DB] Suppressed error:", e); }
       }
     }
     
@@ -1633,7 +1633,7 @@ export async function getCompetitorTrend(keywordId: number, weeks: number = 8) {
             weekBuckets[weekKey].competitors[name] = (weekBuckets[weekKey].competitors[name] || 0) + 1;
           }
         }
-      } catch {}
+      } catch (e) { console.warn("[DB] Suppressed error:", e); }
     }
   }
   
@@ -2441,7 +2441,7 @@ export async function getReviewReportAdmin() {
           const clause = issue.clause || "기타";
           issueMap.set(clause, (issueMap.get(clause) || 0) + 1);
         });
-      } catch {}
+      } catch (e) { console.warn("[DB] Suppressed error:", e); }
     }
   });
   const topIssues = Array.from(issueMap.entries())
@@ -3270,9 +3270,9 @@ export async function getInterviewContentStats(userId: string) {
   let totalCardnews = 0;
   let totalShortforms = 0;
   for (const v of videos) {
-    if (v.blogContents) { try { totalBlogs += JSON.parse(v.blogContents as string).length; } catch {} }
-    if (v.cardnewsContents) { try { totalCardnews += JSON.parse(v.cardnewsContents as string).length; } catch {} }
-    if (v.shortformContents) { try { totalShortforms += JSON.parse(v.shortformContents as string).length; } catch {} }
+    if (v.blogContents) { try { totalBlogs += JSON.parse(v.blogContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
+    if (v.cardnewsContents) { try { totalCardnews += JSON.parse(v.cardnewsContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
+    if (v.shortformContents) { try { totalShortforms += JSON.parse(v.shortformContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
   }
   return {
     totalVideos: videos.length,
@@ -3452,3 +3452,4 @@ export async function getDailyDiagnosisCount(): Promise<number> {
     .where(gte(seoLeads.createdAt, today));
   return result?.count || 0;
 }
+

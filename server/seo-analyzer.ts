@@ -191,7 +191,11 @@ async function fetchWithRetry(url: string, timeout = 15000, retries = 2, country
   throw lastError;
 }
 
-export function normalizeUrl(input: string): string {
+// normalizeUrl은 ./lib/normalize-url에서 import됨 (re-export 유지)
+import { normalizeUrl } from "./lib/normalize-url";
+export { normalizeUrl };
+// @deprecated 아래 원본은 참조용
+function _normalizeUrl_DEPRECATED(input: string): string {
   // 1. URL 정규화: 불필요한 텍스트, 괄호, 공백 제거
   let url = input.trim();
   // 괄호 안의 텍스트 제거 (예: "namedps.com/ (https )" → "namedps.com/")

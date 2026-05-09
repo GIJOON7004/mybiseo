@@ -4,12 +4,7 @@
  */
 import * as PDFDocumentModule from "pdfkit";
 const PDFDocument = (PDFDocumentModule as any).default || PDFDocumentModule;
-import { krRegularBase64, krBoldBase64 } from "./fonts-base64";
-
-const FONT_BUFFERS = {
-  krRegular: Buffer.from(krRegularBase64, "base64"),
-  krBold: Buffer.from(krBoldBase64, "base64"),
-};
+import { loadFonts } from "./fonts-base64";
 
 // 색상 팔레트
 const C = {
@@ -65,6 +60,7 @@ interface BenchmarkingReportData {
 }
 
 export async function generateBenchmarkingPdf(data: BenchmarkingReportData): Promise<Buffer> {
+  const FONT_BUFFERS = await loadFonts();
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     const doc = new PDFDocument({

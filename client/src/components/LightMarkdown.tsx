@@ -1,3 +1,4 @@
+import DOMPurify from 'dompurify';
 /**
  * LightMarkdown — streamdown 대체 경량 마크다운 렌더러
  * streamdown은 mermaid(2.3MB) + shiki(9.4MB)를 끌어오므로
@@ -148,7 +149,7 @@ export function LightMarkdown({ children }: { children: string }) {
   return (
     <div
       className="prose prose-invert max-w-none text-foreground"
-      dangerouslySetInnerHTML={{ __html: html }}
+      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(html) }}
     />
   );
 }

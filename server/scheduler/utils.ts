@@ -8,8 +8,9 @@
 export function formatBlogContent(content: string): string {
   let formatted = content;
   formatted = formatted.replace(/\r\n/g, '\n');
-  formatted = formatted.replace(/\n*(## [^\n]+)/g, '\n\n\n$1\n\n');
+  // ### 를 먼저 처리해야 ## regex가 ### 를 삼키지 않음
   formatted = formatted.replace(/\n*(### [^\n]+)/g, '\n\n$1\n');
+  formatted = formatted.replace(/\n*(## [^\n]+)/g, '\n\n\n$1\n\n');
   formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
   const lines = formatted.split('\n');
   const result: string[] = [];

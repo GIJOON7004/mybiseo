@@ -78,6 +78,16 @@ const shareTokenLimiter = rateLimit({
  * - 전역 limiter는 /api/ 경로에만 적용 (정적 파일 제외)
  * - 진단/이메일/인증은 tRPC 프로시저 이름 기반으로 적용
  */
+
+/** tracking.pageview/inquiry — IP당 1분 30회 (봇 방어) */
+const trackingLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many tracking requests" },
+});
+
 export function registerRateLimiting(app: Express): void {
   // 전역 API Rate Limit
   app.use("/api/", globalLimiter);
@@ -96,4 +106,6 @@ export function registerRateLimiting(app: Express): void {
 
   // 공유 토큰 조회 — 열거 공격 방지
   app.use("/api/trpc/report.getByShareToken", shareTokenLimiter);
+  // 트래킹 API — 봇 방어
+  app.use("/api/trpc/tracking", trackingLimiter);
 }

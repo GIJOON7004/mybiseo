@@ -17,7 +17,7 @@ import { invokeLLM } from "./_core/llm";
 import { resolveSpecialty } from "./specialty-weights";
 import { SPECIALTY_REVENUE_PROFILES } from "./utils/specialty-revenue-data";
 import { translateResultToEnglish } from "./ai-visibility-translate";
-import { krRegularBase64, krBoldBase64 } from "./fonts-base64";
+import { loadFonts } from "./fonts-base64";
 import { getMonthlyTrendByUrl, getScoreComparisonByUrl } from "./db";
 // Modularized imports from report/
 import type { SeoAuditResult, RealityDiagnosis, Lang, ReportLanguage } from "./report/types";
@@ -27,17 +27,6 @@ import { sanitizeHospitalName as _sanitizeHospitalName, stripMarkdown, getGradeC
 // Re-export for backward compatibility
 export const sanitizeHospitalName = _sanitizeHospitalName;
 
-// ── Lazy font buffer cache (4.5MB base64 → Buffer 변환 1회만) ──
-let _fontBuffers: { krRegular: Buffer; krBold: Buffer } | null = null;
-function getFontBuffers() {
-  if (!_fontBuffers) {
-    _fontBuffers = {
-      krRegular: Buffer.from(krRegularBase64, "base64"),
-      krBold: Buffer.from(krBoldBase64, "base64"),
-    };
-  }
-  return _fontBuffers;
-}
 
 // QR 코드 캐시
 let cachedQrBuffer: Buffer | null = null;
@@ -103,7 +92,7 @@ export async function generateAiVisibilityReport(
   doc.on("data", (c: Buffer) => chunks.push(c));
 
   // ── Register fonts (lazy cached) ──
-  const fontBuffers = getFontBuffers();
+  const fontBuffers = await loadFonts();
   doc.registerFont("KrRegular", fontBuffers.krRegular);
   doc.registerFont("KrBold", fontBuffers.krBold);
 

@@ -18,4 +18,10 @@ export const ENV = {
   notifyPhone: process.env.NOTIFY_PHONE ?? "",
   // Kakao JS Key
   kakaoJsKey: process.env.KAKAO_JS_KEY ?? "",
+
+  GOOGLE_PAGESPEED_API_KEY: process.env.GOOGLE_PAGESPEED_API_KEY || "",
+  GOOGLE_SERVICE_ACCOUNT_KEY: process.env.GOOGLE_SERVICE_ACCOUNT_KEY || "",
+  NAVER_AD_API_ACCESS_LICENSE: process.env.NAVER_AD_API_ACCESS_LICENSE || "",
+  NAVER_AD_API_CUSTOMER_ID: process.env.NAVER_AD_API_CUSTOMER_ID || "",
+  NAVER_AD_API_SECRET_KEY: process.env.NAVER_AD_API_SECRET_KEY || "",
 };

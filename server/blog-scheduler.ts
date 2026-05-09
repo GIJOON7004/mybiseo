@@ -48,51 +48,65 @@ import {
 } from "./scheduler/utils";
 import { AUTO_BLOG_PROMPT, MONTHLY_KEYWORD_PROMPT, FOLLOWUP_3D_SUBJECT, FOLLOWUP_7D_SUBJECT } from "./scheduler/prompts";
 import { buildFollowup3dEmailNew as buildFollowup3dHtml, buildFollowup7dEmailNew as buildFollowup7dHtml } from "./email-templates";
-
-
 // ── 스케줄러 상태 ──
-let schedulerInterval: ReturnType<typeof setInterval> | null = null;
-let lastRunAt: Date | null = null;
-let lastRunResult: { success: boolean; title?: string; error?: string } | null = null;
-let lastKeywordGenAt: Date | null = null;
-let lastKeywordGenResult: { success: boolean; count?: number; error?: string } | null = null;
-let isRunning = false;
-let lastAiMonitorAt: Date | null = null;
-let lastAiMonitorResult: { success: boolean; count?: number; error?: string } | null = null;
-let lastAutoDiagnosisAt: Date | null = null;
-let lastAutoDiagnosisResult: { success: boolean; diagnosed?: number; error?: string } | null = null;
-let lastMonthlyDiagnosisAt: Date | null = null;
-let lastMonthlyDiagnosisResult: { success: boolean; diagnosed?: number; totalUrls?: number; error?: string } | null = null;
-let lastWeeklyBriefingRun = "";
+/** 스케줄러 전역 상태 — 단일 객체로 캡슐화 (#13) */
+interface SchedulerState {
+  schedulerInterval: ReturnType<typeof setInterval> | null;
+  lastRunAt: Date | null;
+  lastRunResult: { success: boolean; title?: string; error?: string } | null;
+  lastKeywordGenAt: Date | null;
+  lastKeywordGenResult: { success: boolean; count?: number; error?: string } | null;
+  isRunning: boolean;
+  lastAiMonitorAt: Date | null;
+  lastAiMonitorResult: { success: boolean; count?: number; error?: string } | null;
+  lastAutoDiagnosisAt: Date | null;
+  lastAutoDiagnosisResult: { success: boolean; diagnosed?: number; error?: string } | null;
+  lastMonthlyDiagnosisAt: Date | null;
+  lastMonthlyDiagnosisResult: { success: boolean; diagnosed?: number; totalUrls?: number; error?: string } | null;
+  lastWeeklyBriefingRun: string;
+}
+const state: SchedulerState = {
+  schedulerInterval: null,
+  lastRunAt: null,
+  lastRunResult: null,
+  lastKeywordGenAt: null,
+  lastKeywordGenResult: null,
+  isRunning: false,
+  lastAiMonitorAt: null,
+  lastAiMonitorResult: null,
+  lastAutoDiagnosisAt: null,
+  lastAutoDiagnosisResult: null,
+  lastMonthlyDiagnosisAt: null,
+  lastMonthlyDiagnosisResult: null,
+  lastWeeklyBriefingRun: "",
+};
 
 /**
  * 스케줄러 상태 조회
  */
 export function getSchedulerStatus() {
   return {
-    active: schedulerInterval !== null,
-    lastRunAt: lastRunAt?.toISOString() ?? null,
-    lastRunResult,
-    lastKeywordGenAt: lastKeywordGenAt?.toISOString() ?? null,
-    lastKeywordGenResult,
-    isRunning,
+    active: state.schedulerInterval !== null,
+    lastRunAt: state.lastRunAt?.toISOString() ?? null,
+    lastRunResult: state.lastRunResult,
+    lastKeywordGenAt: state.lastKeywordGenAt?.toISOString() ?? null,
+    lastKeywordGenResult: state.lastKeywordGenResult,
+    isRunning: state.isRunning,
     schedule: "매주 화요일, 금요일 10:00 (KST)",
     keywordSchedule: "매월 1일 00:10 (KST) — 8개 키워드 자동 선정",
     aiMonitorSchedule: "매주 월요일 09:00 (KST) — 전체 활성 키워드 자동 검사",
     weeklyBriefingSchedule: "매주 월요일 08:00 (KST) — 주간 브리핑 Push 자동 발송",
     autoDiagnosisSchedule: "매주 목요일 06:00 (KST) — 계약 병원 자동 SEO 진단",
     monthlyDiagnosisSchedule: "매월 15일 06:00 (KST) — 전체 URL 월간 진단 (히스토리 축적)",
-    lastMonthlyDiagnosisAt: lastMonthlyDiagnosisAt?.toISOString() ?? null,
-    lastMonthlyDiagnosisResult,
-    lastAiMonitorAt: lastAiMonitorAt?.toISOString() ?? null,
-    lastAiMonitorResult,
-    lastAutoDiagnosisAt: lastAutoDiagnosisAt?.toISOString() ?? null,
-    lastAutoDiagnosisResult,
+    lastMonthlyDiagnosisAt: state.lastMonthlyDiagnosisAt?.toISOString() ?? null,
+    lastMonthlyDiagnosisResult: state.lastMonthlyDiagnosisResult,
+    lastAiMonitorAt: state.lastAiMonitorAt?.toISOString() ?? null,
+    lastAiMonitorResult: state.lastAiMonitorResult,
+    lastAutoDiagnosisAt: state.lastAutoDiagnosisAt?.toISOString() ?? null,
+    lastAutoDiagnosisResult: state.lastAutoDiagnosisResult,
     recentHistory: getHistory().slice(-10),
   };
 }
-
-
 /**
  * 매월 1일 — AI가 그 달의 키워드 8개를 선정하여 큐에 등록
  */
@@ -101,11 +115,11 @@ export async function generateMonthlyKeywords(): Promise<{
   count?: number;
   error?: string;
 }> {
-  if (isRunning) {
+  if (state.isRunning) {
     return { success: false, error: "이미 작업 중입니다" };
   }
 
-  isRunning = true;
+  state.isRunning = true;
   try {
     const categories = await getAllBlogCategories();
     if (categories.length === 0) {
@@ -198,8 +212,8 @@ ${usedKeywords || "없음"}
     }
 
     const genResult = { success: true, count: savedCount };
-    lastKeywordGenAt = new Date();
-    lastKeywordGenResult = genResult;
+    state.lastKeywordGenAt = new Date();
+    state.lastKeywordGenResult = genResult;
 
     addHistory("keyword_gen", true, `${savedCount}개 키워드 선정 완료`);
     console.log(`[BlogScheduler] 월간 키워드 ${savedCount}개 선정 완료`);
@@ -207,15 +221,13 @@ ${usedKeywords || "없음"}
   } catch (error: any) {
     const errorMsg = error?.message || "알 수 없는 오류";
     console.error(`[BlogScheduler] 월간 키워드 선정 실패:`, errorMsg);
-    lastKeywordGenResult = { success: false, error: errorMsg };
+    state.lastKeywordGenResult = { success: false, error: errorMsg };
     addHistory("keyword_gen", false, errorMsg);
     return { success: false, error: errorMsg };
   } finally {
-    isRunning = false;
+    state.isRunning = false;
   }
 }
-
-
 /**
  * pending 상태의 키워드 중 하나를 선택하여 블로그 글 생성 (재시도 포함)
  */
@@ -226,11 +238,11 @@ export async function generateAndPublishBlogPost(retryCount = 0): Promise<{
 }> {
   const MAX_RETRIES = 2;
 
-  if (isRunning && retryCount === 0) {
+  if (state.isRunning && retryCount === 0) {
     return { success: false, error: "이미 생성 중입니다" };
   }
 
-  if (retryCount === 0) isRunning = true;
+  if (retryCount === 0) state.isRunning = true;
 
   try {
     // 1. 카테고리 목록 가져오기
@@ -385,8 +397,8 @@ ${seasonalContext}
     }
 
     const runResult = { success: true, title: parsed.title };
-    lastRunAt = new Date();
-    lastRunResult = runResult;
+    state.lastRunAt = new Date();
+    state.lastRunResult = runResult;
 
     addHistory("publish", true, `"${parsed.title}" 발행 완료`);
     console.log(`[BlogScheduler] 자동 발행 완료: "${parsed.title}"`);
@@ -400,20 +412,18 @@ ${seasonalContext}
       return generateAndPublishBlogPost(retryCount + 1);
     }
 
-    lastRunResult = { success: false, error: errorMsg };
+    state.lastRunResult = { success: false, error: errorMsg };
     addHistory("publish", false, errorMsg);
     return { success: false, error: errorMsg };
   } finally {
-    if (retryCount === 0) isRunning = false;
+    if (retryCount === 0) state.isRunning = false;
   }
 }
-
-
 /**
  * 스케줄러 시작 — 10분마다 체크
  */
 export function startBlogScheduler() {
-  if (schedulerInterval) {
+  if (state.schedulerInterval) {
     console.log("[BlogScheduler] 이미 실행 중입니다");
     return;
   }
@@ -430,8 +440,9 @@ export function startBlogScheduler() {
   let lastBenchmarkRun = "";
   let lastInsightRun = "";
   let lastMonthlyDiagRun = "";
+  // TODO: setInterval은 Cloud Run에서 동작하지 않음. Heartbeat cron으로 전환 필요 (references/periodic-updates.md 참조)
 
-  schedulerInterval = setInterval(async () => {
+  state.schedulerInterval = setInterval(async () => {
     try {
       // 예약 발행 처리 (매 체크마다)
       await publishScheduledPosts();
@@ -612,10 +623,10 @@ export function startBlogScheduler() {
       // 매주 목요일 06:00 KST 계약 병원 자동 SEO 진단
       if (kst.dayOfWeek === 4 && kst.hour === 6 && kst.minute < 10) {
         const diagRunKey = `${todayKey}-autodiag`;
-        if (!lastAutoDiagnosisAt || lastAutoDiagnosisAt.toISOString().slice(0, 10) !== todayKey) {
+        if (!state.lastAutoDiagnosisAt || state.lastAutoDiagnosisAt.toISOString().slice(0, 10) !== todayKey) {
           console.log("[AutoDiagnosis] 주간 자동 진단 시작");
           try {
-            lastAutoDiagnosisAt = new Date();
+            state.lastAutoDiagnosisAt = new Date();
             const { getActiveHospitalProfiles, saveDiagnosisHistory } = await import("./db");
             const { analyzeSeo } = await import("./seo-analyzer");
             const profiles = await getActiveHospitalProfiles();
@@ -643,7 +654,7 @@ export function startBlogScheduler() {
               // 서버 부하 방지: 각 진단 사이 3초 대기
               await new Promise(r => setTimeout(r, 3000));
             }
-            lastAutoDiagnosisResult = { success: true, diagnosed };
+            state.lastAutoDiagnosisResult = { success: true, diagnosed };
             addHistory("auto_diagnosis", true, `${diagnosed}/${profiles.length}개 병원 진단 완료 (${failed}건 실패)`);
             await notifyOwner({
               title: "[자동 진단] 주간 SEO 진단 완료",
@@ -656,7 +667,7 @@ export function startBlogScheduler() {
               metadata: JSON.stringify({ diagnosed, failed, total: profiles.length }),
             });
           } catch (err) {
-            lastAutoDiagnosisResult = { success: false, error: String(err) };
+            state.lastAutoDiagnosisResult = { success: false, error: String(err) };
             addHistory("auto_diagnosis", false, String(err));
           }
         }
@@ -669,9 +680,9 @@ export function startBlogScheduler() {
           lastMonthlyDiagRun = monthlyDiagKey;
           console.log("[MonthlyDiagnosis] 월간 전체 URL 진단 시작");
           try {
-            lastMonthlyDiagnosisAt = new Date();
+            state.lastMonthlyDiagnosisAt = new Date();
             const result = await runMonthlyBatchDiagnosis();
-            lastMonthlyDiagnosisResult = { success: true, diagnosed: result.diagnosed, totalUrls: result.totalUrls };
+            state.lastMonthlyDiagnosisResult = { success: true, diagnosed: result.diagnosed, totalUrls: result.totalUrls };
             addHistory("monthly_diagnosis", true, `${result.diagnosed}/${result.totalUrls}개 URL 진단 완료 (${result.failed}건 실패, ${result.skipped}건 스킵)`);
             await notifyOwner({
               title: "[월간 진단] 전체 URL 월간 SEO 진단 완료",
@@ -684,7 +695,7 @@ export function startBlogScheduler() {
               metadata: JSON.stringify({ ...result, type: "monthly" }),
             });
           } catch (err) {
-            lastMonthlyDiagnosisResult = { success: false, error: String(err) };
+            state.lastMonthlyDiagnosisResult = { success: false, error: String(err) };
             addHistory("monthly_diagnosis", false, String(err));
           }
         }
@@ -697,11 +708,11 @@ export function startBlogScheduler() {
           lastAiMonitorRun = monitorRunKey;
           console.log("[AIMonitor] 주간 자동 모니터링 시작");
           try {
-            lastAiMonitorAt = new Date();
+            state.lastAiMonitorAt = new Date();
             // v2 고도화 버전 사용 (AI 인용 점수 자동 산정 + DB 저장 포함)
             const { runEnhancedAutoMonitor } = await import("./lib/ai-monitor-enhanced");
             const monitorResult = await runEnhancedAutoMonitor();
-            lastAiMonitorResult = { success: true, count: monitorResult.checkedKeywords };
+            state.lastAiMonitorResult = { success: true, count: monitorResult.checkedKeywords };
             const scoresSummary = monitorResult.scores.map((s: any) => `${s.keyword}: ${s.score}점`).join(", ");
             addHistory("ai_monitor", true, `${monitorResult.checkedKeywords}개 키워드 검사, ${monitorResult.totalMentions}건 언급, 점수: ${scoresSummary}`);
             // 관리자에게 결과 알림
@@ -710,7 +721,7 @@ export function startBlogScheduler() {
               content: `${monitorResult.checkedKeywords}개 키워드 검사 완료\n총 ${monitorResult.totalMentions}건 AI 언급 감지\n\n상세 결과는 관리자 대시보드 > AI 모니터링에서 확인하세요.`,
             });
           } catch (err) {
-            lastAiMonitorResult = { success: false, error: String(err) };
+            state.lastAiMonitorResult = { success: false, error: String(err) };
             addHistory("ai_monitor", false, String(err));
           }
         }
@@ -718,8 +729,8 @@ export function startBlogScheduler() {
        // ═══ 매주 월요일 08:00 KST — 주간 브리핑 Push ═══
       if (kst.dayOfWeek === 1 && kst.hour === 8 && kst.minute < 10) {
         const briefingRunKey = `${todayKey}-briefing`;
-        if (lastWeeklyBriefingRun !== briefingRunKey) {
-          lastWeeklyBriefingRun = briefingRunKey;
+        if (state.lastWeeklyBriefingRun !== briefingRunKey) {
+          state.lastWeeklyBriefingRun = briefingRunKey;
           console.log("[WeeklyBriefing] 주간 브리핑 생성 시작");
           try {
             const data = await getWeeklyBriefingData();
@@ -930,9 +941,9 @@ export async function sendWeeklyBriefingNow(): Promise<{ success: boolean; conte
 }
 
 export function stopBlogScheduler() {
-  if (schedulerInterval) {
-    clearInterval(schedulerInterval);
-    schedulerInterval = null;
+  if (state.schedulerInterval) {
+    clearInterval(state.schedulerInterval);
+    state.schedulerInterval = null;
     console.log("[BlogScheduler] 스케줄러 중지됨");
   }
 }

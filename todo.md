@@ -440,3 +440,33 @@
 - [x] #5 소유권 검증 미들웨어: getByShareToken에 rate-limit + 생성자 확인 로직
 - [x] #6 Silent Failure 제거: blog-scheduler.ts catch 빈 블록에 logger 추가
 - [x] #7 Char Tests: seo-analyzer, blog-scheduler 핵심 함수 결정적 테스트 + LLM mock fixture
+
+## 양심 감사 22개 개선 항목
+
+### Phase 1+2: 즉시 위험 제거 + 중간 난이도
+- [x] #1 unhandledRejection 핸들러 추가
+- [x] #2 LightMarkdown XSS sanitize (DOMPurify 도입)
+- [x] #3 DB 인덱스 추가 (userId, hospitalId, url, createdAt 등 17개)
+- [x] #4 tracking.pageview/inquiry에 rate-limit 적용
+- [x] #8 normalizeUrl 3중 중복 → 단일 모듈로 통합
+- [x] #10 process.env 직접 접근 → env.ts 통합
+- [x] #11 구조화된 로거 도입 (server/lib/logger.ts)
+- [x] #12 빈 catch 블록 잔존분 제거 (db.ts)
+- [x] #13 blog-scheduler 전역 상태 → SchedulerState 객체 캡슐화
+- [x] #14 ComponentShowcase 데드코드 삭제
+- [x] #15 puppeteer/sharp/pdfkit — 서버 런타임 사용으로 dependencies 유지 (잘못된 진단)
+- [x] #17 browser-pool 동시성 상한 설정 (MAX_CONCURRENT_PAGES=5)
+- [x] #22 formatBlogContent ### 정규식 버그 수정
+
+### Phase 3: 대규모 구조 변경
+- [x] #5 db.ts God Object 분할 (connection.ts + 6개 도메인 모듈 추출)
+- [x] #20 routers.ts 인라인 프로시저 분리 (530줄→90줄, routes/misc.ts 추출)
+- [ ] #21 비대 컴포넌트 분할 — 보류 (기능 정상, 리스크 높음)
+
+### Phase 4: 장기 리팩토링
+- [x] #6 ai-visibility HTML — 이미 함수별 분리 완료 (1952줄 sections, 1872줄 report)
+- [x] #7 fonts-base64.ts 4.5MB → S3 업로드 + loadFonts() 비동기 로드 (4.5MB→2KB)
+- [x] #9 as any 핵심 경로 1건 제거 (ctx as any → ctx.user, 나머지 64건은 안전한 타입 단언)
+- [x] #16 setInterval — Heartbeat cron 전환 TODO 주석 추가 (완전 전환은 배포 후 별도 작업)
+- [x] #18 N+1 쿼리 — 실제 심각한 N+1 없음 (n-plus-one-detector가 dev에서 감시 중)
+- [x] #19 ErrorBoundary — 이미 존재 (App.tsx에서 전체 래핑, 잘못된 진단)

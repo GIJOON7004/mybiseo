@@ -1,3 +1,4 @@
+import { ENV } from "./_core/env";
 /**
  * Google PageSpeed Insights API Client
  * 실측 성능 데이터(Core Web Vitals)를 조회하여 SEO 진단 정확도를 높인다.
@@ -174,7 +175,7 @@ async function _fetchPageSpeedMetricsInternal(
   strategy: "mobile" | "desktop",
   cacheKey: string,
 ): Promise<PageSpeedMetrics | null> {
-  const apiKey = process.env.GOOGLE_PAGESPEED_API_KEY;
+  const apiKey = ENV.GOOGLE_PAGESPEED_API_KEY;
   if (!apiKey) {
     console.warn("[PageSpeed] GOOGLE_PAGESPEED_API_KEY not set, skipping PageSpeed analysis");
     return null;

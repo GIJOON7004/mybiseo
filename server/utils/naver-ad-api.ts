@@ -1,3 +1,4 @@
+import { ENV } from "../_core/env";
 /**
  * 네이버 검색광고 API 실연동 모듈
  * - RelKwdStat: 키워드 검색량 조회
@@ -9,9 +10,9 @@ const BASE_URL = "https://api.searchad.naver.com";
 
 function getApiCredentials() {
   return {
-    apiKey: process.env.NAVER_AD_API_ACCESS_LICENSE || "",
-    secretKey: process.env.NAVER_AD_API_SECRET_KEY || "",
-    customerId: process.env.NAVER_AD_API_CUSTOMER_ID || "",
+    apiKey: ENV.NAVER_AD_API_ACCESS_LICENSE || "",
+    secretKey: ENV.NAVER_AD_API_SECRET_KEY || "",
+    customerId: ENV.NAVER_AD_API_CUSTOMER_ID || "",
   };
 }
 

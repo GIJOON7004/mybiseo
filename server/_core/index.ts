@@ -94,6 +94,17 @@ startServer().catch(console.error);
 
 // Graceful shutdown
 import { closeDb } from "../db";
+
+// ─── Global Error Handlers ───
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[FATAL] Unhandled Rejection at:", promise, "reason:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("[FATAL] Uncaught Exception:", error);
+  // 프로세스를 즉시 종료하지 않고 graceful shutdown 시도
+  setTimeout(() => process.exit(1), 3000);
+});
+
 const shutdown = async (signal: string) => {
   console.log(`\n[${signal}] Shutting down gracefully...`);
   await closeDb();

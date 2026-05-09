@@ -1,3 +1,7 @@
+const MAX_CONCURRENT_PAGES = 5;
+let activePages = 0;
+const waitQueue: Array<() => void> = [];
+
 /**
  * Browser Pool 싱글톤
  * 
@@ -99,3 +103,20 @@ export async function drainPool(): Promise<void> {
 // Graceful shutdown
 process.on("SIGTERM", drainPool);
 process.on("SIGINT", drainPool);
+
+
+/** 동시성 제어 — MAX_CONCURRENT_PAGES 초과 시 대기 */
+async function acquireSlot(): Promise<void> {
+  if (activePages < MAX_CONCURRENT_PAGES) {
+    activePages++;
+    return;
+  }
+  return new Promise<void>((resolve) => {
+    waitQueue.push(() => { activePages++; resolve(); });
+  });
+}
+function releaseSlot(): void {
+  activePages--;
+  const next = waitQueue.shift();
+  if (next) next();
+}

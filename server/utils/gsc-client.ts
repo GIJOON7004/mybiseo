@@ -1,3 +1,4 @@
+import { ENV } from "../_core/env";
 /**
  * Google Search Console API 클라이언트
  * 
@@ -108,7 +109,7 @@ async function getAccessToken(serviceAccountKey: string): Promise<string | null>
  * Google Search Console Search Analytics API를 호출합니다.
  */
 export async function querySearchAnalytics(params: GSCQueryParams): Promise<GSCResult> {
-  const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  const serviceAccountKey = ENV.GOOGLE_SERVICE_ACCOUNT_KEY;
   
   if (!serviceAccountKey) {
     return {
@@ -182,7 +183,7 @@ export async function querySearchAnalytics(params: GSCQueryParams): Promise<GSCR
  * GSC 연동 상태를 확인합니다.
  */
 export function getGSCStatus(): { available: boolean; reason?: string } {
-  const key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+  const key = ENV.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (!key) {
     return { available: false, reason: "GOOGLE_SERVICE_ACCOUNT_KEY 환경변수 미설정" };
   }
