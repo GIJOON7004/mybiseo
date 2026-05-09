@@ -4,7 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
-import { injectMedicalGuard } from "../lib/medical-law-gate";
+import { injectMedicalGuard, validateMedicalContent, withMedicalGate } from "../lib/medical-law-gate";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { getHospitalProfileByUserId } from "../db";
 import { TRPCError } from "@trpc/server";
@@ -210,22 +210,35 @@ ${input.additionalContext ? `추가 맥락: ${input.additionalContext}` : ""}
 
       const content = result.choices[0]?.message?.content;
       const parsed = JSON.parse(typeof content === "string" ? content : "{}");
-
-      // 초안 상태로 저장
+      
+      // 의료법 출력 검증 (Fail-Close)
+      const formattedContent = formatBlogContent(parsed.content);
+      const gateResult = withMedicalGate(formattedContent);
+      const titleValidation = validateMedicalContent(parsed.title + " " + parsed.excerpt);
+      
+      // 초안 상태로 저장 (위반 여부와 관계없이 저장하되, 위반 시 경고 포함)
       await createBlogPost({
         categoryId: input.categoryId,
         title: parsed.title,
         slug: parsed.slug + "-" + Date.now().toString(36),
         excerpt: parsed.excerpt,
-        content: formatBlogContent(parsed.content),
+        content: formattedContent,
         metaTitle: parsed.metaTitle,
         metaDescription: parsed.metaDescription,
         tags: parsed.tags,
         readingTime: parsed.readingTime || 5,
         published: "draft",
       });
-
-      return { success: true, post: { ...parsed, content: formatBlogContent(parsed.content) } } as const;
+      return {
+        success: true,
+        post: { ...parsed, content: formattedContent },
+        medicalCompliance: {
+          contentValid: gateResult.validation.isValid,
+          titleValid: titleValidation.isValid,
+          violations: [...gateResult.validation.violations, ...titleValidation.violations],
+          disclaimer: gateResult.disclaimer,
+        },
+      } as const;
     }),
 
   // 키워드 추천

@@ -4,7 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
-import { injectMedicalGuard } from "../lib/medical-law-gate";
+import { injectMedicalGuard, withMedicalGate } from "../lib/medical-law-gate";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   createBookingSlot, createInquiry, deleteBookingSlot, deleteInquiry,
@@ -231,6 +231,18 @@ JSON 형식으로 응답해주세요.`) },
         }
       });
       const aiData = JSON.parse(typeof aiResponse.choices[0].message.content === "string" ? aiResponse.choices[0].message.content : "{}");
-      return aiData;
+
+      // 의료법 출력 검증 — SNS 마케팅 팁에서 과장 광고 표현 검사
+      const allTipText = (aiData.tips || []).map((t: any) => `${t.title} ${t.description} ${(t.contentIdeas || []).join(" ")}`).join(" ");
+      const gateResult = withMedicalGate(allTipText + " " + (aiData.overallStrategy || ""));
+
+      return {
+        ...aiData,
+        medicalCompliance: {
+          isValid: gateResult.validation.isValid,
+          violations: gateResult.validation.violations,
+          disclaimer: gateResult.disclaimer,
+        },
+      };
     }),
 });

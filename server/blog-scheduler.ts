@@ -33,118 +33,22 @@ import {
 } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { sendEmailViaNaver } from "./notifier";
+import {
+  formatBlogContent,
+  getSeasonalContext,
+  validatePostQuality,
+  addHistory,
+  getHistory,
+  getKSTTime,
+  isAiMonitorTime,
+  isPublishTime,
+  isKeywordGenTime,
+  normalizeUrlForDiag,
+  formatWeeklyBriefing,
+} from "./scheduler/utils";
+import { AUTO_BLOG_PROMPT, MONTHLY_KEYWORD_PROMPT, FOLLOWUP_3D_SUBJECT, FOLLOWUP_7D_SUBJECT } from "./scheduler/prompts";
+import { buildFollowup3dEmailNew as buildFollowup3dHtml, buildFollowup7dEmailNew as buildFollowup7dHtml } from "./email-templates";
 
-/**
- * 블로그 콘텐츠 후처리 포맷팅 — AI가 생성한 마크다운 콘텐츠의 가독성을 자동으로 개선
- */
-function formatBlogContent(content: string): string {
-  let formatted = content;
-  formatted = formatted.replace(/\r\n/g, '\n');
-  formatted = formatted.replace(/\n*(## [^\n]+)/g, '\n\n\n$1\n\n');
-  formatted = formatted.replace(/\n*(### [^\n]+)/g, '\n\n$1\n');
-  formatted = formatted.replace(/\n{4,}/g, '\n\n\n');
-  const lines = formatted.split('\n');
-  const result: string[] = [];
-  for (const line of lines) {
-    if (line.startsWith('#') || line.startsWith('-') || line.startsWith('|') || line.trim() === '') {
-      result.push(line);
-      continue;
-    }
-    const sentences = line.split(/(?<=[.!?])\s+/);
-    if (sentences.length > 5) {
-      const mid = Math.ceil(sentences.length / 2);
-      result.push(sentences.slice(0, mid).join(' '));
-      result.push('');
-      result.push(sentences.slice(mid).join(' '));
-    } else {
-      result.push(line);
-    }
-  }
-  formatted = result.join('\n');
-  formatted = formatted.trim();
-  return formatted;
-}
-
-// ── 블로그 생성 프롬프트 (v2 — 품질 강화) ──
-const AUTO_BLOG_PROMPT = `당신은 AEO(AI Engine Optimization) / GEO(Generative Engine Optimization) 전문 병원 마케팅 블로그 라이터입니다.
-ChatGPT, Gemini, Claude, Perplexity 등 AI 검색엔진이 답변에 인용하는 구조로 블로그를 작성합니다.
-네이버·구글 검색 최적화(SEO)는 기본이고, 그 위에 AI 검색엔진 인용 최적화(AEO/GEO)를 추가합니다.
-
-## AEO/GEO 최적화 규칙
-1. 제목: 환자/원장님이 AI에게 질문할 법한 자연어 키워드 포함, 호기심 유발 (50자 이내)
-2. 요약(excerpt): AI가 답변 요약으로 사용할 수 있는 핵심 2~3문장 (150자 이내)
-3. 본문: 마크다운 형식, H2/H3 소제목 활용, Q&A 패턴 자연스럽게 포함, 표 포함 가능, 1500~2500자
-4. E-E-A-T 강화: 전문의 경험(Experience)·전문성(Expertise)·권위(Authority)·신뢰(Trust)를 드러내는 문체
-5. 구조화된 데이터: 핵심 정보를 "질문: ... / 답변: ..." 패턴으로 AI가 추출하기 쉬운 형태로 정리
-6. 구체적 수치·사례·팁 포함으로 AI 인용 신뢰도 확보
-7. 자사 제품(MY비서) 직접 홍보 금지 — 객관적 정보 제공에 집중
-8. 외부 링크 사용 금지
-9. metaTitle: AI 검색엔진이 제목으로 사용할 수 있는 60자 이내
-10. metaDescription: AI가 요약으로 인용할 수 있는 1~2문장 (155자 이내)
-11. 태그: 관련 키워드 5~7개 (쉼표 구분)
-
-## 품질 기준
-- 반드시 H2 소제목 3개 이상 포함
-- 각 섹션은 최소 2문단 이상
-- 도입부에서 독자의 고민/문제를 공감하는 문장으로 시작
-- 마무리에 실행 가능한 액션 아이템 또는 체크리스트 포함
-- 전문 용어 사용 시 쉬운 설명 병기
-
-## ⭐ AI 인용 최적 블록 규칙 (가장 중요)
-AI 검색엔진(ChatGPT, Gemini, Perplexity 등)은 답변에 인용할 때 134~167단어 길이의 자기완결형 문단을 가장 선호합니다.
-1. 핵심 정보 문단을 134~167단어(한국어 80~120어절) 길이로 작성
-2. 각 문단은 다른 문맥 없이도 독립적으로 의미가 통하는 자기완결형 구조
-3. 각 H2/H3 섹션의 첫 문단을 "질문: [AI에게 물어볼 법한 자연어 질문]" + "답변: [134~167단어 최적 블록]" 형식으로 작성
-4. 문단 첫 문장에 핵심 키워드 포함
-5. 최소 3개 이상의 Q&A 블록 포함
-6. 각 최적 블록에 구체적 수치(예: "평균 10년", "90% 이상") 포함으로 AI 신뢰도 확보
-
-## ⭐ 가독성 규칙 (매우 중요 — 반드시 준수)
-- 문단 사이에 반드시 빈 줄(\n\n)을 넣어 시각적으로 여백을 만들 것
-- 한 문단은 최대 3~4문장으로 짧게 작성. 길어지면 새 문단으로 나눌 것
-- H2 소제목 앞뒤로 빈 줄 2개씩 넣을 것 (\n\n## 소제목\n\n)
-- H3 소제목 앞에도 빈 줄 1개 넣을 것
-- 3개 이상 나열할 때는 반드시 불릿 포인트(-) 목록으로 작성
-- 핵심 키워드나 중요 수치는 **굵은 글씨**로 강조
-- 긴 설명보다 짧은 문장 + 줄바꿈으로 호흡을 만들 것
-- 도입부는 1~2문장으로 짧게 시작하고, 바로 다음 줄에서 공감 포인트를 던질 것
-- 표(테이블)를 사용할 때도 표 앞뒤로 빈 줄을 넣을 것
-- 전체적으로 "시원하게 읽히는" 느낌을 주는 것이 목표. 빼곡하게 채워진 글은 절대 금지.
-
-## 중복 방지
-- 아래 "기존 글 제목 목록"과 겹치지 않는 새로운 관점/주제로 작성하세요.
-- 같은 키워드라도 다른 각도(비용 분석, 사례 연구, 트렌드, 실전 가이드 등)로 접근하세요.
-
-## 응답 형식 (반드시 이 JSON 형식으로)
-{
-  "title": "블로그 제목",
-  "slug": "url-friendly-slug-in-english",
-  "excerpt": "요약 텍스트",
-  "content": "마크다운 본문 전체",
-  "metaTitle": "검색 노출용 제목",
-  "metaDescription": "검색 노출용 설명",
-  "tags": "태그1, 태그2, 태그3, 태그4, 태그5",
-  "readingTime": 5
-}`;
-
-// ── 월간 키워드 선정 프롬프트 (v2 — 계절/시기 반영) ──
-const MONTHLY_KEYWORD_PROMPT = `당신은 AEO/GEO 관점의 병원 마케팅 키워드 전문가입니다.
-AI 검색엔진(ChatGPT, Gemini, Claude, Perplexity)이 답변에 인용할 수 있는 콘텐츠를 만들기 위한 키워드를 선정합니다.
-
-## 규칙
-- 환자가 AI에게 질문할 법한 자연어 키워드 위주 (예: "임플란트 후 통증 얼마나", "라섹 부작용 있나요")
-- 해당 월의 계절, 시기, 트렌드를 반영 (예: 여름=제모/자외선, 겨울=보습/리프팅, 연초=건강검진, 연말=연말정산 의료비)
-- AI 검색엔진에서 경쟁이 낮으면서 인용 가능성이 높은 롱테일 키워드 위주
-- 이미 사용된 키워드와 겹치지 않도록 새로운 키워드만 추천
-- 각 카테고리에서 균등하게 선정
-
-## 응답 형식
-{
-  "keywords": [
-    {"keyword": "키워드1", "categorySlug": "카테고리슬러그", "reason": "선정 이유"},
-    {"keyword": "키워드2", "categorySlug": "카테고리슬러그", "reason": "선정 이유"}
-  ]
-}`;
 
 // ── 스케줄러 상태 ──
 let schedulerInterval: ReturnType<typeof setInterval> | null = null;
@@ -153,7 +57,6 @@ let lastRunResult: { success: boolean; title?: string; error?: string } | null =
 let lastKeywordGenAt: Date | null = null;
 let lastKeywordGenResult: { success: boolean; count?: number; error?: string } | null = null;
 let isRunning = false;
-let runHistory: Array<{ date: string; type: "publish" | "keyword_gen" | "ai_monitor" | "followup_email" | "benchmark" | "chat_insight" | "auto_diagnosis" | "monthly_diagnosis" | "weekly_briefing"; success: boolean; detail: string }> = [];
 let lastAiMonitorAt: Date | null = null;
 let lastAiMonitorResult: { success: boolean; count?: number; error?: string } | null = null;
 let lastAutoDiagnosisAt: Date | null = null;
@@ -185,35 +88,10 @@ export function getSchedulerStatus() {
     lastAiMonitorResult,
     lastAutoDiagnosisAt: lastAutoDiagnosisAt?.toISOString() ?? null,
     lastAutoDiagnosisResult,
-    recentHistory: runHistory.slice(-10),
+    recentHistory: getHistory().slice(-10),
   };
 }
 
-/**
- * 현재 월의 계절/시기 컨텍스트 생성
- */
-function getSeasonalContext(): string {
-  const now = new Date();
-  const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  const month = kstDate.getMonth() + 1; // 1~12
-
-  const seasonMap: Record<number, string> = {
-    1: "겨울 (신년, 건강검진 시즌, 연말정산 의료비 공제, 피부 건조/보습)",
-    2: "겨울~초봄 (발렌타인, 졸업 시즌, 피부 관리, 리프팅 수요 증가)",
-    3: "봄 (개학/입학, 꽃가루 알레르기, 봄맞이 피부 관리, 다이어트 시즌 시작)",
-    4: "봄 (벚꽃 시즌, 야외활동 증가, 자외선 차단, 봄철 피부 트러블)",
-    5: "초여름 (가정의달, 어버이날 효도 시술, 자외선 관리, 제모 시즌 시작)",
-    6: "여름 (장마, 여름휴가 준비, 바디 시술, 제모, 다이어트 피크)",
-    7: "여름 (휴가 시즌, 자외선 피해, 여름 피부 관리, 바디 시술 피크)",
-    8: "여름~초가을 (개학 준비, 여름 피부 회복, 가을 시술 준비)",
-    9: "가을 (추석, 환절기 피부, 가을 리프팅, 탈모 관리 시즌)",
-    10: "가을 (건조한 날씨, 보습 관리, 할로윈, 겨울 시술 준비)",
-    11: "초겨울 (수능, 겨울 피부 관리, 연말 시술 예약, 블랙프라이데이)",
-    12: "겨울 (연말, 크리스마스, 겨울방학 시술, 신년 준비, 보습/리프팅)",
-  };
-
-  return `현재: ${kstDate.getFullYear()}년 ${month}월\n시기적 특성: ${seasonMap[month] || "일반"}`;
-}
 
 /**
  * 매월 1일 — AI가 그 달의 키워드 8개를 선정하여 큐에 등록
@@ -337,40 +215,6 @@ ${usedKeywords || "없음"}
   }
 }
 
-/**
- * 글 품질 검증 — 최소 기준 미달 시 재생성 요청
- */
-function validatePostQuality(parsed: any): { valid: boolean; issues: string[] } {
-  const issues: string[] = [];
-
-  if (!parsed.title || parsed.title.length < 10) {
-    issues.push("제목이 너무 짧습니다 (10자 이상)");
-  }
-  if (!parsed.content || parsed.content.length < 800) {
-    issues.push("본문이 너무 짧습니다 (800자 이상)");
-  }
-  if (!parsed.excerpt || parsed.excerpt.length < 20) {
-    issues.push("요약이 너무 짧습니다 (20자 이상)");
-  }
-
-  // H2 소제목 3개 이상 체크
-  const h2Count = (parsed.content || "").match(/^##\s/gm)?.length || 0;
-  if (h2Count < 2) {
-    issues.push(`H2 소제목이 부족합니다 (현재 ${h2Count}개, 최소 2개)`);
-  }
-
-  if (!parsed.metaTitle || parsed.metaTitle.length < 10) {
-    issues.push("메타 타이틀이 너무 짧습니다");
-  }
-  if (!parsed.metaDescription || parsed.metaDescription.length < 30) {
-    issues.push("메타 디스크립션이 너무 짧습니다");
-  }
-  if (!parsed.tags || parsed.tags.split(",").length < 3) {
-    issues.push("태그가 부족합니다 (최소 3개)");
-  }
-
-  return { valid: issues.length === 0, issues };
-}
 
 /**
  * pending 상태의 키워드 중 하나를 선택하여 블로그 글 생성 (재시도 포함)
@@ -564,180 +408,6 @@ ${seasonalContext}
   }
 }
 
-/**
- * 실행 히스토리 추가
- */
-function addHistory(type: "publish" | "keyword_gen" | "ai_monitor" | "followup_email" | "benchmark" | "chat_insight" | "auto_diagnosis" | "monthly_diagnosis" | "weekly_briefing", success: boolean, detail: string) {
-  const now = new Date();
-  const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  runHistory.push({
-    date: kstDate.toISOString().replace("T", " ").slice(0, 19) + " KST",
-    type,
-    success,
-    detail,
-  });
-  // 최근 50개만 유지
-  if (runHistory.length > 50) {
-    runHistory = runHistory.slice(-50);
-  }
-}
-
-/**
- * KST 기준 현재 시간 정보
- */
-function getKSTTime() {
-  const now = new Date();
-  const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-  return {
-    year: kstDate.getUTCFullYear(),
-    month: kstDate.getUTCMonth() + 1,
-    day: kstDate.getUTCDate(),
-    dayOfWeek: kstDate.getUTCDay(), // 0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토
-    hour: kstDate.getUTCHours(),
-    minute: kstDate.getUTCMinutes(),
-  };
-}
-
-/**
- * 주간 브리핑 포맷팅 — 통계 데이터를 가독성 높은 텍스트로 변환
- */
-function formatWeeklyBriefing(data: Awaited<ReturnType<typeof getWeeklyBriefingData>>): string {
-  // 전주 대비 증감률 계산 헬퍼
-  function delta(current: number, prev: number): string {
-    if (prev === 0 && current === 0) return "";
-    if (prev === 0) return current > 0 ? ` (▲ 신규)` : "";
-    const diff = current - prev;
-    const pct = Math.round((diff / prev) * 100);
-    if (diff > 0) return ` (▲${diff}건, +${pct}%)`;
-    if (diff < 0) return ` (▼${Math.abs(diff)}건, ${pct}%)`;
-    return " (→ 전주 동일)";
-  }
-
-  const lines: string[] = [];
-  lines.push(`📊 MY비서 주간 브리핑`);
-  lines.push(`기간: ${data.period.from} ~ ${data.period.to}`);
-  lines.push(``);
-  lines.push(`━━ 핵심 지표 (전주 대비) ━━`);
-  lines.push(``);
-  lines.push(`📝 블로그: ${data.blog.weekly}건 발행${delta(data.blog.weekly, data.blog.prevWeek)} │ 누적 ${data.blog.total}건`);
-  lines.push(`💬 챗봇 상담: ${data.chat.weeklySessions}건${delta(data.chat.weeklySessions, data.chat.prevWeekSessions)} │ 예약문의 ${data.chat.weeklyInquiries}건${delta(data.chat.weeklyInquiries, data.chat.prevWeekInquiries)}`);
-  lines.push(`🔍 AI 인용 진단: ${data.diagnosis.weekly}건${delta(data.diagnosis.weekly, data.diagnosis.prevWeek)} │ 누적 ${data.diagnosis.total}건`);
-  lines.push(`📥 신규 리드: ${data.leads.weekly}건${delta(data.leads.weekly, data.leads.prevWeek)} │ 누적 ${data.leads.total}건`);
-  lines.push(`✨ AI 블로그 체험: ${data.trials.weekly}건${delta(data.trials.weekly, data.trials.prevWeek)}`);
-  lines.push(`🏥 계약 병원: ${data.hospitals.contracted}개`);
-  lines.push(``);
-  // 하이라이트 요약 (전주 대비 변화 반영)
-  const highlights: string[] = [];
-  if (data.chat.weeklyInquiries > 0) highlights.push(`예약문의 ${data.chat.weeklyInquiries}건 발생${delta(data.chat.weeklyInquiries, data.chat.prevWeekInquiries)} — 빠른 후속 조치 권장`);
-  if (data.leads.weekly > 0) highlights.push(`신규 리드 ${data.leads.weekly}건${delta(data.leads.weekly, data.leads.prevWeek)} — 영업 파이프라인 확인 필요`);
-  if (data.blog.weekly === 0 && data.blog.prevWeek > 0) highlights.push(`이번 주 블로그 발행 0건 (전주 ${data.blog.prevWeek}건) — 콘텐츠 전략 점검 필요`);
-  if (data.chat.weeklySessions > data.chat.prevWeekSessions * 1.5 && data.chat.weeklySessions > 5) highlights.push(`챗봇 상담 급증${delta(data.chat.weeklySessions, data.chat.prevWeekSessions)} — 자주 묻는 질문 분석 권장`);
-  if (data.diagnosis.weekly > data.diagnosis.prevWeek * 2 && data.diagnosis.weekly > 3) highlights.push(`AI 인용 진단 급증${delta(data.diagnosis.weekly, data.diagnosis.prevWeek)} — 마케팅 관심도 상승 중`);
-  if (highlights.length > 0) {
-    lines.push(`━━ 주요 액션 포인트 ━━`);
-    lines.push(``);
-    highlights.forEach(h => lines.push(`• ${h}`));
-    lines.push(``);
-  }
-  lines.push(`상세 현황은 관리자 대시보드에서 확인하세요.`);
-  return lines.join("\n");
-}
-
-/**
- * AI 모니터링 시간 체크: 매주 월(1) 09:00 KST
- */
-function isAiMonitorTime(): boolean {
-  const kst = getKSTTime();
-  return kst.dayOfWeek === 1 && kst.hour === 9;
-}
-
-/**
- * AI 모니터링 전체 실행
- */
-export async function runAutoAiMonitor(): Promise<{ success: boolean; checkedKeywords: number; totalMentions: number }> {
-  const keywords = await getAiMonitorKeywords(true);
-  if (keywords.length === 0) {
-    return { success: true, checkedKeywords: 0, totalMentions: 0 };
-  }
-
-  let totalMentions = 0;
-  const platforms = ["chatgpt", "gemini", "claude", "perplexity", "grok"] as const;
-
-  for (const keyword of keywords) {
-    const queries = [
-      `${keyword.keyword} 추천 병원`,
-      `${keyword.specialty || ""} ${keyword.keyword} 잘하는 곳`,
-      `${keyword.hospitalName} ${keyword.keyword} 후기`,
-    ];
-
-    for (const platform of platforms) {
-      const query = queries[Math.floor(Math.random() * queries.length)];
-      try {
-        const llmResponse = await invokeLLM({
-          messages: [
-            {
-              role: "system",
-              content: `당신은 ${platform} AI 검색엔진입니다. 사용자의 질문에 대해 자연스럽게 답변해주세요. 특정 병원이나 의료기관을 추천할 때는 실제로 존재하는 곳을 언급해주세요. 답변은 한국어로 200자 이내로 작성해주세요.`,
-            },
-            { role: "user", content: query },
-          ],
-        });
-
-        const rawContent = llmResponse?.choices?.[0]?.message?.content;
-        const responseText = typeof rawContent === "string" ? rawContent : "응답 없음";
-        const mentioned = responseText.includes(keyword.hospitalName);
-        if (mentioned) totalMentions++;
-
-        let sentiment: "positive" | "neutral" | "negative" = "neutral";
-        if (mentioned) {
-          const positiveWords = ["추천", "좋은", "유명", "전문", "우수", "만족", "신뢰"];
-          const negativeWords = ["불만", "주의", "문제", "단점"];
-          if (positiveWords.some(w => responseText.includes(w))) sentiment = "positive";
-          if (negativeWords.some(w => responseText.includes(w))) sentiment = "negative";
-        }
-
-        let mentionContext = "";
-        if (mentioned) {
-          const idx = responseText.indexOf(keyword.hospitalName);
-          const start = Math.max(0, idx - 30);
-          const end = Math.min(responseText.length, idx + keyword.hospitalName.length + 30);
-          mentionContext = (start > 0 ? "..." : "") + responseText.slice(start, end) + (end < responseText.length ? "..." : "");
-        }
-
-        await createAiMonitorResult({
-          keywordId: keyword.id,
-          platform,
-          query,
-          response: responseText,
-          mentioned: mentioned ? 1 : 0,
-          mentionContext: mentionContext || null,
-          sentiment,
-          rank: null,
-        });
-      } catch (err) {
-        console.error(`[AIMonitor] ${platform} 검사 실패:`, err);
-      }
-    }
-  }
-
-  return { success: true, checkedKeywords: keywords.length, totalMentions };
-}
-
-/**
- * 발행 시간 체크: 매주 화(2)/금(5) 10:00 KST
- */
-function isPublishTime(): boolean {
-  const kst = getKSTTime();
-  return (kst.dayOfWeek === 2 || kst.dayOfWeek === 5) && kst.hour === 10;
-}
-
-/**
- * 키워드 선정 시간 체크: 매월 1일 00:10 KST
- */
-function isKeywordGenTime(): boolean {
-  const kst = getKSTTime();
-  return kst.day === 1 && kst.hour === 0 && kst.minute >= 10 && kst.minute < 40;
-}
 
 /**
  * 스케줄러 시작 — 10분마다 체크
@@ -1152,35 +822,6 @@ export async function runMonthlyBatchDiagnosis() {
   return { diagnosed, failed, skipped, totalUrls };
 }
 
-/** URL 정규화 (진단용) */
-function normalizeUrlForDiag(url: string): string {
-  let u = url.trim();
-  if (!u.startsWith("http://") && !u.startsWith("https://")) u = "https://" + u;
-  try {
-    const parsed = new URL(u);
-    return parsed.origin + (parsed.pathname === "/" ? "/" : parsed.pathname);
-  } catch {
-    return u;
-  }
-}
-
-/**
- * 스케줄러 중지
- */
-// ── 후속 이메일 발송 ──
-const FOLLOWUP_3D_SUBJECT = "[MY비서] AI 인용, 개선하셨나요?";
-const FOLLOWUP_7D_SUBJECT = "[MY비서] 경쟁 병원은 이미 AI 인용을 시작했습니다";
-
-function buildFollowup3dHtml(email: string, url: string, score: number | null, aiScore: number | null): string {
-  const { buildFollowup3dEmailNew } = require("./email-templates");
-  return buildFollowup3dEmailNew({ email, url, score, aiScore });
-}
-
-function buildFollowup7dHtml(email: string, url: string, score: number | null, aiScore: number | null): string {
-  const { buildFollowup7dEmailNew } = require("./email-templates");
-  return buildFollowup7dEmailNew({ email, url, score, aiScore });
-}
-
 /**
  * 월간 리포트 자동 발송 — 계약 고객에게 매월 1일 AI 인용 리포트 발송
  */
@@ -1237,7 +878,7 @@ export async function runFollowupEmails(): Promise<{ sent3d: number; sent7d: num
     // 3일 후속
     const leads3d = await getLeadsForFollowup3d();
     for (const lead of leads3d) {
-      const html = buildFollowup3dHtml(lead.email, lead.url, lead.totalScore, lead.aiScore);
+      const html = buildFollowup3dHtml({ email: lead.email, url: lead.url, score: lead.totalScore, aiScore: lead.aiScore });
       const ok = await sendEmailViaNaver({ to: lead.email, subject: FOLLOWUP_3D_SUBJECT, html });
       if (ok) {
         await markFollowupSent(lead.id, "3d");
@@ -1248,7 +889,7 @@ export async function runFollowupEmails(): Promise<{ sent3d: number; sent7d: num
     // 7일 후속
     const leads7d = await getLeadsForFollowup7d();
     for (const lead of leads7d) {
-      const html = buildFollowup7dHtml(lead.email, lead.url, lead.totalScore, lead.aiScore);
+      const html = buildFollowup7dHtml({ email: lead.email, url: lead.url, score: lead.totalScore, aiScore: lead.aiScore });
       const ok = await sendEmailViaNaver({ to: lead.email, subject: FOLLOWUP_7D_SUBJECT, html });
       if (ok) {
         await markFollowupSent(lead.id, "7d");

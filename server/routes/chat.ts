@@ -4,7 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
-import { injectMedicalGuard } from "../lib/medical-law-gate";
+import { injectMedicalGuard, withMedicalGate } from "../lib/medical-law-gate";
 import { adminProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   deleteChatSession, getAllChatSessions, getChatInsightStats, getChatMessagesBySession,
@@ -74,12 +74,25 @@ export const chatRouter = router({
       const showForm = text.includes("[SHOW_INQUIRY_FORM]");
       const cleanText = text.replace(/\[SHOW_INQUIRY_FORM\]/g, "").trim();
 
+      // 의료법 출력 검증 — 환자 대면 채널이므로 가장 엄격하게 적용
+      const gateResult = withMedicalGate(cleanText);
+      let finalReply = cleanText;
+      if (!gateResult.validation.isValid) {
+        // 위반 발견 시 디스클레이머 추가 + 위반 부분 경고 로깅
+        console.warn("[ChatBot] 의료법 위반 감지:", gateResult.validation.violations);
+        finalReply = cleanText + "\n\n" + gateResult.disclaimer;
+      }
+
       // AI 응답 저장
-      await saveChatMessage(session.id, "assistant", cleanText);
+      await saveChatMessage(session.id, "assistant", finalReply);
 
       return {
-        reply: cleanText,
+        reply: finalReply,
         showInquiryForm: showForm,
+        medicalCompliance: {
+          isValid: gateResult.validation.isValid,
+          violations: gateResult.validation.violations,
+        },
       };
     }),
 

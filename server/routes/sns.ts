@@ -4,7 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
-import { injectMedicalGuard } from "../lib/medical-law-gate";
+import { injectMedicalGuard, validateMedicalContent, withMedicalGate } from "../lib/medical-law-gate";
 import { adminProcedure, router } from "../_core/trpc";
 import { createSnsContent, deleteSnsContent, getAllSnsContents } from "../db";
 import { z } from "zod";
@@ -51,13 +51,24 @@ ${input.tone ? `톤: ${input.tone}` : "톤: 친근하고 전문적인"}
       const content = result.choices[0]?.message?.content;
       const parsed = JSON.parse(typeof content === "string" ? content : "{}");
 
+      // 의료법 출력 검증
+      const captionGate = withMedicalGate(parsed.instagramCaption || "");
+      const kakaoGate = validateMedicalContent(parsed.kakaoMessage || "");
+
       await createSnsContent({
         type: "caption",
         input: JSON.stringify(input),
         output: typeof content === "string" ? content : "{}",
       });
 
-      return parsed;
+      return {
+        ...parsed,
+        medicalCompliance: {
+          isValid: captionGate.validation.isValid && kakaoGate.isValid,
+          violations: [...captionGate.validation.violations, ...kakaoGate.violations],
+          disclaimer: captionGate.disclaimer,
+        },
+      };
     }),
 
   generatePromotion: adminProcedure
@@ -99,13 +110,24 @@ ${input.tone ? `톤: ${input.tone}` : "톤: 친근하고 전문적인"}
       const content = result.choices[0]?.message?.content;
       const parsed = JSON.parse(typeof content === "string" ? content : "{}");
 
+      // 의료법 출력 검증 — 프로모션은 특히 과장 광고 위험이 높음
+      const allText = [parsed.instagram, parsed.kakao, parsed.blog, parsed.banner].filter(Boolean).join(" ");
+      const promoGate = withMedicalGate(allText);
+
       await createSnsContent({
         type: "promotion",
         input: JSON.stringify(input),
         output: typeof content === "string" ? content : "{}",
       });
 
-      return parsed;
+      return {
+        ...parsed,
+        medicalCompliance: {
+          isValid: promoGate.validation.isValid,
+          violations: promoGate.validation.violations,
+          disclaimer: promoGate.disclaimer,
+        },
+      };
     }),
 
   generateGuide: adminProcedure
@@ -147,13 +169,24 @@ ${input.focus ? `특별 포커스: ${input.focus}` : ""}
       const content = result.choices[0]?.message?.content;
       const parsed = JSON.parse(typeof content === "string" ? content : "{}");
 
+      // 의료법 출력 검증
+      const guideText = [parsed.instagramCaption, parsed.blogOutline, parsed.weeklyThemes].filter(Boolean).join(" ");
+      const guideGate = withMedicalGate(guideText);
+
       await createSnsContent({
         type: "guide",
         input: JSON.stringify(input),
         output: typeof content === "string" ? content : "{}",
       });
 
-      return parsed;
+      return {
+        ...parsed,
+        medicalCompliance: {
+          isValid: guideGate.validation.isValid,
+          violations: guideGate.validation.violations,
+          disclaimer: guideGate.disclaimer,
+        },
+      };
     }),
 
   history: adminProcedure
