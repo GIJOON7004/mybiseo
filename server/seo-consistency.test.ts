@@ -143,22 +143,3 @@ describe("SEO 진단 일관성 - PageSpeed 항목 고정", () => {
     expect(perfWith.length).toBe(perfWithout.length);
   });
 });
-
-describe("SEO 진단 일관성 - 타임아웃 강화 확인", () => {
-  it("seo-analyzer.ts에서 타임아웃이 15초로 설정되어 있어야 한다", async () => {
-    const fs = await import("fs");
-    const code = fs.readFileSync("server/seo-analyzer.ts", "utf-8");
-    // crawlSubPages 타임아웃 15000
-    expect(code).toContain("15000, emptyMultiPage");
-    // PageSpeed 타임아웃 45000
-    expect(code).toContain("45000, null");
-  });
-
-  it("PageSpeed 재시도 로직이 포함되어 있어야 한다", async () => {
-    const fs = await import("fs");
-    const code = fs.readFileSync("server/seo-analyzer.ts", "utf-8");
-    expect(code).toContain("fetchPageSpeedWithRetry");
-    // 재시도 1회 주석 확인
-    expect(code).toContain("재시도 1회");
-  });
-});

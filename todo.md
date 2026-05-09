@@ -401,3 +401,19 @@
 
 ### 텍스트 수정
 - [x] Hero 섹션 "해외 신환이" → "국내/해외 신환이"로 수정
+
+### 클로드 의견서 3 실행 (코드 구조 개선)
+- [x] P0: .bak2, .bak3 파일 git rm (이미 정리됨)
+- [x] P0: depcheck로 미사용 의존성 감사 (미사용 PDF 라이브러리 package.json에 없음)
+- [x] P0: vite.config.ts NODE_ENV 보안 가드 보강 (이미 적용됨)
+- [x] P0: publicProcedure vs protectedProcedure 인증 전수 조사 (37 public / 161 protected — 모두 의도적)
+- [x] P1: server/ai-visibility/types.ts 추출
+- [x] P1: server/ai-visibility/constants.ts 추출
+- [x] P1: server/ai-visibility/text-utils.ts + sanitizeReportText() 추출
+- [x] P1: server/ai-visibility/score-calculator.ts 추출
+- [x] P2: server/ai-visibility/data-fetcher.ts 추출
+- [x] P2: server/ai-visibility/pdf-renderer.ts 추출
+- [x] 테스트: 가짜 readFileSync+toContain 테스트 제거 (3개 파일 삭제 + 2개 파일 부분 제거)
+- [x] 테스트: characterization 스냅샷 테스트 33개 작성 (ai-visibility.test.ts)
+- [x] P3: db.ts Strangler Fig Facade (server/db/index.ts) — barrel re-export 패턴 적용, 점진적 마이그레이션 준비 완료
+- [~] P3: NanoID publicId 컨럼 추가 — 보류 (admin 전용 1곳만 ID 노출, 공개 URL은 shareToken 사용 중)
