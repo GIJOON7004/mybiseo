@@ -417,3 +417,17 @@
 - [x] 테스트: characterization 스냅샷 테스트 33개 작성 (ai-visibility.test.ts)
 - [x] P3: db.ts Strangler Fig Facade (server/db/index.ts) — barrel re-export 패턴 적용, 점진적 마이그레이션 준비 완료
 - [~] P3: NanoID publicId 컨럼 추가 — 보류 (admin 전용 1곳만 ID 노출, 공개 URL은 shareToken 사용 중)
+
+## AI 피드백 의견5 반영 (4개 AI 종합)
+- [x] Tier 0: dist/ 디렉토리 git에서 제거 + .gitignore 추가 (187개 파일)
+- [x] Tier 0: require("url") → ESM import 변환 (3곳)
+- [x] Tier 1: 의료법 Fail-Close 게이트 모듈 (server/lib/medical-law-gate.ts)
+- [x] Tier 1: blog, sns, chat, engagement, marketingChannel에 injectMedicalGuard 적용
+- [x] Tier 1: 복제→추출 전환 (ai-visibility/ 모듈 import 연결, 동치성 검증)
+- [x] Tier 1: Browser Pool 싱글톤 (server/lib/browser-pool.ts) - cold-start 제거
+- [x] Tier 1: html-engine, pdf-renderer, search-screenshot에 Pool 적용
+- [x] Tier 1: report.ts shareToken을 nanoid(21)로 교체
+- [x] Tier 1: N+1 Query Detector (dev 환경 전용, server/lib/n-plus-one-detector.ts)
+- [x] Tier 2: ReportContext + SectionPlugin 인터페이스 정의 (server/lib/report-plugin-types.ts)
+- [x] Tier 2: db.ts Strangler Fig 마이그레이션 가이드 (server/db/README.md)
+- [x] 테스트: medical-law-gate 7개, n-plus-one-detector 4개, report-plugin-types 5개 (전체 51파일 705테스트 통과)
