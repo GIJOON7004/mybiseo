@@ -549,3 +549,11 @@
 - [x] F-2: MyHospital.tsx (1,330줄) → AiExposureTab, DemoPreview 추출 (426줄 메인 + 3개 서브파일)
 - [x] F-3(보류): Bundle Size Limit — F-2 완료, React Compiler 활성 상태로 재평가 불필요
 - [x] F-4: seo-middleware.ts AI 크롤러 미들웨어 보완 — BASE_URL 환경변수화, JSON-LD 9종(Org+WebSite+Software+ProfService+Service×5+Breadcrumb) 통합, llms.txt footer 링크 추가
+
+## 카테고리 G: 보안/인프라/거버넌스 (AI 종합 피드백 G 전용)
+
+- [x] G-2: eslint-plugin-sonarjs Cognitive Complexity ≤ 15 도입 (sonarjs v4.0.3 + server/client 양쪽 warn)
+- [x] G-3: Hotspot 분석 bash 스크립트 작성 (scripts/hotspot.sh — churn×LOC Top 10)
+- [x] G-5: Lighthouse CI workflow 추가 (treosh/lighthouse-ci-action@v12 + budget.json)
+- [x] G-7: ASVS V7+V8+V14 선별 audit + ADR-007 작성 (13/17 통과, 미통과 4개 재검토 트리거 설정)
+- [x] G-6: Slow Query Log — TiDB SUPER 권한 부족으로 설정 불가, 플랫폼 제약으로 제외

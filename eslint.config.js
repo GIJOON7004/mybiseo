@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import reactHooks from "eslint-plugin-react-hooks";
+import sonarjs from "eslint-plugin-sonarjs";
 
 export default tseslint.config(
   // Global ignores
@@ -28,7 +29,11 @@ export default tseslint.config(
   // Server-side rules
   {
     files: ["server/**/*.ts"],
+    plugins: {
+      sonarjs,
+    },
     rules: {
+      "sonarjs/cognitive-complexity": ["warn", 15],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
@@ -44,8 +49,10 @@ export default tseslint.config(
     files: ["client/src/**/*.ts", "client/src/**/*.tsx"],
     plugins: {
       "react-hooks": reactHooks,
+      sonarjs,
     },
     rules: {
+      "sonarjs/cognitive-complexity": ["warn", 15],
       ...reactHooks.configs.recommended.rules,
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "@typescript-eslint/no-explicit-any": "warn",

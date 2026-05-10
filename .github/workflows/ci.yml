@@ -83,3 +83,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true  # 초기 도입 — false positive 정리 후 강제화
+
+  # Lighthouse CI — SEO SaaS 자체 사이트 품질 자동 측정
+  lighthouse:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lighthouse audit
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://mybiseo.com/
+            https://mybiseo.com/diagnose
+          budgetPath: .github/lighthouse-budget.json
+          uploadArtifacts: true
+        continue-on-error: true  # 초기 도입 — 기준선 수집 후 강제화
