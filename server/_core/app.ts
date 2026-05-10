@@ -33,6 +33,7 @@ function securityHeaders(_req: express.Request, res: express.Response, next: exp
       "form-action 'self'",
     ].join("; ")
   );
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   res.removeHeader("Server");
   next();
 }
@@ -97,7 +98,12 @@ export function createApp(): express.Express {
   registerSeoMiddleware(app);
   registerScheduledRoutes(app);
 
-  // tRPC API
+  // tRPC API — API 응답 캐싱 방지 (ASVS 8.2.1)
+  app.use("/api/trpc", (_req, res, next) => {
+    res.setHeader("Cache-Control", "no-store, private");
+    res.setHeader("Pragma", "no-cache");
+    next();
+  });
   app.use(
     "/api/trpc",
     createExpressMiddleware({
