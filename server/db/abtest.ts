@@ -98,3 +98,12 @@ export async function upsertDiagnosisAutomationConfig(data: Partial<DiagnosisAut
   }
 }
 
+
+
+export async function getActiveExperimentForElement(targetElement: string) {
+  const db = await getDb(); if (!db) return null;
+  const [exp] = await db.select().from(schema.abExperiments)
+    .where(and(eq(schema.abExperiments.targetElement, targetElement), eq(schema.abExperiments.status, "running")))
+    .limit(1);
+  return exp || null;
+}

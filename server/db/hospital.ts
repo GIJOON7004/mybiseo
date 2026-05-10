@@ -213,3 +213,14 @@ export async function deleteHospitalInfoItem(id: number, hospitalId: number) {
 
 // ─── 상담 CRM 확장 (파이프라인 통계) ──────────────────────────────
 
+
+export async function getLastAutoDiagnosisDate(hospitalUrl: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select({ diagnosedAt: schema.diagnosisHistory.diagnosedAt })
+    .from(schema.diagnosisHistory)
+    .where(eq(schema.diagnosisHistory.url, hospitalUrl))
+    .orderBy(desc(schema.diagnosisHistory.diagnosedAt))
+    .limit(1);
+  return rows[0]?.diagnosedAt ?? null;
+}

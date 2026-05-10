@@ -30,19 +30,10 @@ import { sampleImages, extractImagesFromHtml } from "./utils/image-sampling";
 const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.6422.175 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 // ── 타입 정의 ──
-export type SeoCheckStatus = "pass" | "fail" | "warning" | "info";
+// SeoCheckStatus moved to seo-analyzer-types.ts
+import type { SeoCheckStatus, SeoCheckItem } from "./seo-analyzer-types";
+export type { SeoCheckStatus, SeoCheckItem };
 
-export interface SeoCheckItem {
-  id: string;
-  category: string;
-  name: string;
-  status: SeoCheckStatus;
-  score: number;
-  maxScore: number;
-  detail: string;
-  recommendation: string;
-  impact: string;
-}
 
 export interface SeoAnalysisResult {
   url: string;

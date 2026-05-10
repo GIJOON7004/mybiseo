@@ -8,7 +8,7 @@ import {
   seoKeywords, InsertSeoKeyword,
   InsertBlogCategory, InsertBlogPost, InsertSnsContent,
 } from "../../drizzle/schema";
-import { getDb } from "../db";
+import { getDb } from "./connection";
 
 
 // ── Blog Category helpers ──

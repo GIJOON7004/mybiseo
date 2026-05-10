@@ -24,12 +24,13 @@ import { seoKeywordRouter, seoAnalyzerRouter } from "./routes/seo";
 import { snsRouter } from "./routes/sns";
 import { treatmentPageRouter } from "./routes/treatmentPage";
 import { abtestRouter, diagnosisAutomationRouter } from "./routes/abtest";
-import {
-  notificationRouter, seoDashboardRouter, seoLeadsRouter, diagnosisRouter,
-  newsletterRouter, awardsRouter, batchDiagnosisRouter, userEventRouter,
-  monthlyBenchmarkRouter, leadScoringRouter, seasonalCalendarRouter,
-  competitorAnalysisRouter, autoOptimizerRouter, trackingRouter, crmRouter,
-} from "./routes/misc";
+
+// === B-2: misc.ts에서 도메인별로 분할된 라우터 ===
+import { notificationRouter } from "./routes/notification";
+import { diagnosisRouter, batchDiagnosisRouter, monthlyBenchmarkRouter } from "./routes/diagnosis";
+import { newsletterRouter, awardsRouter, seoLeadsRouter, seoDashboardRouter, leadScoringRouter } from "./routes/lead";
+import { userEventRouter, trackingRouter, crmRouter } from "./routes/tracking";
+import { seasonalCalendarRouter, competitorAnalysisRouter, autoOptimizerRouter } from "./routes/marketingTools";
 
 export const appRouter = router({
   system: systemRouter,

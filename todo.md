@@ -506,3 +506,10 @@
 - [x] A-8: DB 인덱스 10개 추가 (treatment_pages, automation_rules, marketing_content, user_events 등)
 - [x] A-11: .manus/ 디렉토리 Git 추적 제거 + .gitignore 추가 완료
 - [x] A-12: 소유권 검증 — 모든 protectedProcedure에서 ctx.user.id 기반 검증 이미 적용됨 확인
+
+## 카테고리 B: 아키텍처 구조 부채 개선 (AI 종합 피드백 6차)
+- [x] B-1: db.ts 3,455줄 God Object → 40줄 re-export facade + 16개 도메인 모듈 (admin, hospital, content, content-factory, chat, lead, ad, abtest, interview, misc, user, seo, engagement, analytics, report, notification)
+- [x] B-2: misc.ts(452줄, 15개 라우터) → 4개 도메인 파일로 분할 (notification.ts, diagnosis.ts, lead.ts, tracking.ts, marketingTools.ts)
+- [x] B-3: 순환 의존성 제거 — seo-analyzer-types.ts 추출로 해결, madge "No circular dependency found!" 확인
+- [x] B-4: shared/const.ts ONE_YEAR_MS 레거시 상수 제거 (사용처 0개 확인 후 삭제)
+- [x] B-6: server/_core/index.ts → app.ts(미들웨어 등록) + index.ts(서버 부트스트랩) 분리

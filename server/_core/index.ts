@@ -1,18 +1,11 @@
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
 import { createServer } from "http";
 import net from "net";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { registerOAuthRoutes } from "./oauth";
-import { registerStorageProxy } from "./storageProxy";
-import { registerSeoMiddleware } from "../seo-middleware";
-import { registerScheduledRoutes } from "../routes/scheduled";
-import { registerRateLimiting } from "./rate-limit";
-import { appRouter } from "../routers";
-import { createContext } from "./context";
+import { createApp } from "./app";
 import { serveStatic, setupVite } from "./vite";
+import { closeDb } from "../db";
 
+// ─── Port Discovery ───
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
     const server = net.createServer();
@@ -32,85 +25,10 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
   throw new Error(`No available port found starting from ${startPort}`);
 }
 
+// ─── Server Bootstrap ───
 async function startServer() {
-  const app = express();
-  app.disable("x-powered-by");
-  app.set("trust proxy", 1); // 프록시 환경에서 정확한 클라이언트 IP 식별
-  // Security headers
-  app.use((req, res, next) => {
-    res.setHeader("X-Content-Type-Options", "nosniff");
-    res.setHeader("X-Frame-Options", "DENY");
-    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-    res.setHeader("Permissions-Policy", "camera=(), microphone=(self), geolocation=(), payment=()");
-    res.setHeader(
-      "Content-Security-Policy",
-      [
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.clarity.ms https://www.googletagmanager.com",
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-        "font-src 'self' https://fonts.gstatic.com",
-        "img-src 'self' data: blob: https: http:",
-        "connect-src 'self' https://api.manus.im https://*.clarity.ms https://www.google-analytics.com https://*.googleapis.com",
-        "frame-ancestors 'none'",
-        "base-uri 'self'",
-        "form-action 'self'",
-      ].join("; ")
-    );
-    res.removeHeader("Server");
-    next();
-  });
+  const app = createApp();
   const server = createServer(app);
-  // CORS — 프로덕션 도메인 + 개발 환경 허용
-  const allowedOrigins = [
-    "https://mybiseo.com",
-    "https://www.mybiseo.com",
-    "https://mybiseo-ynrsyg5s.manus.space",
-  ];
-  app.use(cors({
-    origin: process.env.NODE_ENV === "production"
-      ? (origin, cb) => {
-          if (!origin || allowedOrigins.includes(origin)) cb(null, true);
-          else cb(new Error("CORS not allowed"));
-        }
-      : true,
-    credentials: true,
-  }));
-
-  // Body parser (1MB 제한 — DoS 방지)
-  app.use(express.json({ limit: "1mb" }));
-  app.use(express.urlencoded({ limit: "1mb", extended: true }));
-  // Rate Limiting (보안 + LLM 비용 보호)
-  registerRateLimiting(app);
-
-  registerStorageProxy(app);
-  registerOAuthRoutes(app);
-  // Phase 0: SEO 미들웨어 (sitemap, robots.txt, AI 크롤러 대응)
-  registerSeoMiddleware(app);
-  // Heartbeat cron 콜백 라우트
-  registerScheduledRoutes(app);
-  // tRPC API
-  app.use(
-    "/api/trpc",
-    createExpressMiddleware({
-      router: appRouter,
-      createContext,
-    })
-  );
-  // Global error handler — production에서 stack trace 노출 방지
-  // Global error handler — 프로덕션에서 내부 에러 메시지/스택 노출 방지
-  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    const isErrorLike = (e: unknown): e is { status?: number; statusCode?: number; message?: string; stack?: string } =>
-      typeof e === "object" && e !== null;
-    const status = isErrorLike(err) ? (err.status || err.statusCode || 500) : 500;
-    const message = isErrorLike(err) ? err.message : undefined;
-    const stack = isErrorLike(err) ? err.stack : undefined;
-    const isDev = process.env.NODE_ENV === "development";
-    console.error(`[Error ${status}]`, isDev ? err : (message || "Unknown error"));
-    res.status(status).json({
-      error: isDev ? (message || "서버 오류가 발생했습니다.") : "서버 오류가 발생했습니다.",
-      ...(isDev && stack && { stack }),
-    });
-  });
 
   // development mode uses Vite, production mode uses static files
   if (process.env.NODE_ENV === "development") {
@@ -133,19 +51,7 @@ async function startServer() {
 
 startServer().catch(console.error);
 
-// Graceful shutdown
-import { closeDb } from "../db";
-
-// ─── Global Error Handlers ───
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("[FATAL] Unhandled Rejection at:", promise, "reason:", reason);
-});
-process.on("uncaughtException", (error) => {
-  console.error("[FATAL] Uncaught Exception:", error);
-  // 프로세스를 즉시 종료하지 않고 graceful shutdown 시도
-  setTimeout(() => process.exit(1), 3000);
-});
-
+// ─── Graceful Shutdown ───
 const shutdown = async (signal: string) => {
   console.log(`\n[${signal}] Shutting down gracefully...`);
   await closeDb();
@@ -153,3 +59,12 @@ const shutdown = async (signal: string) => {
 };
 process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+// ─── Global Error Handlers ───
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("[FATAL] Unhandled Rejection at:", promise, "reason:", reason);
+});
+process.on("uncaughtException", (error) => {
+  console.error("[FATAL] Uncaught Exception:", error);
+  setTimeout(() => process.exit(1), 3000);
+});

@@ -3,7 +3,7 @@
  * 한국의 "네이버 검색 최적화" 카테고리를 "Google Thailand 최적화"로 대체
  * 카카오→LINE, 네이버 플레이스→Google Maps TH, 네이버 블로그→Facebook TH 등
  */
-import type { SeoCheckItem } from "./seo-analyzer";
+import type { SeoCheckItem } from "./seo-analyzer-types";
 import type { CheerioAPI } from "cheerio";
 
 interface ThItemsContext {

@@ -4,7 +4,7 @@
  * 4개 신규 카테고리 + 기존 카테고리 확장
  */
 import * as cheerio from "cheerio";
-import type { SeoCheckItem } from "./seo-analyzer";
+import type { SeoCheckItem } from "./seo-analyzer-types";
 import type { AggregatedData } from "./multi-page-crawler";
 import type { PageSpeedMetrics } from "./pagespeed-client";
 
