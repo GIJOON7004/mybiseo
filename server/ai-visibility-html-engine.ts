@@ -8,8 +8,7 @@
  * - 페이지 번호 정확한 치환 (regex 수정)
  * - 섹션 번호 순차 정리 (01~10)
  */
-import puppeteer from "puppeteer";
-import { getBrowser, releasePage } from "./lib/browser-pool";
+import { acquirePage, releasePage } from "./lib/browser-pool";
 import * as QRCode from "qrcode";
 import type { RealityDiagnosis } from "./reality-diagnosis";
 import { translateResultToEnglish } from "./ai-visibility-translate";
@@ -192,9 +191,8 @@ export async function generateHtmlPdfReport(
 </body>
 </html>`;
 
-  // ── Puppeteer PDF conversion (Browser Pool 싱글톤) ──
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  // ── Puppeteer PDF conversion (Browser Pool + 동시성 제어) ──
+  const page = await acquirePage();
   try {
     await page.setContent(fullHtml, {
       waitUntil: "networkidle0",
@@ -214,7 +212,7 @@ export async function generateHtmlPdfReport(
     return Buffer.from(pdfBuffer);
   } finally {
     await page.close();
-    await releasePage();
+    releasePage();
   }
 }
 

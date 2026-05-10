@@ -17,6 +17,23 @@ const L2_TTL_MS = 24 * 60 * 60 * 1000; // L2: DB 24시간
 const L1_MAX_ENTRIES = 200;             // L1: 인메모리 최대 200건
 const L2_MAX_ENTRIES = 1000;            // L2: DB 최대 1000건
 
+/**
+ * E-3: 콘텐츠 유형별 차등 TTL 프리셋
+ * 호출부에서 { ttlMs: TTL_PRESETS.SNS } 형태로 전달
+ */
+export const TTL_PRESETS = {
+  /** SNS 콘텐츠 (트렌드 민감) — 1시간 */
+  SNS: 1 * 60 * 60 * 1000,
+  /** 블로그 콘텐츠 (중간 수명) — 6시간 */
+  BLOG: 6 * 60 * 60 * 1000,
+  /** 키워드 분석 — 12시간 */
+  KEYWORD: 12 * 60 * 60 * 1000,
+  /** SEO 진단 / 의료법 검수 (변동 적음) — 24시간 */
+  DIAGNOSIS: 24 * 60 * 60 * 1000,
+  /** 단기 캐시 (일회성 요청) — 30분 */
+  SHORT: 30 * 60 * 1000,
+} as const;
+
 // ── 캐시 엔트리 ──
 interface CacheEntry {
   result: InvokeResult;

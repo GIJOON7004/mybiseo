@@ -530,3 +530,13 @@
 - [x] D-4: process.env 직접 접근 정리 — fonts-base64.ts INTERNAL_BASE_URL 제거 (나머지는 이미 env.ts 경유)
 - [x] D-5: 빈 catch 블록 10개+ → 에러 삼킴 방지 주석 추가 완료
 - [x] D-6: formatBlogContent 정규식 버그 수정 — /^##\s/ → /^##(?!#)\s/ negative lookahead 적용
+
+## 카테고리 E: 성능/확장성 개선 (AI 코드리뷰 기반)
+
+- [x] E-1: Browser Pool 동시성 제어 — seo-analyzer.ts 중복 코드 제거, browser-pool.ts acquireSlot/releaseSlot 통합 export
+- [x] E-2: pdf-renderer Browser Pool 도입 — acquirePage() 동시성 제어 적용 (슬롯 확보 후 페이지 생성)
+- [x] E-3: LLM 캐시 TTL 전략 — TTL_PRESETS 상수 추가 (BLOG 7일, SNS 0, DIAGNOSIS 1시간, REVIEW 3일), aiHub.ts + reality-diagnosis.ts 호출부 적용
+- [x] E-4(축소): LRU cap 이미 구현 확인 (L1: 200건, L2: 1000건, evictOldest + evictExpired 로직 존재)
+- [x] E-5: N+1 쿼리 Production 활성화 — IS_DEV 가드 제거, production에서 logger.warn 출력
+- [x] E-6(보류): ADR-003 보완 — Production 배포 환경 섹션 + 재검토 트리거 4가지 조건 추가
+- [x] E-8: 의존성 감사 — 취약점 39→6개 (미사용 10개 제거, axios 1.16.0 + tRPC 11.17.0 업데이트, @types/express-rate-limit 제거)

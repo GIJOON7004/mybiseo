@@ -4,7 +4,7 @@
  */
 
 import { invokeLLM } from "../_core/llm";
-import { invokeLLMCached } from "../llm-cache";
+import { invokeLLMCached, TTL_PRESETS } from "../llm-cache";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import {
   createAiBlogTrial, createAiContentLog, createCardnewsTemplate, getAiBlogTrialStats,
@@ -161,7 +161,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
               },
             },
           },
-        }, { caller: "aiHub.checkAdLaw" });
+        }, { caller: "aiHub.checkAdLaw", ttlMs: TTL_PRESETS.DIAGNOSIS });
         const rawReview = reviewResult.choices[0].message.content;
         review = JSON.parse(typeof rawReview === "string" ? rawReview : "{}");
       } catch (e) {
@@ -924,7 +924,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
             content: `제목: ${content.generatedTitle}\n\n${content.revisedContent || content.generatedContent}`,
           },
         ],
-      }, { caller: "aiHub.naverHtml" });
+      }, { caller: "aiHub.naverHtml", ttlMs: TTL_PRESETS.BLOG });
       const html = typeof htmlResult.choices[0].message.content === "string"
         ? htmlResult.choices[0].message.content
         : "";

@@ -22,6 +22,7 @@ import { crawlSubPages, type AggregatedData } from "./multi-page-crawler";
 import { fetchPageSpeedMetrics, getCWVRating, type PageSpeedMetrics } from "./pagespeed-client";
 import { displayScore } from "./utils/score-rounding";
 import { enrichWithStandardIds } from "./utils/item-id-registry";
+import { acquireSlot, releaseSlot } from "./lib/browser-pool";
 import { validateMinItems, CATEGORY_MAX_SCORES, TOTAL_MAX_SCORE } from "./utils/check-item-registry";
 import { detectDynamicContent } from "./utils/dynamic-content-detector";
 import { analyzeMultipleKeywords } from "./utils/keyword-exposure-checker";
@@ -80,31 +81,8 @@ const cache = new Map<string, { result: SeoAnalysisResult; expiry: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // ── 동시 진단 안정성: 세마포어 + in-flight 중복 방지 ──
-const MAX_CONCURRENT = 3;
-let activeDiagnoses = 0;
+// acquireSlot/releaseSlot은 browser-pool에서 import (중복 제거)
 const inFlight = new Map<string, Promise<SeoAnalysisResult>>();
-
-function acquireSlot(): Promise<void> {
-  if (activeDiagnoses < MAX_CONCURRENT) {
-    activeDiagnoses++;
-    return Promise.resolve();
-  }
-  return new Promise(resolve => {
-    const check = () => {
-      if (activeDiagnoses < MAX_CONCURRENT) {
-        activeDiagnoses++;
-        resolve();
-      } else {
-        setTimeout(check, 500);
-      }
-    };
-    setTimeout(check, 500);
-  });
-}
-
-function releaseSlot() {
-  activeDiagnoses = Math.max(0, activeDiagnoses - 1);
-}
 
 function getCached(url: string): SeoAnalysisResult | null {
   const entry = cache.get(url);

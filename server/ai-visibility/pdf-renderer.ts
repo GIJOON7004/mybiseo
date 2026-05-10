@@ -2,11 +2,10 @@
  * AI 가시성 진단 보고서 — Puppeteer PDF 렌더링 모듈
  * 
  * HTML → PDF 변환 로직을 분리하여 단일 책임 원칙 준수.
+ * Browser Pool의 acquirePage()를 사용하여 동시성 제어 + 싱글톤 재사용.
  * 향후 PDF 엔진 교체(wkhtmltopdf, WeasyPrint 등) 시 이 파일만 수정.
  */
-import puppeteer from "puppeteer";
-import * as fs from "fs";
-import { getBrowser, releasePage } from "../lib/browser-pool";
+import { acquirePage, releasePage } from "../lib/browser-pool";
 
 // ── Types ──
 export interface PdfRenderOptions {
@@ -27,49 +26,19 @@ const DEFAULT_OPTIONS: Required<PdfRenderOptions> = {
   extraDelay: 500,
 };
 
-// ── Chromium path detection ──
-function findChromiumPath(): string | undefined {
-  const systemPaths = [
-    "/usr/bin/chromium",
-    "/usr/bin/chromium-browser",
-    "/usr/bin/google-chrome",
-  ];
-  return systemPaths.find(p => fs.existsSync(p));
-}
-
 // ── Main render function ──
 
 /**
  * HTML 문자열을 PDF Buffer로 변환
+ * acquirePage()가 동시성 슬롯 확보 + 브라우저 싱글톤 재사용을 처리합니다.
  */
 export async function renderHtmlToPdf(
   html: string,
   options: PdfRenderOptions = {}
 ): Promise<Buffer> {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  const chromiumPath = findChromiumPath();
 
-  const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
-    headless: true,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage",
-      "--disable-gpu",
-      "--disable-extensions",
-      "--disable-background-networking",
-      "--font-render-hinting=none",
-    ],
-    timeout: opts.timeout,
-  };
-
-  if (chromiumPath) {
-    launchOptions.executablePath = chromiumPath;
-  }
-
-  // Browser Pool 싱글톤 사용
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await acquirePage();
   try {
     await page.setContent(html, {
       waitUntil: "networkidle0",
@@ -94,7 +63,7 @@ export async function renderHtmlToPdf(
     return Buffer.from(pdfBuffer);
   } finally {
     await page.close();
-    await releasePage();
+    releasePage();
   }
 }
 
@@ -106,11 +75,8 @@ export async function renderHtmlToScreenshot(
   options: { width?: number; height?: number; timeout?: number } = {}
 ): Promise<Buffer> {
   const { width = 1200, height = 1600, timeout = 30000 } = options;
-  const chromiumPath = findChromiumPath();
 
-  // Browser Pool 싱글톤 사용
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await acquirePage();
   try {
     await page.setViewport({ width, height });
     await page.setContent(html, { waitUntil: "networkidle0", timeout });
@@ -118,6 +84,6 @@ export async function renderHtmlToScreenshot(
     return Buffer.from(screenshot);
   } finally {
     await page.close();
-    await releasePage();
+    releasePage();
   }
 }

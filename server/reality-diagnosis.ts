@@ -16,7 +16,7 @@ const logger = createLogger("reality-diagnosis");
  * - 독립적 fallback으로 부분 실패 시 graceful degradation
  * - SimilarWeb + LLM 병렬 실행
  */
-import { invokeLLMCached } from "./llm-cache";
+import { invokeLLMCached, TTL_PRESETS } from "./llm-cache";
 import { callDataApi } from "./_core/dataApi";
 import { resolveSpecialty, type SpecialtyType } from "./specialty-weights";
 import { ensureExecutiveSummary, type SummaryContext } from "./utils/executive-summary-template";
@@ -497,7 +497,7 @@ closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요
         },
       },
     },
-    }, { caller: "diagnosis.core" });
+    }, { caller: "diagnosis.core", ttlMs: TTL_PRESETS.DIAGNOSIS });
   // #25 LLM 응답 검증 + #27 통계 기록
   const coreContent = result.choices[0]?.message?.content as string || "{}";
   const coreValidation = validateJsonResponse(coreContent, ["headline", "executiveSummary", "keyFindings", "riskScore"]);
@@ -634,7 +634,7 @@ answerCapsule: 답변 캡슐 품질 진단.
         },
       },
     },
-  }, { caller: "diagnosis.ai" });
+  }, { caller: "diagnosis.ai", ttlMs: TTL_PRESETS.DIAGNOSIS });
   // #25/#27 GEO/AI 응답 검증 + 통계
   const geoContent = result.choices[0]?.message?.content as string || "{}";
   const geoValidation = validateJsonResponse(geoContent, ["geoTriAxis", "aiCitationThreshold"]);
@@ -756,7 +756,7 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
         },
       },
     },
-  }, { caller: "diagnosis.technical" });
+  }, { caller: "diagnosis.technical", ttlMs: TTL_PRESETS.DIAGNOSIS });
     // #25/#27 Channel 응답 검증 + 통계
   const channelContent = result.choices[0]?.message?.content as string || "{}";
   const channelValidation = validateJsonResponse(channelContent, ["crossChannelTrust", "aiSimulator"]);
@@ -905,7 +905,7 @@ mybiseoServices: mybiseo 서비스 소개.
         },
       },
     },
-  }, { caller: "diagnosis.competitor" });
+  }, { caller: "diagnosis.competitor", ttlMs: TTL_PRESETS.DIAGNOSIS });
    // #25/#27 Strategy 응답 검증 + 통계
   const strategyContent = result.choices[0]?.message?.content as string || "{}";
   const strategyValidation = validateJsonResponse(strategyContent, ["websiteTransformGuide", "contentStrategy"]);
