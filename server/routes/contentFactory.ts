@@ -5,6 +5,7 @@
 
 import { invokeLLM } from "../_core/llm";
 import { protectedProcedure, router } from "../_core/trpc";
+import { injectMedicalGuard } from "../lib/medical-law-gate";
 import {
   createCalendarItem, createContentHook, createContentIdea, createContentScript,
   deleteCalendarItem, deleteContentHook, deleteContentIdea, getCalendarItems,
@@ -70,7 +71,7 @@ export const contentFactoryRouter = router({
   })).mutation(async ({ input }) => {
     const resp = await invokeLLM({
       messages: [
-        { role: "system", content: `당신은 병원 마케팅 콘텐츠 전략가입니다. 주어진 콘텐츠 아이디어를 분석하여 병원 마케팅에 어떻게 적용할 수 있는지 제안하세요. JSON으로 응답하세요.` },
+        { role: "system", content: injectMedicalGuard(`당신은 병원 마케팅 콘텐츠 전략가입니다. 주어진 콘텐츠 아이디어를 분석하여 병원 마케팅에 어떻게 적용할 수 있는지 제안하세요. JSON으로 응답하세요.`) },
         { role: "user", content: `콘텐츠: ${input.title}\n플랫폼: ${input.platform || '미지정'}\nURL: ${input.sourceUrl || '없음'}` }
       ],
       response_format: {
@@ -123,7 +124,7 @@ export const contentFactoryRouter = router({
   })).mutation(async ({ input }) => {
     const resp = await invokeLLM({
       messages: [
-        { role: "system", content: `당신은 병원 마케팅 영상 훅 전문가입니다. 3초 안에 시청자를 사로잡는 훅을 작성하세요.\n\n훅 유형:\n- 공포증 해소: "주사 무서운 분?", "마취 안 되면 어쩌죠?"\n- 전후 변신: "이 코가 진짜 제 코예요?"\n- 원장님 직접: "원장이 말하는 OO의 진실"\n- 수술실 비하인드: "수술실에서 보여주는 OO"\n- 질문형: "왜 OO은 실패할까?"\n\nJSON 배열로 응답하세요.` },
+        { role: "system", content: injectMedicalGuard(`당신은 병원 마케팅 영상 훅 전문가입니다. 3초 안에 시청자를 사로잡는 훅을 작성하세요.\n\n훅 유형:\n- 공포증 해소: "주사 무서운 분?", "마취 안 되면 어쩌죠?"\n- 전후 변신: "이 코가 진짜 제 코예요?"\n- 원장님 직접: "원장이 말하는 OO의 진실"\n- 수술실 비하인드: "수술실에서 보여주는 OO"\n- 질문형: "왜 OO은 실패할까?"\n\nJSON 배열로 응답하세요.`) },
         { role: "user", content: `주제: ${input.topic}\n플랫폼: ${input.platform || '인스타그램 릴스'}\n${input.count}개 생성` }
       ],
       response_format: {
@@ -175,7 +176,7 @@ export const contentFactoryRouter = router({
   })).mutation(async ({ ctx, input }) => {
     const resp = await invokeLLM({
       messages: [
-        { role: "system", content: `당신은 병원 마케팅 영상 대본 작가입니다. 의료광고법을 준수하면서 환자의 공감을 얻는 대본을 작성하세요.\n\n대본 구조:\n1. 훅 (0-3초): 시청자를 사로잡는 첫 문장/장면\n2. 본문 (3-45초): 핵심 정보 전달, 실제 사례/데이터 활용\n3. CTA (45-60초): 행동 유도 (예약, 상담, 팔로우)\n\n의료광고법 준수: 전후 사진 비교 금지, "최고/최초" 등 과장 표현 금지, 부작용 안내 필수\nJSON으로 응답하세요.` },
+        { role: "system", content: injectMedicalGuard(`당신은 병원 마케팅 영상 대본 작가입니다. 의료광고법을 준수하면서 환자의 공감을 얻는 대본을 작성하세요.\n\n대본 구조:\n1. 훅 (0-3초): 시청자를 사로잡는 첫 문장/장면\n2. 본문 (3-45초): 핵심 정보 전달, 실제 사례/데이터 활용\n3. CTA (45-60초): 행동 유도 (예약, 상담, 팔로우)\n\n의료광고법 준수: 전후 사진 비교 금지, "최고/최초" 등 과장 표현 금지, 부작용 안내 필수\nJSON으로 응답하세요.`) },
         { role: "user", content: `주제: ${input.topic}\n훅: ${input.hookText || '자동 생성'}\n플랫폼: ${input.platform || '인스타그램 릴스'}\n영상 유형: ${input.scriptType || '정보 전달'}\n길이: ${input.duration || '60초'}\n병원: ${input.hospitalName || ''}\n시술: ${input.treatmentName || ''}` }
       ],
       response_format: {

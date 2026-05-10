@@ -40,6 +40,22 @@ async function startServer() {
   app.use((req, res, next) => {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(self), geolocation=(), payment=()");
+    res.setHeader(
+      "Content-Security-Policy",
+      [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.clarity.ms https://www.googletagmanager.com",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "img-src 'self' data: blob: https: http:",
+        "connect-src 'self' https://api.manus.im https://*.clarity.ms https://www.google-analytics.com https://*.googleapis.com",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ].join("; ")
+    );
     res.removeHeader("Server");
     next();
   });
@@ -81,13 +97,18 @@ async function startServer() {
     })
   );
   // Global error handler — production에서 stack trace 노출 방지
-  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    const status = err.status || err.statusCode || 500;
+  // Global error handler — 프로덕션에서 내부 에러 메시지/스택 노출 방지
+  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    const isErrorLike = (e: unknown): e is { status?: number; statusCode?: number; message?: string; stack?: string } =>
+      typeof e === "object" && e !== null;
+    const status = isErrorLike(err) ? (err.status || err.statusCode || 500) : 500;
+    const message = isErrorLike(err) ? err.message : undefined;
+    const stack = isErrorLike(err) ? err.stack : undefined;
     const isDev = process.env.NODE_ENV === "development";
-    console.error(`[Error ${status}]`, isDev ? err : err.message);
+    console.error(`[Error ${status}]`, isDev ? err : (message || "Unknown error"));
     res.status(status).json({
-      error: err.message || "서버 오류가 발생했습니다.",
-      ...(isDev && { stack: err.stack }),
+      error: isDev ? (message || "서버 오류가 발생했습니다.") : "서버 오류가 발생했습니다.",
+      ...(isDev && stack && { stack }),
     });
   });
 

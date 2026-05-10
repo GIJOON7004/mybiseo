@@ -1,9 +1,0 @@
-{
-  "query": "ALTER TABLE `seo_leads` ADD `hospital_name` varchar(200);\nALTER TABLE `seo_leads` ADD `specialty` varchar(100);\nALTER TABLE `seo_leads` ADD `region` varchar(100);\nALTER TABLE `seo_leads` ADD `phone` varchar(30);\nALTER TABLE `seo_leads` ADD `privacy_consent` boolean DEFAULT false NOT NULL;\nALTER TABLE `seo_leads` ADD `marketing_consent` boolean DEFAULT false NOT NULL;",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute ALTER TABLE `seo_leads` ADD `hospital_name` varchar(200);\nALTER TABLE `seo_leads` ADD `specialty` varchar(100);\nALTER TABLE `seo_leads` ADD `region` varchar(100);\nALTER TABLE `seo_leads` ADD `phone` varchar(30);\nALTER TABLE `seo_leads` ADD `privacy_consent` boolean DEFAULT false NOT NULL;\nALTER TABLE `seo_leads` ADD `marketing_consent` boolean DEFAULT false NOT NULL;",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 4411
-}

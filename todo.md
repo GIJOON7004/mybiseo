@@ -496,3 +496,13 @@
 - [x] #14 CORS 명시적 설정 — cors 패키지 도입 + origin 화이트리스트 적용 완료
 - [x] #15 이메일 발송 재시도 로직 — 3회 지수 백오프 (1s→2s→4s) 적용 완료
 - [x] #16 구조화 로거 실적용 — blog-scheduler, scheduled, notifier, reality-diagnosis, pagespeed-client 5개 핵심 모듈에 logger 적용 완료
+
+## 카테고리 A: 보안/법적 위험 개선 (AI 종합 피드백 6차)
+- [x] A-1: 의료법 게이트 미적용 라우트 3개 (interviewContent, contentFactory, treatmentPage)에 injectMedicalGuard 적용 완료
+- [x] A-2: 글로벌 에러 핸들러 err:any → 타입 안전 + 프로덕션 에러 메시지 노출 방지 완료
+- [x] A-3: 환경변수 Zod 스키마 검증 — 필수 7개 누락 시 서버 시작 차단 완료
+- [x] A-4: CSP + Referrer-Policy + Permissions-Policy 보안 헤더 추가 완료
+- [x] A-5: LightMarkdown XSS — DOMPurify 이미 적용됨 확인
+- [x] A-8: DB 인덱스 10개 추가 (treatment_pages, automation_rules, marketing_content, user_events 등)
+- [x] A-11: .manus/ 디렉토리 Git 추적 제거 + .gitignore 추가 완료
+- [x] A-12: 소유권 검증 — 모든 protectedProcedure에서 ctx.user.id 기반 검증 이미 적용됨 확인

@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `ai_crawler_visits` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`crawler_name` varchar(100) NOT NULL,\n\t`path` varchar(500) NOT NULL,\n\t`user_agent` text,\n\t`ip` varchar(45),\n\t`visited_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `ai_crawler_visits_id` PRIMARY KEY(`id`)\n);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute CREATE TABLE `ai_crawler_visits` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`crawler_name` varchar(100) NOT NULL,\n\t`path` varchar(500) NOT NULL,\n\t`user_agent` text,\n\t`ip` varchar(45),\n\t`visited_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `ai_crawler_visits_id` PRIMARY KEY(`id`)\n);",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 1856
-}

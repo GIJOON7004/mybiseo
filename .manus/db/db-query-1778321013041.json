@@ -1,9 +1,0 @@
-{
-  "query": "CREATE TABLE `llm_usage_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`caller` varchar(100) NOT NULL,\n\t`prompt_tokens` int NOT NULL DEFAULT 0,\n\t`completion_tokens` int NOT NULL DEFAULT 0,\n\t`total_tokens` int NOT NULL DEFAULT 0,\n\t`cached` boolean NOT NULL DEFAULT false,\n\t`duration_ms` int DEFAULT 0,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `llm_usage_logs_id` PRIMARY KEY(`id`)\n);",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute CREATE TABLE `llm_usage_logs` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`caller` varchar(100) NOT NULL,\n\t`prompt_tokens` int NOT NULL DEFAULT 0,\n\t`completion_tokens` int NOT NULL DEFAULT 0,\n\t`total_tokens` int NOT NULL DEFAULT 0,\n\t`cached` boolean NOT NULL DEFAULT false,\n\t`duration_ms` int DEFAULT 0,\n\t`created_at` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `llm_usage_logs_id` PRIMARY KEY(`id`)\n);",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 1979
-}

@@ -6,6 +6,7 @@
 import { invokeLLM } from "../_core/llm";
 import { transcribeAudio } from "../_core/voiceTranscription";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { injectMedicalGuard, withMedicalGate } from "../lib/medical-law-gate";
 import { storagePut } from "../storage";
 import { generateImage } from "../_core/imageGeneration";
 import {
@@ -274,7 +275,7 @@ export const interviewContentRouter = router({
         if (input.contentTypes.includes("blog")) {
           const blogResponse = await invokeLLM({
             messages: [
-              { role: "system", content: INTERVIEW_BLOG_PROMPT },
+              { role: "system", content: injectMedicalGuard(INTERVIEW_BLOG_PROMPT) },
               {
                 role: "user",
                 content: `## 인터뷰 정보\n${contextInfo}\n\n## 인터뷰 트랜스크립트\n${video.transcript}\n\n위 인터뷰 내용을 바탕으로 고품질 블로그 글 3개를 작성해주세요. 각각 다른 관점(환자 관점, 전문가 관점, 트렌드 관점)으로 작성합니다.`,
@@ -289,7 +290,7 @@ export const interviewContentRouter = router({
         if (input.contentTypes.includes("cardnews")) {
           const cardnewsResponse = await invokeLLM({
             messages: [
-              { role: "system", content: INTERVIEW_CARDNEWS_PROMPT },
+              { role: "system", content: injectMedicalGuard(INTERVIEW_CARDNEWS_PROMPT) },
               {
                 role: "user",
                 content: `## 인터뷰 정보\n${contextInfo}\n\n## 인터뷰 트랜스크립트\n${video.transcript}\n\n위 인터뷰 내용을 바탕으로 인스타그램 카드뉴스 5세트를 기획해주세요.`,
@@ -304,7 +305,7 @@ export const interviewContentRouter = router({
         if (input.contentTypes.includes("shortform")) {
           const shortformResponse = await invokeLLM({
             messages: [
-              { role: "system", content: INTERVIEW_SHORTFORM_PROMPT },
+              { role: "system", content: injectMedicalGuard(INTERVIEW_SHORTFORM_PROMPT) },
               {
                 role: "user",
                 content: `## 인터뷰 정보\n${contextInfo}\n\n## 인터뷰 트랜스크립트\n${video.transcript}\n\n위 인터뷰 내용을 바탕으로 숏폼 영상 스크립트 5개를 작성해주세요.`,

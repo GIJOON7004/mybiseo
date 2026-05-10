@@ -1,9 +1,0 @@
-{
-  "query": "\nCREATE INDEX IF NOT EXISTS idx_site_visits_visited_at ON site_visits(visited_at);\n",
-  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3xr15hTS159DZY6.8d8bea4325aa --database YnRsYg5SNCYEtebW9rjF7K --execute \nCREATE INDEX IF NOT EXISTS idx_site_visits_visited_at ON site_visits(visited_at);\n",
-  "rows": [],
-  "messages": [],
-  "stdout": "",
-  "stderr": "",
-  "execution_time_ms": 2170
-}

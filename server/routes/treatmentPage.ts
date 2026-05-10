@@ -5,6 +5,7 @@
 
 import { invokeLLM } from "../_core/llm";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
+import { injectMedicalGuard, withMedicalGate } from "../lib/medical-law-gate";
 import {
   createTreatmentPage, deleteTreatmentPage, getTreatmentPageById, getTreatmentPageBySlug,
   getTreatmentPagesByUser, incrementTreatmentPageView, updateTreatmentPage,
@@ -59,7 +60,7 @@ export const treatmentPageRouter = router({
 ${lang}로 작성하세요.`;
 
     const aiResponse = await invokeLLM({
-      messages: [{ role: "system", content: prompt }, { role: "user", content: `${input.treatmentName} 시술 상세페이지 콘텐츠를 JSON으로 생성해주세요.` }],
+      messages: [{ role: "system", content: injectMedicalGuard(prompt) }, { role: "user", content: `${input.treatmentName} 시술 상세페이지 콘텐츠를 JSON으로 생성해주세요.` }],
       response_format: {
         type: "json_schema",
         json_schema: {
