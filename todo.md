@@ -569,3 +569,14 @@
 - [x] H-6: 통계 "76%" → "약 70~80% (Gartner, 2024)" 출처 각주 명시 (HTML 3개 언어, PDF는 이미 적용됨)
 - [x] H-4+H-5: "유입 누락 환자" → "미유입 잠재 환자" 표현 통일 + A등급 이상 isHighScore 분기 HTML 리포트 적용 (card-pass-top/info-box-pass CSS 추가)
 - [x] H-7: 경쟁사 정보 부족 시 섹션 숨김 처리 (HTML: allLackInfo 가드 추가, PDF: 이미 적용됨)
+
+## 카테고리 I: 프로세스/문서화 개선 (AI 3사 종합 피드백)
+
+- [x] I-8: License compliance — npm audit high 15→ 2 해결 (vite 7.3.2, pnpm 10.27.0, archiver 8.0.0, rollup override) + suppress 문서화
+- [x] I-7: DR-POLICY.md 작성 — TiDB Serverless SLA 인용, 의료 데이터 보존 기간, RTO/RPO 정의
+- [x] I-3+I-4: Characterization Tests 25개 — ai-visibility-html-report, seo-analyzer, reality-diagnosis 골든 스냅샷 테스트 전체 통과
+
+## 카테고리 K: 메타 감사/인수실사 준비 (AI 3사 종합 피드백)
+
+- [x] K-1: 회피 패턴 메타 KPI 스크립트 (scripts/manus-audit.sh) — server/ vs docs/ 변경 비율 체크
+- [x] K-2: DD 메트릭 표 (docs/dd-metrics.md) — 인수실사 5대 메트릭 자동 측정 + DORA/DR/License 통합

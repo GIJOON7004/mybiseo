@@ -84,6 +84,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true  # 초기 도입 — false positive 정리 후 강제화
 
+  # 회피 패턴 메타 KPI — AI 에이전트 자기 감시
+  manus-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50  # 최근 50개 커밋 히스토리 필요
+
+      - name: Run manus-audit KPI check
+        run: bash scripts/manus-audit.sh --ci 30
+
   # Lighthouse CI — SEO SaaS 자체 사이트 품질 자동 측정
   lighthouse:
     runs-on: ubuntu-latest
