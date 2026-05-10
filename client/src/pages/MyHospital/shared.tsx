@@ -1,5 +1,58 @@
-import { Plus } from "lucide-react";
+import { Plus, ArrowUpRight, ArrowDownRight, Minus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+
+/* ── 공통 컴포넌트 ── */
+
+export function GradeCircle({ score, grade, size = "lg" }: { score: number; grade: string; size?: "lg" | "sm" }) {
+  const color = score >= 80 ? "text-emerald-400" : score >= 60 ? "text-amber-400" : score >= 40 ? "text-orange-400" : "text-red-400";
+  const bgColor = score >= 80 ? "bg-emerald-400/10" : score >= 60 ? "bg-amber-400/10" : score >= 40 ? "bg-orange-400/10" : "bg-red-400/10";
+  const borderColor = score >= 80 ? "border-emerald-400/30" : score >= 60 ? "border-amber-400/30" : score >= 40 ? "border-orange-400/30" : "border-red-400/30";
+  if (size === "sm") {
+    return (
+      <div className={`w-12 h-12 rounded-full ${bgColor} border ${borderColor} flex items-center justify-center`}>
+        <span className={`text-sm font-bold ${color}`}>{score}</span>
+      </div>
+    );
+  }
+  return (
+    <div className={`w-28 h-28 rounded-full ${bgColor} border-2 ${borderColor} flex flex-col items-center justify-center`}>
+      <span className={`text-3xl font-bold ${color}`}>{score}</span>
+      <span className={`text-xs ${color} font-medium`}>{grade}</span>
+    </div>
+  );
+}
+
+export function ScoreChangeIndicator({ current, previous }: { current: number; previous?: number }) {
+  if (previous === undefined) return <span className="text-xs text-muted-foreground">첫 진단</span>;
+  const diff = current - previous;
+  if (diff > 0) return <span className="text-xs text-emerald-400 flex items-center gap-0.5"><ArrowUpRight className="w-3 h-3" />+{diff}점</span>;
+  if (diff < 0) return <span className="text-xs text-red-400 flex items-center gap-0.5"><ArrowDownRight className="w-3 h-3" />{diff}점</span>;
+  return <span className="text-xs text-muted-foreground flex items-center gap-0.5"><Minus className="w-3 h-3" />변동없음</span>;
+}
+
+export function EmptyState({ icon: Icon, title, description }: { icon: any; title: string; description: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+        <Icon className="w-7 h-7 text-muted-foreground" />
+      </div>
+      <h3 className="text-sm font-medium text-foreground mb-1">{title}</h3>
+      <p className="text-xs text-muted-foreground max-w-sm">{description}</p>
+    </div>
+  );
+}
+
+export function InsightBanner({ icon: Icon, color, message }: { icon: any; color: string; message: string }) {
+  return (
+    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl ${color} mb-6`}>
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      <p className="text-sm font-medium">{message}</p>
+    </div>
+  );
+}
+
+export const SPECIALTIES = ["치과", "피부과", "성형외과", "한의원", "정형외과", "안과", "산부인과", "내과", "이비인후과", "비뇨기과", "종합병원"];
+export const REGIONS = ["서울 강남", "서울 서초", "서울 송파", "서울 마포", "서울 강서", "서울", "경기 성남", "경기 수원", "부산", "대구", "인천", "대전", "광주"];
 
 export const CHANNEL_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   ai_chatgpt: { label: "ChatGPT", color: "bg-emerald-500", icon: "🤖" },

@@ -540,3 +540,12 @@
 - [x] E-5: N+1 쿼리 Production 활성화 — IS_DEV 가드 제거, production에서 logger.warn 출력
 - [x] E-6(보류): ADR-003 보완 — Production 배포 환경 섹션 + 재검토 트리거 4가지 조건 추가
 - [x] E-8: 의존성 감사 — 취약점 39→6개 (미사용 10개 제거, axios 1.16.0 + tRPC 11.17.0 업데이트, @types/express-rate-limit 제거)
+
+## 카테고리 F: 프론트엔드/UX 개선 (AI 코드리뷰 기반)
+
+- [x] F-1: React Compiler 활성화 — babel-plugin-react-compiler 1.0.0 설치 + vite.config.ts 적용 완료 (수동 memo 불필요 확정)
+- [x] F-2: InterviewContentFactory.tsx (1,820줄) → lazy + Suspense 컴포넌트 분할 (86줄 메인 + 6개 서브파일)
+- [x] F-2: SeoChecker.tsx (1,752줄) → lazy + Suspense 컴포넌트 분할 (760줄 메인 + types.tsx + components.tsx)
+- [x] F-2: MyHospital.tsx (1,330줄) → AiExposureTab, DemoPreview 추출 (426줄 메인 + 3개 서브파일)
+- [x] F-3(보류): Bundle Size Limit — F-2 완료, React Compiler 활성 상태로 재평가 불필요
+- [x] F-4: seo-middleware.ts AI 크롤러 미들웨어 보완 — BASE_URL 환경변수화, JSON-LD 9종(Org+WebSite+Software+ProfService+Service×5+Breadcrumb) 통합, llms.txt footer 링크 추가
