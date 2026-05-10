@@ -513,3 +513,12 @@
 - [x] B-3: 순환 의존성 제거 — seo-analyzer-types.ts 추출로 해결, madge "No circular dependency found!" 확인
 - [x] B-4: shared/const.ts ONE_YEAR_MS 레거시 상수 제거 (사용처 0개 확인 후 삭제)
 - [x] B-6: server/_core/index.ts → app.ts(미들웨어 등록) + index.ts(서버 부트스트랩) 분리
+
+## 카테고리 C: 개발 인프라/거버넌스 개선 (AI 종합 피드백 6차)
+- [x] C-1: CI/CD GitHub Actions workflow 작성 (.github/workflows/ci.yml — tsc + test + architecture-guard + gitleaks)
+- [x] C-2: ESLint flat config 도입 (eslint.config.js — no-console warn, no-explicit-any warn, react-hooks, no-undef off)
+- [x] C-3: ADR 문서 6장 작성 (docs/adr/001~006: db분할, logger, puppeteer, as-any, snapshot, 의료법게이트)
+- [x] C-4: GitHub branch protection 적용 (allow_force_pushes=false, allow_deletions=false, required_status_checks=quality)
+- [x] C-6: Pre-commit hook (Husky + lint-staged) 설정 완료
+- [x] C-7: git audit 완료 — 7건 탐지 모두 false positive/테스트 더미키 확인, .gitleaksignore 생성
+- [x] C-8: 루트 .mjs 4개 scripts/ 폴더로 이동 완료

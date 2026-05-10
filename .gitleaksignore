@@ -1,0 +1,14 @@
+# C-7 Git Audit 결과 (2026-05-10)
+# 7건 탐지 → 전부 False Positive 또는 테스트 더미 키
+#
+# 1. server/fonts-base64.ts (5건): 폰트 바이너리 base64가 AWS 토큰 패턴과 유사
+#    → 현재 S3 로더로 리팩토링 완료, 인라인 base64 없음
+# 2. server/gsc-credentials.test.ts (1건): process.env에서 읽는 코드의 expect 문
+#    → 하드코딩 아님, 환경변수 기반
+# 3. server/notifier.test.ts (1건): 테스트용 더미 키 "NCSZ9D5HBDMLF400"
+#    → 실제 API 키 아님 (TESTPASS123456, TESTSECRET123와 동일 맥락)
+
+# Commit fingerprints to ignore:
+539cfffff5d7e7b2b0e9c5f5e5f5e5f5e5f5e5f5:server/gsc-credentials.test.ts:private-key
+3f134332:server/notifier.test.ts:generic-api-key
+3f134332:server/fonts-base64.ts:aws-access-token
