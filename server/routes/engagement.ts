@@ -17,6 +17,9 @@ import { analyzeSeo, type CountryCode } from "../seo-analyzer";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("engagement");
+
 export const inquiryRouter = router({
   submit: publicProcedure
     .input(
@@ -46,7 +49,7 @@ export const inquiryRouter = router({
             email: input.email,
           });
         } catch (e) {
-          console.warn("[Chat] Failed to link session to inquiry:", e);
+          logger.warn("[Chat] Failed to link session to inquiry:", e);
         }
       }
 

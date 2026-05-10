@@ -9,6 +9,8 @@
 import type { Express, Request, Response, NextFunction } from "express";
 import { getDb } from "./db";
 import { sql } from "drizzle-orm";
+import { createLogger } from "./lib/logger";
+const logger = createLogger("seo-middleware");
 
 // ── AI 크롤러 User-Agent 패턴 ──
 const AI_CRAWLER_PATTERNS = [
@@ -326,7 +328,7 @@ export function registerSeoMiddleware(app: Express): void {
       res.setHeader("Cache-Control", "public, max-age=3600"); // 1시간 캐시
       res.send(sitemap);
     } catch (err) {
-      console.error("[SEO] Sitemap generation error:", err);
+      logger.error("Sitemap generation error", { error: String(err) });
       res.status(500).send("Sitemap generation failed");
     }
   });

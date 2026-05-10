@@ -1,4 +1,7 @@
 import { ENV } from "../_core/env";
+
+import { createLogger } from "../lib/logger";
+const logger = createLogger("gsc-client");
 /**
  * Google Search Console API 클라이언트
  * 
@@ -56,7 +59,7 @@ async function getAccessToken(serviceAccountKey: string): Promise<string | null>
     const { client_email, private_key } = key;
     
     if (!client_email || !private_key) {
-      console.warn("[GSC] 서비스 계정 키에 client_email 또는 private_key가 없습니다.");
+      logger.warn("[GSC] 서비스 계정 키에 client_email 또는 private_key가 없습니다.");
       return null;
     }
 
@@ -93,14 +96,14 @@ async function getAccessToken(serviceAccountKey: string): Promise<string | null>
     });
 
     if (!tokenResponse.ok) {
-      console.warn("[GSC] 토큰 발급 실패:", tokenResponse.status);
+      logger.warn("[GSC] 토큰 발급 실패:", tokenResponse.status);
       return null;
     }
 
     const tokenData = await tokenResponse.json() as { access_token: string };
     return tokenData.access_token;
   } catch (e) {
-    console.warn("[GSC] 토큰 발급 중 오류:", (e as Error).message);
+    logger.warn("[GSC] 토큰 발급 중 오류:", (e as Error).message);
     return null;
   }
 }

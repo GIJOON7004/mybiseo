@@ -34,6 +34,7 @@ import {
 // ── Hospital name sanitizer ──
 function sanitizeHospitalName(raw: string): string {
   if (!raw) return raw;
+  // eslint-disable-next-line no-useless-escape
   const parts = raw.split(/[|\-·–—:「」\[\]()（）!！。,，~]/).map(s => s.trim()).filter(Boolean);
   const medicalKeywords = /(?:병원|의원|치과|성형외과|피부과|안과|한의원|클리닉|센터|의료원|재활|정형|내과|외과|산부인과|비뇨기과|이비인후과|정신과|소아과|가정의학과|마취과|Clinic|Hospital|Center|Medical)/i;
   const medPart = parts.find(p => medicalKeywords.test(p));

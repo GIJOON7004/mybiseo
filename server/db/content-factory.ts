@@ -25,7 +25,7 @@ export async function upsertStyleGuide(userId: string, data: Partial<schema.Cont
 
 export async function getContentIdeas(userId: string, opts: { status?: string; platform?: string; limit?: number } = {}) {
   const db = await getDb(); if (!db) return [];
-  let q = db.select().from(schema.contentIdeas).where(eq(schema.contentIdeas.userId, userId)).orderBy(desc(schema.contentIdeas.createdAt));
+  const q = db.select().from(schema.contentIdeas).where(eq(schema.contentIdeas.userId, userId)).orderBy(desc(schema.contentIdeas.createdAt));
   return q.limit(opts.limit || 50);
 }
 

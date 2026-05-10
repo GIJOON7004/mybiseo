@@ -6,6 +6,9 @@
 import { invokeLLM } from "./_core/llm";
 import { translateCategoryName, translateItemName } from "./ai-visibility-i18n";
 
+import { createLogger } from "./lib/logger";
+const logger = createLogger("ai-visibility");
+
 interface SeoCheckItem {
   id: string;
   category: string;
@@ -201,7 +204,7 @@ Rules:
 
     return translations;
   } catch (err) {
-    console.error("[seo-report-translate] LLM translation failed, using originals:", err);
+    logger.error("[seo-report-translate] LLM translation failed, using originals:", err);
     return texts; // Fallback to originals on error
   }
 }

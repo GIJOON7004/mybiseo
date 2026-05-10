@@ -1,3 +1,5 @@
+import { createLogger } from "./lib/logger";
+const logger = createLogger("search-screenshot");
 /**
  * search-screenshot.ts
  * 네이버/구글 검색 결과 스크린샷 캡처 모듈
@@ -324,10 +326,7 @@ async function captureSingle(
   }
 
   // 모든 재시도 실패 → placeholder 생성
-  console.warn(
-    `[screenshot] ${engine}/${keyword} 캡처 ${CONFIG.MAX_RETRIES + 1}회 실패, placeholder 생성`,
-    lastError?.message,
-  );
+  logger.warn(`${engine}/${keyword} 캡처 ${CONFIG.MAX_RETRIES + 1}회 실패, placeholder 생성`, { error: lastError?.message });
 
   const placeholder = await generatePlaceholderImage(browser, engine, keyword);
   if (placeholder) {
@@ -368,6 +367,7 @@ export async function captureSearchScreenshots(
     return { screenshots, errors };
   }
 
+  // eslint-disable-next-line no-useless-assignment
   let browser: Browser | null = null;
 
   try {

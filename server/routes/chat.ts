@@ -14,6 +14,9 @@ import {
 import { z } from "zod";
 import { CHATBOT_SYSTEM_PROMPT } from "./_shared";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("chat");
+
 export const chatRouter = router({
   send: publicProcedure
     .input(
@@ -52,13 +55,13 @@ export const chatRouter = router({
       try {
         result = await invokeLLM({ messages: llmMessages });
       } catch (firstError) {
-        console.error("[ChatBot] LLM 1차 호출 실패:", firstError);
+        logger.error("[ChatBot] LLM 1차 호출 실패:", firstError);
         try {
           // 1초 대기 후 재시도
           await new Promise((r) => setTimeout(r, 1000));
           result = await invokeLLM({ messages: llmMessages });
         } catch (retryError) {
-          console.error("[ChatBot] LLM 재시도 실패:", retryError);
+          logger.error("[ChatBot] LLM 재시도 실패:", retryError);
           const fallbackReply = "죄송합니다, 잠시 연결이 불안정합니다.\n\n📞 직접 문의: cjw7004@naver.com\n👉 또는 하단 무료 상담 폼을 이용해주세요!";
           await saveChatMessage(session.id, "assistant", fallbackReply);
           return {
@@ -79,7 +82,7 @@ export const chatRouter = router({
       let finalReply = cleanText;
       if (!gateResult.validation.isValid) {
         // 위반 발견 시 디스클레이머 추가 + 위반 부분 경고 로깅
-        console.warn("[ChatBot] 의료법 위반 감지:", gateResult.validation.violations);
+        logger.warn("[ChatBot] 의료법 위반 감지:", gateResult.validation.violations);
         finalReply = cleanText + "\n\n" + gateResult.disclaimer;
       }
 
@@ -174,7 +177,7 @@ export const chatInsightRouter = router({
         await updateChatSessionInsight(session.id, parsed);
         processed++;
       } catch (e) {
-        console.error(`[ChatInsight] 세션 ${session.id} 분석 실패:`, e);
+        logger.error(`[ChatInsight] 세션 ${session.id} 분석 실패:`, e);
       }
     }
     return { processed };

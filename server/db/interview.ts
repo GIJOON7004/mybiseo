@@ -6,6 +6,9 @@ import { eq, desc, and, gte, lte, sql, count, lt, ne, isNull, or, asc, between, 
 import { getDb } from "./connection";
 import * as schema from "../../drizzle/schema";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("db-interview");
+
 export async function createInterviewVideo(data: {
   userId: string;
   videoUrl: string;
@@ -75,9 +78,9 @@ export async function getInterviewContentStats(userId: string) {
   let totalCardnews = 0;
   let totalShortforms = 0;
   for (const v of videos) {
-    if (v.blogContents) { try { totalBlogs += JSON.parse(v.blogContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
-    if (v.cardnewsContents) { try { totalCardnews += JSON.parse(v.cardnewsContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
-    if (v.shortformContents) { try { totalShortforms += JSON.parse(v.shortformContents as string).length; } catch (e) { console.warn("[DB] Suppressed error:", e); } }
+    if (v.blogContents) { try { totalBlogs += JSON.parse(v.blogContents as string).length; } catch (e) { logger.warn("[DB] Suppressed error:", e); } }
+    if (v.cardnewsContents) { try { totalCardnews += JSON.parse(v.cardnewsContents as string).length; } catch (e) { logger.warn("[DB] Suppressed error:", e); } }
+    if (v.shortformContents) { try { totalShortforms += JSON.parse(v.shortformContents as string).length; } catch (e) { logger.warn("[DB] Suppressed error:", e); } }
   }
   return {
     totalVideos: videos.length,

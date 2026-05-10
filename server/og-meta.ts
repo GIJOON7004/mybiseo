@@ -6,6 +6,9 @@
 import type { Request, Response, NextFunction } from "express";
 import { analyzeSeo } from "./seo-analyzer";
 
+import { createLogger } from "./lib/logger";
+const logger = createLogger("og-meta");
+
 // 크롤러/봇 User-Agent 패턴
 const BOT_UA = /kakaotalk|facebookexternalhit|twitterbot|slackbot|linkedinbot|discordbot|telegrambot|whatsapp|line-poker|bandapp|naverbot|yeti|googlebot|bingbot|baiduspider|duckduckbot|pinterestbot|embedly|quora|outbrain|vkshare|tumblr|w3c_validator|redditbot|applebot|petalbot|semrushbot|ahrefsbot|mj12bot/i;
 
@@ -113,7 +116,7 @@ export function ogMetaMiddleware(htmlTemplate: string) {
       return res.status(200).set({ "Content-Type": "text/html" }).end(html);
     } catch (err) {
       // 분석 실패 시 기본 HTML로 통과
-      console.error("[OG Meta] Error generating dynamic OG:", err);
+      logger.error("[OG Meta] Error generating dynamic OG:", err);
       return next();
     }
   };

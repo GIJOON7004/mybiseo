@@ -14,6 +14,9 @@ import { analyzeSeo } from "../seo-analyzer";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("benchmarking");
+
 export const benchmarkingReportRouter = router({
   // 벤치마킹 리포트 생성 (경쟁사 SEO 분석 + AI Actionable Insights)
   generate: protectedProcedure
@@ -228,7 +231,7 @@ JSON 형식으로 응답해주세요:`;
           if (contactId) await incrementEmailSentCount(contactId);
         }
       } catch (emailErr) {
-        console.error("[benchmarking] 자동 이메일 발송 실패:", emailErr);
+        logger.error("[benchmarking] 자동 이메일 발송 실패:", emailErr);
       }
 
       return {

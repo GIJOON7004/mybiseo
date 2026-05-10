@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../lib/errors";
 /**
  * interviewContent 라우터
  * 원장님 인터뷰 영상 → 멀티포맷 콘텐츠 자동 생산
@@ -31,6 +32,9 @@ import { BLOG_GENERATOR_PROMPT } from "./_shared";
 import sharp from "sharp";
 import archiver from "archiver";
 import { Readable, PassThrough } from "stream";
+
+import { createLogger } from "../lib/logger";
+const logger = createLogger("interview-content");
 
 /* ─── 프롬프트 ─── */
 
@@ -238,11 +242,11 @@ export const interviewContentRouter = router({
         });
 
         return { transcript: result.text, duration: result.duration };
-      } catch (e: any) {
+      } catch (e: unknown) {
         if (e instanceof TRPCError) throw e;
         await updateInterviewVideo(input.id, userId, {
           status: "error",
-          errorMessage: e.message || "트랜스크립션 실패",
+          errorMessage: getErrorMessage(e) || "트랜스크립션 실패",
         });
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "트랜스크립션 중 오류가 발생했습니다" });
       }
@@ -322,10 +326,10 @@ export const interviewContentRouter = router({
         });
 
         return { success: true, ...results };
-      } catch (e: any) {
+      } catch (e: unknown) {
         await updateInterviewVideo(input.id, userId, {
           status: "error",
-          errorMessage: e.message || "콘텐츠 생성 실패",
+          errorMessage: getErrorMessage(e) || "콘텐츠 생성 실패",
         });
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "콘텐츠 생성 중 오류가 발생했습니다" });
       }
@@ -512,8 +516,8 @@ export const interviewContentRouter = router({
             card.imageUrl = url;
             results.push({ cardIndex: i, imageUrl: url });
           }
-        } catch (e: any) {
-          console.error(`Card ${i} image generation failed:`, e.message);
+        } catch (e: unknown) {
+          logger.error(`Card ${i} image generation failed:`, getErrorMessage(e));
           // 개별 카드 실패는 무시하고 계속
         }
       }
@@ -685,8 +689,8 @@ export const interviewContentRouter = router({
           const fileKey = `interview-subtitles/${userId}/${Date.now()}-${safeTitle}.${input.format}`;
           const { url } = await storagePut(fileKey, content, "text/plain; charset=utf-8");
           results.push({ index: i, title: sf.title, downloadUrl: url, fileName: `${safeTitle}.${input.format}` });
-        } catch (e: any) {
-          console.error(`Subtitle generation failed for shortform ${i}:`, e.message);
+        } catch (e: unknown) {
+          logger.error(`Subtitle generation failed for shortform ${i}:`, getErrorMessage(e));
         }
       }
 
@@ -1247,6 +1251,7 @@ IMPORTANT:
 
 function sanitizeFileName(name: string): string {
   return name
+    // eslint-disable-next-line no-control-regex, no-useless-escape
     .replace(/[<>:"\/\\|?*\x00-\x1f]/g, "")
     .replace(/\s+/g, "_")
     .substring(0, 50);
@@ -1300,8 +1305,8 @@ async function createCardNewsZip(cardSet: any, cardsWithImages: any[]): Promise<
         const optimized = await fetchAndOptimizeImage(card.imageUrl);
         const fileName = `${String(card.slideNumber || i + 1).padStart(2, "0")}_card.jpg`;
         archive.append(optimized, { name: fileName });
-      } catch (e: any) {
-        console.error(`ZIP: Card ${i} optimization failed:`, e.message);
+      } catch (e: unknown) {
+        logger.error(`ZIP: Card ${i} optimization failed:`, getErrorMessage(e));
       }
     }
 
@@ -1310,6 +1315,7 @@ async function createCardNewsZip(cardSet: any, cardsWithImages: any[]): Promise<
 }
 
 async function createAllCardNewsZip(cardnewsSets: any[]): Promise<Buffer> {
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     const chunks: Buffer[] = [];
     const passthrough = new PassThrough();
@@ -1332,8 +1338,8 @@ async function createAllCardNewsZip(cardnewsSets: any[]): Promise<Buffer> {
           const optimized = await fetchAndOptimizeImage(card.imageUrl);
           const fileName = `${setFolder}/${String(card.slideNumber || i + 1).padStart(2, "0")}_card.jpg`;
           archive.append(optimized, { name: fileName });
-        } catch (e: any) {
-          console.error(`ZIP: Set ${setIdx} Card ${i} failed:`, e.message);
+        } catch (e: unknown) {
+          logger.error(`ZIP: Set ${setIdx} Card ${i} failed:`, getErrorMessage(e));
         }
       }
     }

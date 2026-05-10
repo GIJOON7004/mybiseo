@@ -121,7 +121,7 @@ export async function sendSmsViaSolapi(options: {
     logger.info(`[sms] Sent successfully:`, result);
     return true;
   } catch (error) {
-    console.error("[Notifier:sms] Failed to send:", error);
+    logger.error("[Notifier:sms] Failed to send:", error);
     return false;
   }
 }
@@ -152,7 +152,7 @@ const manusChannel: NotificationChannel = {
     try {
       return await notifyOwner({ title, content });
     } catch (error) {
-      console.error("[Notifier:manus] Failed:", error);
+      logger.error("[Notifier:manus] Failed:", error);
       return false;
     }
   },
@@ -232,7 +232,7 @@ const kakaoChannel: NotificationChannel = {
   name: "kakao",
   enabled: false,
   async send(payload) {
-    console.log("[Notifier:kakao] Channel not yet configured");
+    logger.info("[Notifier:kakao] Channel not yet configured");
     return false;
   },
 };
@@ -281,14 +281,14 @@ export async function sendInquiryNotification(
   const enabledChannels = channels.filter((ch) => ch.enabled);
 
   if (enabledChannels.length === 0) {
-    console.warn("[Notifier] No enabled notification channels");
+    logger.warn("[Notifier] No enabled notification channels");
     return false;
   }
 
   const results = await Promise.allSettled(
     enabledChannels.map((ch) =>
       ch.send(payload).catch((err) => {
-        console.error(`[Notifier:${ch.name}] Error:`, err);
+        logger.error(`[Notifier:${ch.name}] Error:`, err);
         return false;
       })
     )
@@ -306,7 +306,7 @@ export async function sendInquiryNotification(
     })
     .join(", ");
 
-  console.log(`[Notifier] Sent to ${enabledChannels.length} channels — ${summary}`);
+  logger.info(`[Notifier] Sent to ${enabledChannels.length} channels — ${summary}`);
 
   return anySuccess;
 }

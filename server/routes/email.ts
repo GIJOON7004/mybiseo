@@ -13,6 +13,9 @@ import { sendEmailViaNaver } from "../notifier";
 import { analyzeSeo, type CountryCode } from "../seo-analyzer";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("email");
+
 export const seoEmailRouter = router({
   sendReport: publicProcedure
     .input(z.object({
@@ -90,11 +93,11 @@ export const seoEmailRouter = router({
                 realityDiagnosis.searchScreenshots = ssResult.screenshots;
               }
             } catch (ssErr) {
-              console.warn("[seoEmail] Screenshot capture failed, continuing without:", ssErr);
+              logger.warn("[seoEmail] Screenshot capture failed, continuing without:", ssErr);
             }
           }
         } catch (rdErr) {
-          console.error("[seoEmail] Reality diagnosis generation failed, continuing without it:", rdErr);
+          logger.error("[seoEmail] Reality diagnosis generation failed, continuing without it:", rdErr);
         }
 
         const pdfBuffer = await generateSeoReportPdf(result, input.country as any, reportLang as any, realityDiagnosis);
@@ -105,7 +108,7 @@ export const seoEmailRouter = router({
         const { url } = await storagePut(fileKey, Buffer.from(pdfBuffer), "application/pdf");
         pdfUrl = url;
       } catch (pdfErr) {
-        console.error("[seoEmail] PDF generation failed, sending email without PDF:", pdfErr);
+        logger.error("[seoEmail] PDF generation failed, sending email without PDF:", pdfErr);
       }
 
       // 5. 이메일 발송 — 맥킨지 스타일 고품질 템플릿

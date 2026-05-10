@@ -13,6 +13,9 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("ad-factory");
+
 export const adFactoryRouter = router({
   // 브랜드 DNA 프로필
   listProfiles: protectedProcedure.query(async ({ ctx }) => {
@@ -30,6 +33,7 @@ export const adFactoryRouter = router({
     hospitalUrl: z.string().url(),
   })).mutation(async ({ ctx, input }) => {
     // 1. 웹사이트 HTML 가져오기
+    // eslint-disable-next-line no-useless-assignment
     let html = "";
     try {
       const resp = await fetch(input.hospitalUrl, {
@@ -188,7 +192,7 @@ export const adFactoryRouter = router({
             });
             imageUrl = imgResult.url;
           } catch (e) {
-            console.warn("[AdFactory] Image generation failed:", e);
+            logger.warn("[AdFactory] Image generation failed:", e);
           }
         }
 

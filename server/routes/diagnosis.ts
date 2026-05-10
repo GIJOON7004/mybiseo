@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../lib/errors";
 /**
  * routes/diagnosis.ts — SEO 진단, 배치 진단, 벤치마크 라우터
  */
@@ -95,8 +96,8 @@ export const batchDiagnosisRouter = router({
             });
           }
           results.push({ url: result.url, success: true, totalScore: result.totalScore, aiScore, grade: result.grade });
-        } catch (e: any) {
-          results.push({ url, success: false, error: e.message?.slice(0, 100) || "분석 실패" });
+        } catch (e: unknown) {
+          results.push({ url, success: false, error: getErrorMessage(e).slice(0, 100) || "분석 실패" });
         }
       }
       const succeeded = results.filter(r => r.success).length;

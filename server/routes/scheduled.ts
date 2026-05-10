@@ -124,7 +124,7 @@ router.post("/retarget_email", async (_req, res) => {
         const emailHtml = buildRediagnosisEmail({ url: lead.url, totalScore: lead.totalScore ?? 0, grade: lead.grade ?? "" });
         await sendEmailViaNaver({ to: lead.email, subject: `[MY비서] ${lead.url} AI 인용 점수가 변했을 수 있습니다`, html: emailHtml });
         sent++;
-      } catch (e) { console.warn(`[Scheduled] 재진단 이메일 개별 실패 (${lead.email}):`, String(e)); }
+      } catch (e) { logger.warn(`[Scheduled] 재진단 이메일 개별 실패 (${lead.email}):`, String(e)); }
     }
     addHistory("followup_email", true, `재진단 유도: ${sent}/${targets.length}건 발송`);
     if (sent > 0) {
@@ -202,7 +202,7 @@ router.post("/chat_insight", async (_req, res) => {
         const parsed = JSON.parse(typeof content === "string" ? content : "{}");
         await updateChatSessionInsight(session.id, parsed);
         processed++;
-      } catch (e) { console.warn(`[Scheduled] 세션 ${session.id} 인사이트 실패:`, String(e)); }
+      } catch (e) { logger.warn(`[Scheduled] 세션 ${session.id} 인사이트 실패:`, String(e)); }
     }
     addHistory("chat_insight", true, `${processed}개 세션 인사이트 추출 완료`);
     res.json({ ok: true, task: "chat_insight", processed });
@@ -239,7 +239,7 @@ router.post("/weekly_diagnosis", async (_req, res) => {
         diagnosed++;
       } catch (e) {
         failed++;
-        console.warn(`[Scheduled] ${profile.hospitalUrl} 진단 실패:`, String(e));
+        logger.warn(`[Scheduled] ${profile.hospitalUrl} 진단 실패:`, String(e));
       }
     }
     addHistory("auto_diagnosis", true, `${diagnosed}/${profiles.length}개 병원 진단 완료 (${failed}건 실패)`);
@@ -342,7 +342,7 @@ router.post("/daily_tasks", async (req, res) => {
             const emailHtml = buildRediagnosisEmail({ url: lead.url, totalScore: lead.totalScore ?? 0, grade: lead.grade ?? "" });
             await sendEmailViaNaver({ to: lead.email, subject: `[MY\uBE44\uC11C] ${lead.url} AI \uC778\uC6A9 \uC810\uC218\uAC00 \uBCC0\uD588\uC744 \uC218 \uC788\uC2B5\uB2C8\uB2E4`, html: emailHtml });
             sent++;
-          } catch (e) { console.warn(`[Scheduled] \uC7AC\uC9C4\uB2E8 \uC774\uBA54\uC77C \uAC1C\uBCC4 \uC2E4\uD328:`, String(e)); }
+          } catch (e) { logger.warn(`[Scheduled] \uC7AC\uC9C4\uB2E8 \uC774\uBA54\uC77C \uAC1C\uBCC4 \uC2E4\uD328:`, String(e)); }
         }
         results.retarget = { ok: true, sent, total: targets.length };
       } catch (e) { results.retarget = { ok: false, error: String(e) }; }
@@ -389,7 +389,7 @@ router.post("/daily_tasks", async (req, res) => {
           const parsed = JSON.parse(typeof content === "string" ? content : "{}");
           await updateChatSessionInsight(session.id, parsed);
           processed++;
-        } catch (e) { console.warn(`[Scheduled] \uC138\uC158 \uC778\uC0AC\uC774\uD2B8 \uC2E4\uD328:`, String(e)); }
+        } catch (e) { logger.warn(`[Scheduled] \uC138\uC158 \uC778\uC0AC\uC774\uD2B8 \uC2E4\uD328:`, String(e)); }
       }
       results.chatInsight = { ok: true, processed };
     } catch (e) { results.chatInsight = { ok: false, error: String(e) }; }
@@ -438,7 +438,7 @@ router.post("/weekly_tasks", async (_req, res) => {
             categoryScores: JSON.stringify(result.categories.map((c: any) => ({ name: c.name, score: c.score, max: c.maxScore }))),
           });
           diagnosed++;
-        } catch (e) { failed++; console.warn(`[Scheduled] \uC9C4\uB2E8 \uC2E4\uD328:`, String(e)); }
+        } catch (e) { failed++; logger.warn(`[Scheduled] \uC9C4\uB2E8 \uC2E4\uD328:`, String(e)); }
       }
       results.weeklyDiagnosis = { ok: true, diagnosed, failed, total: profiles.length };
       await createAdminNotification({

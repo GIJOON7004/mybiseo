@@ -8,6 +8,8 @@
  *   import { trackQuery, resetTracker } from "../lib/n-plus-one-detector";
  *   trackQuery("SELECT * FROM users WHERE id = ?", [userId]);
  */
+import { createLogger } from "./logger";
+const logger = createLogger("n-plus-one");
 
 const IS_DEV = process.env.NODE_ENV !== "production";
 
@@ -47,7 +49,7 @@ export function trackQuery(sql: string, context?: string): void {
     existing.lastSeen = now;
 
     if (existing.count === THRESHOLD) {
-      console.warn(
+      logger.warn(
         `\n⚠️  [N+1 DETECTED] ${existing.count}회 반복 쿼리 (${WINDOW_MS}ms 내)\n` +
         `   Pattern: ${pattern.slice(0, 100)}\n` +
         (context ? `   Context: ${context}\n` : "") +

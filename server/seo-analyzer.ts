@@ -12,6 +12,7 @@
  * - 진료과별 가중치 매트릭스 적용
  * - 일반 병원 사이트 30~50점대, 완벽 최적화 시 100점 목표
  */
+import { getErrorMessage, toError } from "./lib/errors";
 import * as cheerio from "cheerio";
 import { generateAdditionalItems } from "./seo-analyzer-v4-items";
 import { generateThaiLocalSearchItems, generateThaiSocialItems, generateThaiMedicalTourismItems } from "./seo-analyzer-th-items";
@@ -32,6 +33,8 @@ const STANDARD_USER_AGENT = "Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/M
 // ── 타입 정의 ──
 // SeoCheckStatus moved to seo-analyzer-types.ts
 import type { SeoCheckStatus, SeoCheckItem } from "./seo-analyzer-types";
+import { createLogger } from "./lib/logger";
+const logger = createLogger("seo-analyzer");
 export type { SeoCheckStatus, SeoCheckItem };
 
 
@@ -169,10 +172,10 @@ async function fetchWithRetry(url: string, timeout = 15000, retries = 2, country
         continue;
       }
       return res;
-    } catch (e: any) {
-      lastError = e;
+    } catch (e: unknown) {
+      lastError = toError(e);
       // 타임아웃/네트워크 에러만 재시도
-      const isRetryable = e.name === "AbortError" || e.code === "ECONNRESET" || e.code === "ETIMEDOUT" || e.code === "ENOTFOUND" || e.message?.includes("fetch failed");
+      const isRetryable = (e instanceof Error) && (e.name === "AbortError" || (e as any).code === "ECONNRESET" || (e as any).code === "ETIMEDOUT" || (e as any).code === "ENOTFOUND" || e.message?.includes("fetch failed"));
       if (!isRetryable) throw e;
       if (attempt < retries) {
         await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt))); // 지수 백오프
@@ -212,7 +215,7 @@ function _normalizeUrl_DEPRECATED(input: string): string {
     try {
       const path = new URL(url).pathname;
       if (!path.includes(".")) url += "/";
-    } catch {}
+    } catch { /* ignored */ }
   }
   return url;
 }
@@ -266,7 +269,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   let html = "";
   let fetchStatus = 0;
   let fetchOk = false;
-  let isHttps = parsedUrl.protocol === "https:";
+  const isHttps = parsedUrl.protocol === "https:";
   let responseHeaders: Record<string, string> = {};
   let responseTime = 0;
   let robotsTxt = "";
@@ -339,6 +342,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
 
   // 2. sitemap.xml 확인 (robots.txt 결과 필요) — (#3) 파싱 개선: sitemap index 재귀 탐색 + URL 수 카운트
   let sitemapExists = false;
+  // eslint-disable-next-line no-useless-assignment
   let sitemapUrl = "";
   let sitemapUrlCount = 0;
   const sitemapMatch = robotsTxt.match(/Sitemap:\s*(.+)/i);
@@ -366,7 +370,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
               const urlMatches = subText.match(/<loc>/g) || [];
               sitemapUrlCount = urlMatches.length;
             }
-          } catch {}
+          } catch { /* ignored */ }
         }
       } else if (sText.includes("<urlset")) {
         sitemapExists = true;
@@ -374,7 +378,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
         sitemapUrlCount = urlMatches.length;
       }
     }
-  } catch {}
+  } catch { /* ignored */ }
 
   // ── 다중 페이지 크롤링 + PageSpeed API 병렬 호출 (타임아웃 가드) ──
   const crawlWithTimeout = <T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> =>
@@ -389,12 +393,12 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
     try {
       const result = await fetchPageSpeedMetrics(targetUrl, strategy as any);
       if (result) return result;
-    } catch {}
+    } catch { /* ignored */ }
     // 재시도 1회
     try {
       const result = await fetchPageSpeedMetrics(targetUrl, strategy as any);
       if (result) return result;
-    } catch {}
+    } catch { /* ignored */ }
     return null;
   };
 
@@ -432,8 +436,8 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   const wordCount = bodyText.length;
 
   const jsonLdScripts = $('script[type="application/ld+json"]');
-  let jsonLdTypes: string[] = [];
-  let jsonLdData: any[] = [];
+  const jsonLdTypes: string[] = [];
+  const jsonLdData: any[] = [];
   jsonLdScripts.each((_, el) => {
     try {
       const data = JSON.parse($(el).html() || "{}");
@@ -444,7 +448,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
           if (item["@type"]) jsonLdTypes.push(item["@type"]);
         });
       }
-    } catch {}
+    } catch { /* ignored */ }
   });
 
   // ── 분석 항목들 ──
@@ -713,6 +717,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   const robotsHasSitemap = /Sitemap:\s*https?:\/\//i.test(robotsTxt);
   const robotsScore = !robotsExists ? 0 : robotsBlocksGooglebot ? 1 : robotsHasSitemap ? 5 : 3;
   const robotsStatus = !robotsExists ? "fail" : robotsBlocksGooglebot ? "fail" : robotsHasSitemap ? "pass" : "warning";
+  // eslint-disable-next-line no-useless-assignment
   let robotsDetail = "";
   if (!robotsExists) {
     robotsDetail = "robots.txt 파일이 없거나 잘못된 형식입니다.";
@@ -1347,7 +1352,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
       const llmsText = await llmsRes.text();
       hasLlmsTxt = llmsText.length > 10 && !llmsText.includes("<!DOCTYPE") && !llmsText.includes("<html");
     }
-  } catch {}
+  } catch { /* ignored */ }
   items.push({
     id: "ai-llms-txt",
     category: "AI 검색 노출",
@@ -1496,12 +1501,12 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   // (#11) 가중치 합산 검증: 카테고리별 maxScore 합이 TOTAL_MAX_SCORE와 일치하는지 확인
   const computedTotal = categories.reduce((s, c) => s + c.maxScore, 0);
   if (computedTotal !== TOTAL_MAX_SCORE && TOTAL_MAX_SCORE > 0) {
-    console.warn(`[SEO] 카테고리 maxScore 합산(${computedTotal}) ≠ TOTAL_MAX_SCORE(${TOTAL_MAX_SCORE}). 정규화 적용.`);
+    logger.warn(`카테고리 maxScore 합산(${computedTotal}) ≠ TOTAL_MAX_SCORE(${TOTAL_MAX_SCORE}). 정규화 적용`);
   }
   // (#12) 최소 항목 수 보장 검증
   const minItemResult = validateMinItems(items);
   if (minItemResult.warnings.length > 0) {
-    console.warn(`[SEO] 최소 항목 수 미달:`, minItemResult.warnings);
+    logger.warn("최소 항목 수 미달", { warnings: minItemResult.warnings });
   }
 
   // 진료과별 가중치 적용
@@ -1540,6 +1545,7 @@ async function _analyzeSeoCore(url: string, cacheKey: string, specialty: string 
   // Extract site name: prefer og:site_name, fallback to title tag
   // 에러 title인 경우 og:site_name → h1 → 도메인명 순으로 fallback
   const ogSiteNameVal = $('meta[property="og:site_name"]').attr("content")?.trim() || "";
+  // eslint-disable-next-line no-useless-assignment
   let extractedSiteName = "";
   if (!rawTitle || isErrorTitle) {
     extractedSiteName = ogSiteNameVal || h1ForTitle || domainName || parsedUrl.hostname;

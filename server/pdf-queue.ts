@@ -14,7 +14,7 @@ const pdfQueue = new PQueue({
 });
 
 // 큐 통계
-let queueStats = {
+const queueStats = {
   totalProcessed: 0,
   totalFailed: 0,
   totalTimeMs: 0,

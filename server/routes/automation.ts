@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../lib/errors";
 /**
  * automation 라우터
  * routers.ts에서 분할 — automation
@@ -78,9 +79,9 @@ export const automationRouter = router({
       await upsertEmailContact({ email: input.patientEmail, name: input.patientName, source: "consultation", tags: ["patient", "booking"] });
       await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "sent", metadata: { type: "booking_confirm", treatment: input.treatmentName } });
       return { success: true };
-    } catch (e: any) {
-      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: e.message });
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: getErrorMessage(e) });
+      return { success: false, error: getErrorMessage(e) };
     }
   }),
 
@@ -109,9 +110,9 @@ export const automationRouter = router({
       await sendEmailViaNaver({ to: input.patientEmail, subject, html });
       await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "sent", metadata: { type: "reminder_d1" } });
       return { success: true };
-    } catch (e: any) {
-      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: e.message });
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: getErrorMessage(e) });
+      return { success: false, error: getErrorMessage(e) };
     }
   }),
 
@@ -137,9 +138,9 @@ export const automationRouter = router({
       await upsertEmailContact({ email: input.patientEmail, name: input.patientName, source: "consultation", tags: ["patient", "review_requested"] });
       await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "sent", metadata: { type: "review_request" } });
       return { success: true };
-    } catch (e: any) {
-      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: e.message });
-      return { success: false, error: e.message };
+    } catch (e: unknown) {
+      await createAutomationLog({ ruleId: 0, userId: ctx.user.id, recipientEmail: input.patientEmail, channel: "email", status: "failed", errorMessage: getErrorMessage(e) });
+      return { success: false, error: getErrorMessage(e) };
     }
   }),
 });

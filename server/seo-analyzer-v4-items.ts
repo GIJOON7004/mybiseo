@@ -480,8 +480,8 @@ export function generateAdditionalItems(ctx: AnalysisContext): SeoCheckItem[] {
   const siteMainLang = htmlLang || "";
   const isEnglishSite = siteMainLang.startsWith("en") || (!siteMainLang && (bodyText.match(/[a-zA-Z]/g) || []).length > bodyText.length * 0.3);
   // 주 언어를 제외한 추가 언어 카운트
-  let additionalLangs: string[] = [];
-  let additionalLangLabels: string[] = [];
+  const additionalLangs: string[] = [];
+  const additionalLangLabels: string[] = [];
   if (!isEnglishSite && hasEnglishContent) { additionalLangs.push("en"); additionalLangLabels.push("영어"); }
   if (hasChineseContent) { additionalLangs.push("zh"); additionalLangLabels.push("중국어"); }
   if (hasJapaneseContent) { additionalLangs.push("ja"); additionalLangLabels.push("일본어"); }

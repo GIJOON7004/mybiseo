@@ -19,6 +19,9 @@ import {
 } from "../db";
 import type { AiMonitorKeyword, AiMonitorCompetitor } from "../../drizzle/schema";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("ai-monitor");
+
 // ═══════════════════════════════════════════════════
 // 유틸리티: 지역 정보 추출
 // ═══════════════════════════════════════════════════
@@ -268,7 +271,7 @@ function extractRankings(text: string): Array<{ rank: number; line: string; line
     // 다양한 번호 매김 패턴:
     // "1.", "1)", "1번", "**1.**", "**1.** ", "### 1.", "- **1.**", "1위"
     const patterns = [
-      /^[\s*#\-]*\*?\*?(\d+)[.)번위\s.\-]\*?\*?/,  // 기본 패턴
+      /^[\s*#-]*\*?\*?(\d+)[.)번위\s.-]\*?\*?/,  // 기본 패턴
       /^[\s]*(?:\*\*)?(\d+)(?:\*\*)?[.).\s]/,        // 마크다운 볼드
       /^[\s]*[-•]\s*(?:\*\*)?(\d+)(?:\*\*)?[.).\s]/,  // 리스트 아이템
       /(?:^|\n)\s*(\d+)\.\s+\*?\*?[가-힣A-Za-z]/,     // "1. 병원명" 패턴
@@ -777,7 +780,7 @@ export async function runEnhancedMonitorCheck(
         confidenceScore: analysis.confidenceScore,
       });
     } catch (err) {
-      console.error(`[AIMonitor Enhanced v2] ${platform} 검사 실패:`, err);
+      logger.error(`[AIMonitor Enhanced v2] ${platform} 검사 실패:`, err);
       allResults.push({
         platform,
         query,
@@ -849,7 +852,7 @@ export async function runEnhancedAutoMonitor(): Promise<{
       totalMentions += mentionCount;
       scores.push({ keywordId: keyword.id, keyword: keyword.keyword, score: score.score });
     } catch (err) {
-      console.error(`[AIMonitor Enhanced v2] 키워드 "${keyword.keyword}" 모니터링 실패:`, err);
+      logger.error(`[AIMonitor Enhanced v2] 키워드 "${keyword.keyword}" 모니터링 실패:`, err);
       scores.push({ keywordId: keyword.id, keyword: keyword.keyword, score: 0 });
     }
   }

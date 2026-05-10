@@ -15,6 +15,7 @@ export default tseslint.config(
       "server/_core/",
       "**/*.test.ts",
       "**/*.test.tsx",
+      "**/*.mjs",
     ],
   },
 
@@ -33,6 +34,8 @@ export default tseslint.config(
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-require-imports": "off",
       "no-undef": "off",  // TypeScript handles this
+      "no-useless-assignment": "warn",
+      "no-async-promise-executor": "warn",
     },
   },
 

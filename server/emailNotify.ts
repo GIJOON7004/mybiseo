@@ -1,5 +1,8 @@
 import { notifyOwner } from "./_core/notification";
 
+import { createLogger } from "./lib/logger";
+const logger = createLogger("email-notify");
+
 /**
  * 문의 접수 시 오너에게 상세 알림을 보냅니다.
  * Manus 내장 알림 시스템을 통해 즉시 전달됩니다.
@@ -33,7 +36,7 @@ export async function sendInquiryNotification(inquiry: {
   try {
     return await notifyOwner({ title, content });
   } catch (error) {
-    console.error("[EmailNotify] Failed to send notification:", error);
+    logger.error("[EmailNotify] Failed to send notification:", error);
     return false;
   }
 }

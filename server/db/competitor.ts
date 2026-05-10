@@ -6,6 +6,9 @@ import { eq, desc, sql, and, lt, ne, gt, gte, lte, or, asc, inArray, isNull, cou
 import * as schema from "../../drizzle/schema";
 import { getDb } from "./connection";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("db-competitor");
+
 export async function getCompetitorComparison(keywordId?: number) {
   const db = await getDb();
   if (!db) return { keywords: [], comparison: [] };
@@ -65,7 +68,7 @@ export async function getCompetitorComparison(keywordId?: number) {
               competitorMentionCounts[name] = (competitorMentionCounts[name] || 0) + 1;
             }
           }
-        } catch (e) { console.warn("[DB] Suppressed error:", e); }
+        } catch (e) { logger.warn("[DB] Suppressed error:", e); }
       }
     }
     
@@ -139,7 +142,7 @@ export async function getCompetitorTrend(keywordId: number, weeks: number = 8) {
             weekBuckets[weekKey].competitors[name] = (weekBuckets[weekKey].competitors[name] || 0) + 1;
           }
         }
-      } catch (e) { console.warn("[DB] Suppressed error:", e); }
+      } catch (e) { logger.warn("[DB] Suppressed error:", e); }
     }
   }
   

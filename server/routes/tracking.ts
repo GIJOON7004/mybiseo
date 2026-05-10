@@ -17,6 +17,9 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("tracking");
+
 export const userEventRouter = router({
   log: publicProcedure
     .input(z.object({
@@ -40,7 +43,7 @@ export const userEventRouter = router({
           referrer: null,
         });
       } catch (e) {
-        console.error("[UserEvent] 로깅 실패:", e);
+        logger.error("[UserEvent] 로깅 실패:", e);
       }
       return { ok: true };
     }),

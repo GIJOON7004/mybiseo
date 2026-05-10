@@ -502,7 +502,7 @@ closingStatement: 종합 의견 (1000~2000자). 5개 단락: 1)전체 현황 요
   const coreContent = result.choices[0]?.message?.content as string || "{}";
   const coreValidation = validateJsonResponse(coreContent, ["headline", "executiveSummary", "keyFindings", "riskScore"]);
   if (!coreValidation.valid) {
-    console.warn("[RealityDiagnosis] Core LLM 응답 검증 경고:", coreValidation.errors);
+    logger.warn("[RealityDiagnosis] Core LLM 응답 검증 경고:", coreValidation.errors);
   }
   recordLLMCall(Date.now() - startTime, coreContent.length, false, !coreValidation.valid);
   return JSON.parse(coreContent);
@@ -639,7 +639,7 @@ answerCapsule: 답변 캡슐 품질 진단.
   const geoContent = result.choices[0]?.message?.content as string || "{}";
   const geoValidation = validateJsonResponse(geoContent, ["geoTriAxis", "aiCitationThreshold"]);
   if (!geoValidation.valid) {
-    console.warn("[RealityDiagnosis] GEO/AI LLM 응답 검증 경고:", geoValidation.errors);
+    logger.warn("[RealityDiagnosis] GEO/AI LLM 응답 검증 경고:", geoValidation.errors);
   }
   recordLLMCall(Date.now() - startTime, geoContent.length, false, !geoValidation.valid);
   return JSON.parse(geoContent);
@@ -761,7 +761,7 @@ naverCueDiagnosis: 네이버 Cue 대응 진단.
   const channelContent = result.choices[0]?.message?.content as string || "{}";
   const channelValidation = validateJsonResponse(channelContent, ["crossChannelTrust", "aiSimulator"]);
   if (!channelValidation.valid) {
-    console.warn("[RealityDiagnosis] Channel LLM 응답 검증 경고:", channelValidation.errors);
+    logger.warn("[RealityDiagnosis] Channel LLM 응답 검증 경고:", channelValidation.errors);
   }
   recordLLMCall(Date.now() - startTime, channelContent.length, false, !channelValidation.valid);
   return JSON.parse(channelContent);
@@ -910,7 +910,7 @@ mybiseoServices: mybiseo 서비스 소개.
   const strategyContent = result.choices[0]?.message?.content as string || "{}";
   const strategyValidation = validateJsonResponse(strategyContent, ["websiteTransformGuide", "contentStrategy"]);
   if (!strategyValidation.valid) {
-    console.warn("[RealityDiagnosis] Strategy LLM 응답 검증 경고:", strategyValidation.errors);
+    logger.warn("[RealityDiagnosis] Strategy LLM 응답 검증 경고:", strategyValidation.errors);
   }
   recordLLMCall(Date.now() - startTime, strategyContent.length, false, !strategyValidation.valid);
   return JSON.parse(strategyContent);
@@ -945,7 +945,7 @@ function calculateDeterministicRevenueLoss(missedPatients: number, specialty: st
   // 포맷팅: 범위 표기로 변경 (±30% 범위)
   const lowerManwon = Math.round(clampedManwon * 0.7);
   const upperManwon = Math.round(clampedManwon * 1.3);
-  let formatted: string;
+  
   const formatManwon = (v: number) => {
     if (v >= 10000) {
       const eok = Math.floor(v / 10000);
@@ -954,7 +954,7 @@ function calculateDeterministicRevenueLoss(missedPatients: number, specialty: st
     }
     return `${Math.round(v / 100) * 100 > 0 ? (Math.round(v / 100) * 100).toLocaleString() : v.toLocaleString()}만원`;
   };
-  formatted = `월 약 ${formatManwon(lowerManwon)}~${formatManwon(upperManwon)}`;
+  const formatted = `월 약 ${formatManwon(lowerManwon)}~${formatManwon(upperManwon)}`;
 
   return { revenueLossManwon: clampedManwon, formatted };
 }
@@ -1087,7 +1087,7 @@ export async function generateRealityDiagnosis(
       logger.info(`[RealityDiagnosis] 네이버 API: "${naverKeywordData.keyword}" 월간검색량=${naverKeywordData.totalMonthlySearches} 경쟁도=${naverKeywordData.competitionLevel}`);
     }
   } catch (e) {
-    console.warn("[RealityDiagnosis] 네이버 API 호출 실패 (fallback 사용):", (e as Error).message);
+    logger.warn("[RealityDiagnosis] 네이버 API 호출 실패 (fallback 사용):", (e as Error).message);
   }
 
   const elapsed = Date.now() - startTime;

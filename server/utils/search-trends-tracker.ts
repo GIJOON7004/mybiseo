@@ -353,7 +353,7 @@ export async function analyzeAdVsOrganic(
   keywords: string[]
 ): Promise<AdVsOrganicAnalysis> {
   let hasNaverAd = false;
-  let hasGoogleAd = false;
+  const hasGoogleAd = false;
   let adKeywordCount = 0;
 
   const cleanDomain = domain.replace(/^(https?:\/\/)?(www\.)?/, "").replace(/\/$/, "");

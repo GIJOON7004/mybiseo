@@ -522,3 +522,11 @@
 - [x] C-6: Pre-commit hook (Husky + lint-staged) 설정 완료
 - [x] C-7: git audit 완료 — 7건 탐지 모두 false positive/테스트 더미키 확인, .gitleaksignore 생성
 - [x] C-8: 루트 .mjs 4개 scripts/ 폴더로 이동 완료
+
+## 카테고리 D: 코드 품질/타입 안전성 개선 (AI 종합 피드백 6차)
+- [x] D-1: as any Category A(catch 40개) 제거 — getErrorMessage 유틸리티 도입, catch(e: any) → catch(e: unknown) 변환 완료
+- [x] D-2: console.log 114개 → 0개 전환 완료 (server 비즈니스 로직 전체, client/index.ts 유지)
+- [x] D-3: TODO 주석 2개 수동 정리 (KakaoFloat.tsx 제거, blog-scheduler.ts NOTE로 변환)
+- [x] D-4: process.env 직접 접근 정리 — fonts-base64.ts INTERNAL_BASE_URL 제거 (나머지는 이미 env.ts 경유)
+- [x] D-5: 빈 catch 블록 10개+ → 에러 삼킴 방지 주석 추가 완료
+- [x] D-6: formatBlogContent 정규식 버그 수정 — /^##\s/ → /^##(?!#)\s/ negative lookahead 적용

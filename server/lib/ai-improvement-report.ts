@@ -5,6 +5,9 @@
 
 import { invokeLLM } from "../_core/llm";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("ai-improvement");
+
 export interface MonitoringData {
   keyword: string;
   hospitalName: string;
@@ -261,7 +264,7 @@ recommendations는 최소 5개 이상, platformAnalysis는 5개 플랫폼 모두
       competitorInsights,
     };
   } catch (err) {
-    console.error("[ImprovementReport] LLM 리포트 생성 실패:", err);
+    logger.error("[ImprovementReport] LLM 리포트 생성 실패:", err);
     // 폴백: 기본 리포트 생성
     return generateFallbackReport(data, mentionedPlatforms, notMentionedPlatforms, competitorMentions);
   }
@@ -658,7 +661,7 @@ ${keywordSummaries}
       competitorInsights: [],
     };
   } catch (err) {
-    console.error("[OverallReport] 생성 실패:", err);
+    logger.error("[OverallReport] 생성 실패:", err);
     return {
       title: "AI 인용 종합 개선 리포트",
       summary: `총 ${totalKeywords}개 키워드 모니터링 결과, 평균 AI 인용 점수는 ${Math.round(avgScore)}점이며, 전체 언급률은 ${Math.round(totalMentions / totalChecks * 100)}%입니다.`,

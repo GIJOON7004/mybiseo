@@ -6,6 +6,9 @@
 import { getDb } from "./db";
 import { llmUsageLogs } from "../drizzle/schema";
 
+import { createLogger } from "./lib/logger";
+const logger = createLogger("llm-usage");
+
 interface UsageEntry {
   caller: string;
   promptTokens: number;
@@ -30,7 +33,7 @@ async function flush(): Promise<void> {
     await db.insert(llmUsageLogs).values(batch);
   } catch (err) {
     // 로깅 실패는 무시 — 메인 로직에 영향 없음
-    console.error("[LLM Usage Logger] flush error:", (err as Error).message);
+    logger.error("[LLM Usage Logger] flush error:", (err as Error).message);
   }
 }
 

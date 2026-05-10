@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./lib/errors";
 import { createLogger } from "./lib/logger";
 const logger = createLogger("pagespeed");
 import { ENV } from "./_core/env";
@@ -241,8 +242,8 @@ async function _fetchPageSpeedMetricsInternal(
     // 캐시 저장
     _psCache.set(cacheKey, { data: result, ts: Date.now() });
     return result;
-  } catch (error: any) {
-    logger.warn(`[PageSpeed] Failed to fetch metrics: ${error.message}`);
+  } catch (error: unknown) {
+    logger.warn(`[PageSpeed] Failed to fetch metrics: ${getErrorMessage(error)}`);
     return null;
   }
 }

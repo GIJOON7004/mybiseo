@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./lib/errors";
 import { createLogger } from "./lib/logger";
 const logger = createLogger("blog-scheduler");
 /**
@@ -209,7 +210,7 @@ ${usedKeywords || "없음"}
         });
         savedCount++;
       } catch (e) {
-        console.warn(`[KeywordGen] 키워드 저장 실패 (중복 등):`, String(e));
+        logger.warn("키워드 저장 실패 (중복 등)", { detail: String(e) });
       }
     }
 
@@ -218,10 +219,10 @@ ${usedKeywords || "없음"}
     state.lastKeywordGenResult = genResult;
 
     addHistory("keyword_gen", true, `${savedCount}개 키워드 선정 완료`);
-    console.log(`[BlogScheduler] 월간 키워드 ${savedCount}개 선정 완료`);
+    logger.info(`월간 키워드 ${savedCount}개 선정 완료`);
     return genResult;
-  } catch (error: any) {
-    const errorMsg = error?.message || "알 수 없는 오류";
+  } catch (error: unknown) {
+    const errorMsg = getErrorMessage(error);
     logger.error("월간 키워드 선정 실패", { detail: errorMsg });
     state.lastKeywordGenResult = { success: false, error: errorMsg };
     addHistory("keyword_gen", false, errorMsg);
@@ -277,7 +278,7 @@ export async function generateAndPublishBlogPost(retryCount = 0): Promise<{
       await updateSeoKeyword(keywordId, { status: "generating" });
     } else {
       // pending 키워드가 없으면 즉석으로 키워드 생성 (fallback)
-      console.log("[BlogScheduler] pending 키워드 없음 — 즉석 생성");
+      logger.info("pending 키워드 없음 — 즉석 생성");
       const autoResult = await generateMonthlyKeywords();
       if (!autoResult.success || !autoResult.count) {
         return { success: false, error: "키워드 자동 생성에 실패했습니다. 다음 발행 시 재시도합니다." };
@@ -358,7 +359,7 @@ ${seasonalContext}
     if (!content) {
       if (keywordId) await updateSeoKeyword(keywordId, { status: "pending" });
       if (retryCount < MAX_RETRIES) {
-        console.log(`[BlogScheduler] AI 응답 비어있음 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
+        logger.info(`AI 응답 비어있음 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
         return generateAndPublishBlogPost(retryCount + 1);
       }
       return { success: false, error: "AI 응답이 비어있습니다 (재시도 실패)" };
@@ -369,14 +370,14 @@ ${seasonalContext}
     // 5. 품질 검증
     const quality = validatePostQuality(parsed);
     if (!quality.valid) {
-      console.log(`[BlogScheduler] 품질 미달: ${quality.issues.join(", ")}`);
+      logger.info(`품질 미달: ${quality.issues.join(", ")}`);
       if (retryCount < MAX_RETRIES) {
         if (keywordId) await updateSeoKeyword(keywordId, { status: "pending" });
-        console.log(`[BlogScheduler] 품질 미달 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
+        logger.info(`품질 미달 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
         return generateAndPublishBlogPost(retryCount + 1);
       }
       // 마지막 시도에서도 미달이면 그래도 발행 (로그만 남김)
-      console.warn(`[BlogScheduler] 품질 미달이지만 최종 시도이므로 발행: ${quality.issues.join(", ")}`);
+      logger.warn(`품질 미달이지만 최종 시도이므로 발행: ${quality.issues.join(", ")}`);
     }
 
     // 6. 블로그 글 저장 (즉시 발행)
@@ -403,14 +404,14 @@ ${seasonalContext}
     state.lastRunResult = runResult;
 
     addHistory("publish", true, `"${parsed.title}" 발행 완료`);
-    console.log(`[BlogScheduler] 자동 발행 완료: "${parsed.title}"`);
+    logger.info(`자동 발행 완료: "${parsed.title}"`);
     return runResult;
-  } catch (error: any) {
-    const errorMsg = error?.message || "알 수 없는 오류";
+  } catch (error: unknown) {
+    const errorMsg = getErrorMessage(error);
     logger.error("자동 발행 실패", { detail: errorMsg });
 
     if (retryCount < MAX_RETRIES) {
-      console.log(`[BlogScheduler] 오류 발생 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
+      logger.info(`오류 발생 — 재시도 ${retryCount + 1}/${MAX_RETRIES}`);
       return generateAndPublishBlogPost(retryCount + 1);
     }
 
@@ -427,12 +428,12 @@ ${seasonalContext}
 /** @deprecated Heartbeat cron으로 전환 완료. /api/scheduled/* 엔드포인트 사용. 이 함수는 하위 호환성을 위해 유지되지만 더 이상 호출되지 않음. */
 export function startBlogScheduler() {
   if (state.schedulerInterval) {
-  console.warn("[BlogScheduler] ⚠️ startBlogScheduler는 deprecated. Heartbeat cron(/api/scheduled/*)으로 전환 완료.");
-    console.log("[BlogScheduler] 이미 실행 중입니다");
+  logger.warn("startBlogScheduler는 deprecated. Heartbeat cron(/api/scheduled/*)으로 전환 완료");
+    logger.info("이미 실행 중입니다");
     return;
   }
 
-  console.log("[BlogScheduler] 스케줄러 시작 — 매주 화/금 10:00 KST 발행, 매월 1일 키워드 선정");
+  logger.info("스케줄러 시작 — 매주 화/금 10:00 KST 발행, 매월 1일 키워드 선정");
 
   const CHECK_INTERVAL = 10 * 60 * 1000; // 10분마다 체크 (정확도 향상)
   let lastPublishRun = "";
@@ -444,7 +445,7 @@ export function startBlogScheduler() {
   let lastBenchmarkRun = "";
   let lastInsightRun = "";
   let lastMonthlyDiagRun = "";
-  // TODO: setInterval은 Cloud Run에서 동작하지 않음. Heartbeat cron으로 전환 필요 (references/periodic-updates.md 참조)
+  // NOTE: setInterval은 Cloud Run에서 동작하지 않음. Heartbeat cron으로 전환 예정 (ADR 미작성 — references/periodic-updates.md 참조)
 
   state.schedulerInterval = setInterval(async () => {
     try {
@@ -459,7 +460,7 @@ export function startBlogScheduler() {
         const keywordRunKey = `${todayKey}-keyword`;
         if (lastKeywordRun !== keywordRunKey) {
           lastKeywordRun = keywordRunKey;
-          console.log("[BlogScheduler] 월간 키워드 선정 시작");
+          logger.info("월간 키워드 선정 시작");
           await generateMonthlyKeywords();
         }
       }
@@ -469,7 +470,7 @@ export function startBlogScheduler() {
         const publishRunKey = `${todayKey}-publish`;
         if (lastPublishRun !== publishRunKey) {
           lastPublishRun = publishRunKey;
-          console.log("[BlogScheduler] 자동 발행 시작");
+          logger.info("자동 발행 시작");
           await generateAndPublishBlogPost();
         }
       }
@@ -479,12 +480,12 @@ export function startBlogScheduler() {
         const followupRunKey = `${todayKey}-followup`;
         if (!lastFollowupRun || lastFollowupRun !== followupRunKey) {
           lastFollowupRun = followupRunKey;
-          console.log("[FollowupEmail] 후속 이메일 발송 시작");
+          logger.info("후속 이메일 발송 시작");
           try {
             const result = await runFollowupEmails();
             if (result.sent3d > 0 || result.sent7d > 0) {
               addHistory("followup_email", true, `3일: ${result.sent3d}건, 7일: ${result.sent7d}건 발송`);
-              console.log(`[FollowupEmail] 발송 완료 — 3일: ${result.sent3d}건, 7일: ${result.sent7d}건`);
+              logger.info(`발송 완료 — 3일: ${result.sent3d}건, 7일: ${result.sent7d}건`);
             }
           } catch (err) {
             addHistory("followup_email", false, String(err));
@@ -497,7 +498,7 @@ export function startBlogScheduler() {
         const reportRunKey = `${todayKey}-monthlyreport`;
         if (lastMonthlyReportRun !== reportRunKey) {
           lastMonthlyReportRun = reportRunKey;
-          console.log("[MonthlyReport] 월간 리포트 자동 발송 시작");
+          logger.info("월간 리포트 자동 발송 시작");
           try {
             const result = await runMonthlyReportAuto();
             addHistory("followup_email", true, `월간 리포트: ${result.sent}건 발송, ${result.failed}건 실패`);
@@ -518,7 +519,7 @@ export function startBlogScheduler() {
         const retargetRunKey = `${todayKey}-retarget`;
         if (lastRetargetRun !== retargetRunKey) {
           lastRetargetRun = retargetRunKey;
-          console.log("[Retarget] 재진단 유도 이메일 발송 시작");
+          logger.info("재진단 유도 이메일 발송 시작");
           try {
             const allLeads = await getAllSeoLeads(500);
             const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
@@ -534,7 +535,7 @@ export function startBlogScheduler() {
                 const emailHtml = buildRediagnosisEmail({ url: lead.url, totalScore: lead.totalScore ?? 0, grade: lead.grade ?? "" });
                 await sendEmailViaNaver({ to: lead.email, subject: `[MY비서] ${lead.url} AI 인용 점수가 변했을 수 있습니다`, html: emailHtml });
                 sent++;
-              } catch (e) { console.warn(`[FollowupEmail] 개별 발송 실패 (${lead.email}):`, String(e)); }
+              } catch (e) { logger.warn(`개별 발송 실패 (${lead.email})`, { detail: String(e) }); }
             }
             addHistory("followup_email", true, `재진단 유도: ${sent}/${targets.length}건 발송`);
             if (sent > 0) {
@@ -551,7 +552,7 @@ export function startBlogScheduler() {
         const benchmarkRunKey = `${todayKey}-benchmark`;
         if (lastBenchmarkRun !== benchmarkRunKey) {
           lastBenchmarkRun = benchmarkRunKey;
-          console.log("[Benchmark] 월간 벤치마크 자동 집계 시작");
+          logger.info("월간 벤치마크 자동 집계 시작");
           try {
             const { aggregateMonthlyBenchmark, generateMonthlyAwards } = await import("./db");
             // 전월 기간 계산
@@ -613,7 +614,7 @@ export function startBlogScheduler() {
                 const parsed = JSON.parse(typeof content === "string" ? content : "{}");
                 await updateChatSessionInsight(session.id, parsed);
                 processed++;
-              } catch (e) { console.warn(`[ChatInsight] 세션 ${session.id} 처리 실패:`, String(e)); }
+              } catch (e) { logger.warn(`세션 ${session.id} 처리 실패`, { detail: String(e) }); }
             }
             if (processed > 0) {
               addHistory("chat_insight", true, `${processed}개 세션 인사이트 추출 완료`);
@@ -628,7 +629,7 @@ export function startBlogScheduler() {
       if (kst.dayOfWeek === 4 && kst.hour === 6 && kst.minute < 10) {
         const diagRunKey = `${todayKey}-autodiag`;
         if (!state.lastAutoDiagnosisAt || state.lastAutoDiagnosisAt.toISOString().slice(0, 10) !== todayKey) {
-          console.log("[AutoDiagnosis] 주간 자동 진단 시작");
+          logger.info("주간 자동 진단 시작");
           try {
             state.lastAutoDiagnosisAt = new Date();
             const { getActiveHospitalProfiles, saveDiagnosisHistory } = await import("./db");
@@ -653,7 +654,7 @@ export function startBlogScheduler() {
                 diagnosed++;
               } catch (e) {
                 failed++;
-                console.warn(`[AutoDiagnosis] ${profile.hospitalUrl} 진단 실패:`, String(e));
+                logger.warn(`${profile.hospitalUrl} 진단 실패`, { detail: String(e) });
               }
               // 서버 부하 방지: 각 진단 사이 3초 대기
               await new Promise(r => setTimeout(r, 3000));
@@ -682,7 +683,7 @@ export function startBlogScheduler() {
         const monthlyDiagKey = `${todayKey}-monthlydiag`;
         if (lastMonthlyDiagRun !== monthlyDiagKey) {
           lastMonthlyDiagRun = monthlyDiagKey;
-          console.log("[MonthlyDiagnosis] 월간 전체 URL 진단 시작");
+          logger.info("월간 전체 URL 진단 시작");
           try {
             state.lastMonthlyDiagnosisAt = new Date();
             const result = await runMonthlyBatchDiagnosis();
@@ -710,7 +711,7 @@ export function startBlogScheduler() {
         const monitorRunKey = `${todayKey}-aimonitor`;
         if (lastAiMonitorRun !== monitorRunKey) {
           lastAiMonitorRun = monitorRunKey;
-          console.log("[AIMonitor] 주간 자동 모니터링 시작");
+          logger.info("주간 자동 모니터링 시작");
           try {
             state.lastAiMonitorAt = new Date();
             // v2 고도화 버전 사용 (AI 인용 점수 자동 산정 + DB 저장 포함)
@@ -735,7 +736,7 @@ export function startBlogScheduler() {
         const briefingRunKey = `${todayKey}-briefing`;
         if (state.lastWeeklyBriefingRun !== briefingRunKey) {
           state.lastWeeklyBriefingRun = briefingRunKey;
-          console.log("[WeeklyBriefing] 주간 브리핑 생성 시작");
+          logger.info("주간 브리핑 생성 시작");
           try {
             const data = await getWeeklyBriefingData();
             const briefingContent = formatWeeklyBriefing(data);
@@ -760,7 +761,7 @@ export function startBlogScheduler() {
     }
   }, CHECK_INTERVAL);
   // 서버 시작 시 즉시 예약 발행 처리
-  publishScheduledPosts().catch(console.error);
+  publishScheduledPosts().catch(e => logger.error("publishScheduledPosts failed", { error: getErrorMessage(e) }));
 }
 
 /**
@@ -798,7 +799,7 @@ export async function runMonthlyBatchDiagnosis() {
   let failed = 0;
   let skipped = 0;
 
-  console.log(`[MonthlyDiagnosis] 전체 ${totalUrls}개 URL 진단 시작 (병원 ${profileUrls.size}개 + 리드 ${leadUrls.size}개)`);
+  logger.info(`전체 ${totalUrls}개 URL 진단 시작 (병원 ${profileUrls.size}개 + 리드 ${leadUrls.size}개)`);
 
   for (const [url, meta] of allUrlEntries) {
     try {
@@ -825,16 +826,16 @@ export async function runMonthlyBatchDiagnosis() {
         categoryScores: JSON.stringify(result.categories.map((c: any) => ({ name: c.name, score: c.score, max: c.maxScore }))),
       });
       diagnosed++;
-      console.log(`[MonthlyDiagnosis] ✓ ${url} — ${result.totalScore}점 (${result.grade})`);
+      logger.info(`✓ ${url} — ${result.totalScore}점 (${result.grade})`);
     } catch (err) {
       failed++;
-      console.error(`[MonthlyDiagnosis] ✗ ${url} — ${String(err).slice(0, 100)}`);
+      logger.error(`✗ ${url} — ${String(err).slice(0, 100)}`);
     }
     // 서버 부하 방지: 각 진단 사이 5초 대기
     await new Promise(r => setTimeout(r, 5000));
   }
 
-  console.log(`[MonthlyDiagnosis] 완료: ${diagnosed}/${totalUrls} 성공, ${failed} 실패, ${skipped} 스킵`);
+  logger.info(`완료: ${diagnosed}/${totalUrls} 성공, ${failed} 실패, ${skipped} 스킵`);
   return { diagnosed, failed, skipped, totalUrls };
 }
 
@@ -879,7 +880,7 @@ export async function runMonthlyReportAuto(): Promise<{ sent: number; failed: nu
       });
       if (emailSent) sent++; else failed++;
     } catch (err) {
-      console.error(`[MonthlyReport] Failed for ${lead.email}:`, err);
+      logger.error(`MonthlyReport failed for ${lead.email}`, { error: String(err) });
       failed++;
     }
   }
@@ -913,7 +914,7 @@ export async function runFollowupEmails(): Promise<{ sent3d: number; sent7d: num
       }
     }
   } catch (err) {
-    console.error("[FollowupEmail] Error:", err);
+    logger.error("FollowupEmail error", { error: String(err) });
   }
 
   return { sent3d, sent7d };
@@ -948,6 +949,6 @@ export function stopBlogScheduler() {
   if (state.schedulerInterval) {
     clearInterval(state.schedulerInterval);
     state.schedulerInterval = null;
-    console.log("[BlogScheduler] 스케줄러 중지됨");
+    logger.info("스케줄러 중지됨");
   }
 }

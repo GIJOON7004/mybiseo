@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../lib/errors";
 /**
  * treatmentPage 라우터
  * routers.ts에서 분할 — treatmentPage
@@ -115,8 +116,8 @@ ${lang}로 작성하세요.`;
     try {
       content = JSON.parse(typeof aiResponse.choices[0].message.content === "string" ? aiResponse.choices[0].message.content : "{}");
       if (!content.heroTitle || !content.sections) throw new Error("AI 응답에 필수 필드가 누락되었습니다");
-    } catch (parseErr: any) {
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `AI 콘텐츠 생성 실패: ${parseErr.message}` });
+    } catch (parseErr: unknown) {
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `AI 콘텐츠 생성 실패: ${getErrorMessage(parseErr)}` });
     }
     const slug = input.treatmentName.toLowerCase().replace(/[^a-z0-9가-힯]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") + "-" + Date.now().toString(36);
     const result = await createTreatmentPage({

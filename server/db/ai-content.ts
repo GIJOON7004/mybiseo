@@ -6,6 +6,9 @@ import { eq, desc, sql, and, lt, ne, gt, gte, lte, or, asc, inArray, isNull, isN
 import * as schema from "../../drizzle/schema";
 import { getDb } from "./connection";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("db-ai-content");
+
 export async function createAiBlogTrial(data: schema.InsertAiBlogTrial) {
   const db = await getDb();
   if (!db) return null;
@@ -143,7 +146,7 @@ export async function getReviewReportAdmin() {
           const clause = issue.clause || "기타";
           issueMap.set(clause, (issueMap.get(clause) || 0) + 1);
         });
-      } catch (e) { console.warn("[DB] Suppressed error:", e); }
+      } catch (e) { logger.warn("[DB] Suppressed error:", e); }
     }
   });
   const topIssues = Array.from(issueMap.entries())

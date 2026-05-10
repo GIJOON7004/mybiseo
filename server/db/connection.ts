@@ -4,6 +4,9 @@
  */
 import { drizzle } from "drizzle-orm/mysql2";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("db-connection");
+
 let _db: ReturnType<typeof drizzle> | null = null;
 
 export async function getDb() {
@@ -11,7 +14,7 @@ export async function getDb() {
     try {
       _db = drizzle(process.env.DATABASE_URL + "&connectionLimit=10&connectTimeout=10000&waitForConnections=true");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      logger.warn("[Database] Failed to connect:", error);
       _db = null;
     }
   }
@@ -26,7 +29,7 @@ export async function closeDb(): Promise<void> {
         await client.end();
       }
     } catch (e) {
-      console.warn("[Database] Error closing pool:", e);
+      logger.warn("[Database] Error closing pool:", e);
     }
     _db = null;
   }

@@ -22,7 +22,7 @@ export function normalizeUrl(input: string): string {
     try {
       const path = new URL(url).pathname;
       if (!path.includes(".")) url += "/";
-    } catch {}
+    } catch { /* ignored */ }
   }
   return url;
 }

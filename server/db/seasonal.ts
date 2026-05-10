@@ -10,7 +10,7 @@ export async function getSeasonalKeywords(specialty?: string, month?: number) {
   const db = await getDb();
   if (!db) return [];
   
-  let query = db.select().from(schema.seasonalCalendar);
+  const query = db.select().from(schema.seasonalCalendar);
   
   if (specialty && month) {
     return query.where(and(

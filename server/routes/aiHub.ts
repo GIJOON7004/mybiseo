@@ -15,6 +15,9 @@ import {
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("ai-hub");
+
 export const aiHubRouter = router({
   // AI 블로그 무료 체험 (로그인 없이 사용 가능)
   trialBlog: publicProcedure
@@ -163,7 +166,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
         review = JSON.parse(typeof rawReview === "string" ? rawReview : "{}");
       } catch (e) {
         // 검수 실패해도 블로그 글은 반환
-        console.error("Trial blog review failed:", e);
+        logger.error("Trial blog review failed:", e);
       }
 
       return { title: parsed.title, content: parsed.content, tags: parsed.tags || [], review };
@@ -346,7 +349,7 @@ JSON: {"title":"...","content":"...","tags":["..."],"metaDescription":"..."}`
           });
           imageUrl = imgResult.url;
         } catch (imgErr) {
-          console.warn("[AI Hub] Image generation failed:", imgErr);
+          logger.warn("[AI Hub] Image generation failed:", imgErr);
         }
 
         if (log) {
@@ -1013,7 +1016,7 @@ JSON: {"verdict":"pass|warning|fail","score":0-100,"issues":[{"original":"...","
         });
         coverImageUrl = imgResult?.url;
       } catch (e) {
-        console.error("Cover image generation failed:", e);
+        logger.error("Cover image generation failed:", e);
       }
 
       return {

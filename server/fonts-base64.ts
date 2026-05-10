@@ -15,7 +15,8 @@ const FONT_URLS = {
 let _fontCache: Record<string, Buffer> | null = null;
 
 async function fetchFont(url: string): Promise<Buffer> {
-  const baseUrl = process.env.INTERNAL_BASE_URL || `http://localhost:${process.env.PORT || 3000}`;
+  // NOTE: 서버 자기 자신에게 요청하므로 localhost 사용 (env.ts의 PORT는 없으므로 직접 참조)
+  const baseUrl = `http://localhost:${process.env.PORT || 3000}`;
   const res = await fetch(`${baseUrl}${url}`);
   if (!res.ok) throw new Error(`Font fetch failed: ${url} (${res.status})`);
   const arrayBuffer = await res.arrayBuffer();

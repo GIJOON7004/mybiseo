@@ -18,6 +18,9 @@ import { analyzeSeo } from "../seo-analyzer";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { createLogger } from "../lib/logger";
+const logger = createLogger("report");
+
 export const monthlyReportRouter = router({
   sendToContracted: adminProcedure.mutation(async () => {
     // 계약 완료 리드들에게 월간 AI 인용 리포트 발송
@@ -59,7 +62,7 @@ export const monthlyReportRouter = router({
 
         if (emailSent) sent++; else failed++;
       } catch (err) {
-        console.error(`[MonthlyReport] Failed for ${lead.email}:`, err);
+        logger.error(`[MonthlyReport] Failed for ${lead.email}:`, err);
         failed++;
       }
     }

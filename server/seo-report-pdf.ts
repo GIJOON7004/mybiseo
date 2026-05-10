@@ -1,3 +1,4 @@
+import { getErrorMessage } from "./lib/errors";
 /**
  * SEO Report PDF — HTML/Puppeteer 엔진 우선, PDFKit 레거시 fallback
  * 
@@ -10,6 +11,9 @@ import { generateHtmlPdfReport, sanitizeHospitalName } from "./ai-visibility-htm
 import { generateAiVisibilityReport } from "./ai-visibility-report";
 import { enqueuePdfGeneration } from "./pdf-queue";
 
+import { createLogger } from "./lib/logger";
+const logger = createLogger("seo-report-pdf");
+
 export async function generateSeoReportPdf(
   ...args: Parameters<typeof generateHtmlPdfReport>
 ): Promise<Buffer> {
@@ -18,13 +22,13 @@ export async function generateSeoReportPdf(
     // 프로덕션에서는 Chromium이 없으므로 PDFKit 엔진을 기본으로 사용
     try {
       return await generateAiVisibilityReport(...args);
-    } catch (pdfkitErr: any) {
-      console.error(`[PDF] PDFKit engine failed:`, pdfkitErr?.message);
+    } catch (pdfkitErr: unknown) {
+      logger.error(`[PDF] PDFKit engine failed:`, getErrorMessage(pdfkitErr));
       // PDFKit 실패 시 HTML/Puppeteer 엔진 시도 (로컬 개발 환경 등)
       try {
         return await generateHtmlPdfReport(...args);
-      } catch (htmlErr: any) {
-        console.error(`[PDF] HTML engine also failed:`, htmlErr?.message);
+      } catch (htmlErr: unknown) {
+        logger.error(`[PDF] HTML engine also failed:`, getErrorMessage(htmlErr));
         throw pdfkitErr;
       }
     }

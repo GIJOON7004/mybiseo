@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-// TODO: 실제 카카오톡 채널 URL로 교체
 const KAKAO_CHANNEL_URL = "https://pf.kakao.com/_KxmnZn/chat";
 
 export default function KakaoFloat() {

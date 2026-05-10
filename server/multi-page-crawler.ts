@@ -390,7 +390,7 @@ function aggregateData(mainHtml: string, main$: cheerio.CheerioAPI, mainBodyText
             if (item["@type"]) allJsonLdTypes.add(item["@type"]);
           });
         }
-      } catch {}
+      } catch { /* ignored */ }
     });
 
     // hreflang 태그
@@ -469,7 +469,7 @@ function aggregateData(mainHtml: string, main$: cheerio.CheerioAPI, mainBodyText
         if (langMatch && !multiLangPaths.includes(langMatch[1].toLowerCase())) {
           multiLangPaths.push(langMatch[1].toLowerCase());
         }
-      } catch {}
+      } catch { /* ignored */ }
     }
   }
 

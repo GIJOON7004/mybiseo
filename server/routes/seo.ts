@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../lib/errors";
 /**
  * seo 라우터
  * routers.ts에서 분할 — seoKeyword, seoAnalyzer
@@ -15,6 +16,9 @@ import { analyzeSeo, type CountryCode } from "../seo-analyzer";
 import { generateRealityDiagnosis } from "../reality-diagnosis";
 import { z } from "zod";
 import { BLOG_GENERATOR_PROMPT, formatBlogContent } from "./_shared";
+
+import { createLogger } from "../lib/logger";
+const logger = createLogger("seo");
 
 export const seoKeywordRouter = router({
   list: adminProcedure.query(async () => {
@@ -189,7 +193,7 @@ export const seoAnalyzerRouter = router({
           content: `병원명: ${input.hospitalName || '-'}\n진료과: ${input.specialty || '-'}\n지역: ${input.region || '-'}\nURL: ${input.url}\n점수: ${result.totalScore}점 (${result.grade})\nAI 노출: ${aiScore}%\n이메일: ${input.email || '-'}\n전화: ${input.phone || '-'}`,
         });
       } catch (e) {
-        console.error("[DataAccumulation] 진단 이력 저장 실패:", e);
+        logger.error("[DataAccumulation] 진단 이력 저장 실패:", e);
       }
       return result;
     }),
@@ -222,7 +226,7 @@ export const seoAnalyzerRouter = router({
               categoryScores: JSON.stringify(res.categories.map((c: any) => ({ name: c.name, score: c.score, max: c.maxScore }))),
             });
           } catch (e) {
-            console.error("[DataAccumulation] 비교 분석 이력 저장 실패:", e);
+            logger.error("[DataAccumulation] 비교 분석 이력 저장 실패:", e);
           }
         }
       }
@@ -281,7 +285,7 @@ export const seoAnalyzerRouter = router({
 
         // (Screenshot capture removed — clean diagnostic report)
       } catch (err) {
-        console.error("[generateReport] Reality diagnosis failed, continuing without it:", err);
+        logger.error("[generateReport] Reality diagnosis failed, continuing without it:", err);
       }
       const { generateSeoReportPdf } = await import("../seo-report-pdf");
       const pdfBuffer = await generateSeoReportPdf(result, input.country as any, input.language as any, realityData);
@@ -419,11 +423,11 @@ export const seoAnalyzerRouter = router({
             pdfUrl,
             fileName: fileNameMap[lang] || fileNameMap.ko,
           });
-        } catch (err: any) {
+        } catch (err: unknown) {
           results.push({
             url: item.url,
             status: "failed",
-            error: err?.message || "진단 실패",
+            error: getErrorMessage(err) || "진단 실패",
           });
         }
       }
@@ -453,7 +457,7 @@ function normalizeUrl(input: string): string {
     try {
       const path = new URL(url).pathname;
       if (!path.includes(".")) url += "/";
-    } catch {}
+    } catch { /* ignored */ }
   }
   return url;
 }

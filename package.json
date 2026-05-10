@@ -153,13 +153,13 @@
   },
   "lint-staged": {
     "server/**/*.ts": [
-      "eslint --fix --max-warnings 0"
+      "eslint --fix"
     ],
     "client/src/**/*.{ts,tsx}": [
-      "eslint --fix --max-warnings 0"
+      "eslint --fix"
     ],
     "shared/**/*.ts": [
-      "eslint --fix --max-warnings 0"
+      "eslint --fix"
     ]
   }
 }
