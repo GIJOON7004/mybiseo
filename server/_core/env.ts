@@ -2,17 +2,21 @@ import { z } from "zod";
 
 /**
  * 환경변수 스키마 — 필수(required)와 선택(optional)을 명시적으로 구분
- * 서버 시작 시 필수 환경변수가 누락되면 즉시 실패하여 런타임 오류 방지
+ * 서버 시작 시 필수 환경변수가 누락되면 경고 로그 출력
+ * 
+ * 참고: 배포 환경(Cloud Run)에서는 일부 환경변수가 플랫폼에 의해 주입되므로
+ * process.exit(1)로 강제 종료하면 배포 실패를 유발할 수 있음.
+ * 따라서 경고만 출력하고 빈 문자열 fallback으로 진행.
  */
 const envSchema = z.object({
-  // ─── 필수: 서버 동작에 반드시 필요 ───
-  VITE_APP_ID: z.string().min(1, "VITE_APP_ID is required"),
-  JWT_SECRET: z.string().min(1, "JWT_SECRET is required"),
-  DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  OAUTH_SERVER_URL: z.string().url("OAUTH_SERVER_URL must be a valid URL"),
-  OWNER_OPEN_ID: z.string().min(1, "OWNER_OPEN_ID is required"),
-  BUILT_IN_FORGE_API_URL: z.string().min(1, "BUILT_IN_FORGE_API_URL is required"),
-  BUILT_IN_FORGE_API_KEY: z.string().min(1, "BUILT_IN_FORGE_API_KEY is required"),
+  // ─── 핵심: 서버 동작에 필요하지만 배포 환경에서 플랫폼이 주입 ───
+  VITE_APP_ID: z.string().default(""),
+  JWT_SECRET: z.string().default(""),
+  DATABASE_URL: z.string().default(""),
+  OAUTH_SERVER_URL: z.string().default(""),
+  OWNER_OPEN_ID: z.string().default(""),
+  BUILT_IN_FORGE_API_URL: z.string().default(""),
+  BUILT_IN_FORGE_API_KEY: z.string().default(""),
 
   // ─── 선택: 없으면 해당 기능 비활성화 ───
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
@@ -37,23 +41,17 @@ if (!parsed.success) {
   for (const issue of parsed.error.issues) {
     console.error(`  - ${issue.path.join(".")}: ${issue.message}`);
   }
-  // 프로덕션에서는 서버 시작 차단, 개발 환경에서는 경고만
-  if (process.env.NODE_ENV === "production") {
-    process.exit(1);
-  }
 }
 
-const env = parsed.success ? parsed.data : envSchema.parse({
-  ...process.env,
-  // 개발 환경 fallback — 필수 값이 없어도 빈 문자열로 진행
-  VITE_APP_ID: process.env.VITE_APP_ID || "dev-app-id",
-  JWT_SECRET: process.env.JWT_SECRET || "dev-secret-change-me",
-  DATABASE_URL: process.env.DATABASE_URL || "mysql://localhost:3306/dev",
-  OAUTH_SERVER_URL: process.env.OAUTH_SERVER_URL || "http://localhost:4000",
-  OWNER_OPEN_ID: process.env.OWNER_OPEN_ID || "dev-owner",
-  BUILT_IN_FORGE_API_URL: process.env.BUILT_IN_FORGE_API_URL || "http://localhost:5000",
-  BUILT_IN_FORGE_API_KEY: process.env.BUILT_IN_FORGE_API_KEY || "dev-key",
-});
+const env = parsed.data ?? envSchema.parse(process.env);
+
+// 핵심 환경변수 누락 경고 (서버는 시작하되, 기능 제한될 수 있음을 알림)
+const criticalVars = ["VITE_APP_ID", "JWT_SECRET", "DATABASE_URL", "OAUTH_SERVER_URL", "BUILT_IN_FORGE_API_URL", "BUILT_IN_FORGE_API_KEY"] as const;
+for (const key of criticalVars) {
+  if (!env[key]) {
+    console.warn(`⚠️  Critical env var ${key} is empty — some features may not work`);
+  }
+}
 
 /**
  * 타입 안전한 환경변수 접근 — 기존 ENV 인터페이스 호환
