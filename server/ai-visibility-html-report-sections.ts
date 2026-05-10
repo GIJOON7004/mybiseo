@@ -692,6 +692,13 @@ export function buildCompetitorPage(
 ): string {
   const competitors: CompetitorSnapshot[] = rd.competitors || [];
   if (competitors.length === 0) return "";
+  // H-7: 모든 경쟁사가 "정보 부족"이면 섹션 숨김 (빈 데이터로 혼란 방지)
+  const allLackInfo = competitors.every(c =>
+    (c.advantage || "").includes("정보 부족") ||
+    (c.advantage || "").includes("insufficient") ||
+    (c.advantage || "").trim().length < 5
+  );
+  if (allLackInfo) return "";
 
   // Count competitors with higher visibility
   const highVisCount = competitors.filter(c => c.estimatedVisibility === "상").length;
@@ -973,6 +980,7 @@ export function buildBrandDefensePage(
           <div class="value">${esc(mentionRate)}</div>
         </div>
       </div>
+      <div class="fs-8 text-muted" style="text-align:center;margin-top:4px;margin-bottom:8px;">${t.aiSimDisclaimer || ""}</div>
 
       ${channels.length > 0 ? `
       <div class="sub-title">${lang === "ko" ? "채널별 브랜드 방어 현황" : "Channel Brand Defense Status"}</div>

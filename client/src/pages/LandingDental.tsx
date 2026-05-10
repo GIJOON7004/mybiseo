@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowLeft, CheckCircle2, TrendingUp, Users, Search, Star, MessageSquare, Calendar, Sparkles, ArrowRight, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 const painPoints = [
   { icon: <Search className="w-5 h-5" />, title: "네이버 광고비만 월 200만원+", desc: "클릭당 5,000~8,000원, 매달 올라가는 CPC에 수익률 하락" },
@@ -37,13 +38,13 @@ export default function LandingDental() {
   useSEO({
     title: "치과 마케팅 전문 | MY비서 - AI로 신환 늘리고 광고비 줄이기",
     description: "임플란트·교정·심미 치과를 위한 AI 마케팅. ChatGPT 노출 최적화, 네이버 상위 노출, 리뷰 관리까지. 광고비 45% 절감, 신환 80% 증가 사례.",
-    canonical: "https://mybiseo.com/dental",
+    canonical: `${APP_BASE_URL}/dental`,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Service",
       name: "MY비서 치과 마케팅",
       description: "치과 전용 AI 마케팅 솔루션 — 검색 최적화, 리뷰 관리, 콘텐츠 자동화",
-      provider: { "@type": "Organization", name: "MY비서", url: "https://mybiseo.com" },
+      provider: { "@type": "Organization", name: "MY비서", url: APP_BASE_URL },
       areaServed: "KR",
       serviceType: "치과 디지털 마케팅",
     },

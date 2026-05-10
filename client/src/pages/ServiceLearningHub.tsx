@@ -13,6 +13,7 @@ import {
   RefreshCw,
   Target,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function ServiceLearningHub() {
   return (
@@ -26,7 +27,7 @@ export default function ServiceLearningHub() {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "AI Learning Hub",
-            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: "https://mybiseo.com" },
+            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: APP_BASE_URL },
             description: "병원 전용 Knowledge Base를 구축하여 AI가 정확한 정보를 학습하도록 하는 데이터 최적화 서비스",
             serviceType: "AI Data Optimization",
             areaServed: { "@type": "Country", name: "KR" },
@@ -35,9 +36,9 @@ export default function ServiceLearningHub() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "홈", item: "https://mybiseo.com" },
-              { "@type": "ListItem", position: 2, name: "서비스", item: "https://mybiseo.com/#services" },
-              { "@type": "ListItem", position: 3, name: "AI Learning Hub", item: "https://mybiseo.com/services/learning-hub" },
+              { "@type": "ListItem", position: 1, name: "홈", item: APP_BASE_URL },
+              { "@type": "ListItem", position: 2, name: "서비스", item: `${APP_BASE_URL}/#services` },
+              { "@type": "ListItem", position: 3, name: "AI Learning Hub", item: `${APP_BASE_URL}/services/learning-hub` },
             ],
           },
         ],

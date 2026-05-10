@@ -12,6 +12,7 @@ import {
 import { sendEmailViaNaver } from "../notifier";
 import { analyzeSeo } from "../seo-analyzer";
 import { TRPCError } from "@trpc/server";
+import { APP_BASE_URL } from "../../shared/const";
 import { z } from "zod";
 
 import { createLogger } from "../lib/logger";
@@ -204,7 +205,7 @@ JSON 형식으로 응답해주세요:`;
           });
           // 이메일 발송
           const { buildBenchmarkingReportEmail } = await import("../email-templates");
-          const reportUrl = `https://mybiseo.com/admin/benchmarking?id=${reportId}`;
+          const reportUrl = `${APP_BASE_URL}/admin/benchmarking?id=${reportId}`;
           const emailHtml = buildBenchmarkingReportEmail({
             hospitalName: input.hospitalName,
             myScore: myResult.totalScore,

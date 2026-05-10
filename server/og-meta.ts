@@ -7,6 +7,7 @@ import type { Request, Response, NextFunction } from "express";
 import { analyzeSeo } from "./seo-analyzer";
 
 import { createLogger } from "./lib/logger";
+import { APP_BASE_URL } from "../shared/const";
 const logger = createLogger("og-meta");
 
 // 크롤러/봇 User-Agent 패턴
@@ -60,7 +61,7 @@ export function ogMetaMiddleware(htmlTemplate: string) {
       const ogTitle = `${emoji} ${displayUrl} — AI+포털 노출 점수 ${score}점 (${grade})`;
       const ogDesc = `통과 ${passed}개 · 주의 ${warnings}개 · 실패 ${failed}개 — 당신의 병원도 무료 진단해 보세요!`;
       const ogImage = "https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png";
-      const canonicalUrl = `https://mybiseo.com/ai-check?url=${encodeURIComponent(targetUrl)}`;
+      const canonicalUrl = `${APP_BASE_URL}/ai-check?url=${encodeURIComponent(targetUrl)}`;
 
       // HTML 템플릿에서 OG 태그 교체
       let html = htmlTemplate;

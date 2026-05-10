@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Eye, ChevronRight, BookOpen, Layers } from "lucide-re
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function BlogCategory() {
   const params = useParams<{ slug: string }>();
@@ -20,18 +21,18 @@ export default function BlogCategory() {
       "@type": "CollectionPage",
       name: category.name,
       description: category.metaDescription || category.description,
-      url: `https://mybiseo.com/blog/category/${category.slug}`,
+      url: `${APP_BASE_URL}/blog/category/${category.slug}`,
       isPartOf: {
         "@type": "WebSite",
         name: "MY비서 블로그",
-        url: "https://mybiseo.com/blog",
+        url: `${APP_BASE_URL}/blog`,
       },
       ...(category.posts && category.posts.length > 0
         ? {
             hasPart: category.posts.map((p) => ({
               "@type": "Article",
               headline: p.title,
-              url: `https://mybiseo.com/blog/${p.slug}`,
+              url: `${APP_BASE_URL}/blog/${p.slug}`,
             })),
           }
         : {}),
@@ -41,7 +42,7 @@ export default function BlogCategory() {
   useSEO({
     title: category?.metaTitle || `${category?.name || "카테고리"} | MY비서 블로그`,
     description: category?.metaDescription || category?.description || undefined,
-    canonical: category ? `https://mybiseo.com/blog/category/${category.slug}` : undefined,
+    canonical: category ? `${APP_BASE_URL}/blog/category/${category.slug}` : undefined,
     jsonLd,
   });
 

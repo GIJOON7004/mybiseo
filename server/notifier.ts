@@ -4,6 +4,7 @@ import { notifyOwner } from "./_core/notification";
 import { ENV } from "./_core/env";
 import nodemailer from "nodemailer";
 import { SolapiMessageService } from "solapi";
+import { APP_BASE_URL, APP_DOMAIN } from "../shared/const";
 
 /**
  * 알림 채널 인터페이스
@@ -203,10 +204,10 @@ const emailChannel: NotificationChannel = {
       <p style="margin: 0; font-size: 15px; line-height: 1.6; white-space: pre-wrap;">${payload.message}</p>
     </div>
     <div style="margin-top: 20px; text-align: center;">
-      <a href="https://mybiseo.com/admin" style="display: inline-block; padding: 10px 24px; background: #6366f1; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">관리자 대시보드에서 확인하기</a>
+      <a href="${APP_BASE_URL}/admin" style="display: inline-block; padding: 10px 24px; background: #6366f1; color: white; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">관리자 대시보드에서 확인하기</a>
     </div>
   </div>
-  <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 16px;">이 메일은 MY비서(mybiseo.com)에서 자동 발송되었습니다.</p>
+  <p style="text-align: center; color: #9ca3af; font-size: 12px; margin-top: 16px;">이 메일은 MY비서(${APP_DOMAIN})에서 자동 발송되었습니다.</p>
 </body>
 </html>`.trim();
 
@@ -220,7 +221,7 @@ const emailChannel: NotificationChannel = {
       `맡기고 싶은 업무:`,
       `${payload.message}`,
       ``,
-      `관리자 대시보드: https://mybiseo.com/admin`,
+      `관리자 대시보드: ${APP_BASE_URL}/admin`,
     ].join("\n");
 
     return sendEmailViaNaver({ to: toEmail, subject, html, text });

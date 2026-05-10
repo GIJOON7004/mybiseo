@@ -13,6 +13,7 @@ import {
   MessageCircle,
   ShieldCheck,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function ServiceReputation() {
   return (
@@ -26,7 +27,7 @@ export default function ServiceReputation() {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Reputation Defense",
-            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: "https://mybiseo.com" },
+            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: APP_BASE_URL },
             description: "AI 기반 실시간 리뷰 모니터링과 의료광고법 컴플라이언스 자동 검수를 통한 병원 온라인 평판 방어 서비스",
             serviceType: "Online Reputation Management",
             areaServed: { "@type": "Country", name: "KR" },
@@ -35,9 +36,9 @@ export default function ServiceReputation() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "홈", item: "https://mybiseo.com" },
-              { "@type": "ListItem", position: 2, name: "서비스", item: "https://mybiseo.com/#services" },
-              { "@type": "ListItem", position: 3, name: "Reputation Defense", item: "https://mybiseo.com/services/reputation" },
+              { "@type": "ListItem", position: 1, name: "홈", item: APP_BASE_URL },
+              { "@type": "ListItem", position: 2, name: "서비스", item: `${APP_BASE_URL}/#services` },
+              { "@type": "ListItem", position: 3, name: "Reputation Defense", item: `${APP_BASE_URL}/services/reputation` },
             ],
           },
         ],

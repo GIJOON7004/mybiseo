@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowLeft, Clock, Eye, Tag, ChevronRight, BookOpen, Stethoscope, Sparkles, Search, Heart, Leaf, Smile, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 const categoryIcons: Record<string, React.ReactNode> = {
   "plastic-surgery": <Heart className="w-5 h-5" />,
@@ -67,17 +68,17 @@ export default function Blog() {
   useSEO({
     title: "병원 마케팅 블로그 | MY비서 - 진료과별 AI 마케팅 가이드",
     description: "성형외과, 피부과, 치과, 한의원 등 진료과별 AI 마케팅 전략과 AI 검색 최적화 가이드. 병원 원장님을 위한 실전 마케팅 노하우를 확인하세요.",
-    canonical: "https://mybiseo.com/blog",
+    canonical: `${APP_BASE_URL}/blog`,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Blog",
       name: "MY비서 병원 마케팅 블로그",
       description: "진료과별 AI 마케팅 전략과 AI 검색 최적화 가이드",
-      url: "https://mybiseo.com/blog",
+      url: `${APP_BASE_URL}/blog`,
       publisher: {
         "@type": "Organization",
         name: "MY비서",
-        url: "https://mybiseo.com",
+        url: APP_BASE_URL,
       },
     },
   });

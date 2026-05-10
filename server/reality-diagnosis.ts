@@ -1141,8 +1141,8 @@ export async function generateRealityDiagnosis(
       // "잠재 환자 유입 기회" 패턴을 먼저 잡아 "유입" 중복 방지
       summary = summary.replace(/잠재\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
       summary = summary.replace(/이탈\s*환자\s*유입\s*기회/g, '웹사이트 유입 기회');
-      summary = summary.replace(/(?<!누락\s*)잠재\s*환자/g, '웹사이트 유입 누락 환자');
-      summary = summary.replace(/이탈\s*환자/g, '웹사이트 유입 누락 환자');
+      summary = summary.replace(/(?<!누락\s*)잠재\s*환자/g, '미유입 잠재 환자');
+      summary = summary.replace(/이탈\s*환자/g, '미유입 잠재 환자');
       summary = summary.replace(/누락\s+누락/g, '누락'); // 중복 방지
       summary = summary.replace(/예상\s*매출\s*손실/g, '예상 잠재 매출 기회');
       summary = summary.replace(/매출\s*기회\s*손실/g, '잠재 매출 기회');

@@ -10,11 +10,12 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { getDb } from "./db";
 import { sql } from "drizzle-orm";
 import { createLogger } from "./lib/logger";
+import { APP_BASE_URL } from "../shared/const";
 
 const logger = createLogger("seo-middleware");
 
-// ── 기본 URL (환경변수 우선, 폴백 mybiseo.com) ──
-const BASE_URL = (process.env.SITE_URL || "https://mybiseo.com").replace(/\/$/, "");
+// ── 기본 URL (shared/const.ts APP_BASE_URL 사용) ──
+const BASE_URL = APP_BASE_URL;
 const DEFAULT_OG_IMAGE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663438971958/PAet9MTkZYRHY348QbWGBd/og-image-wide-VCu4Vf9EQTnQ4LcR8dKRrM.png";
 
 // ── AI 크롤러 User-Agent 패턴 ──

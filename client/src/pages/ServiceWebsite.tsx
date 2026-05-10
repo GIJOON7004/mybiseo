@@ -12,6 +12,7 @@ import {
   Image,
   Users,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function ServiceWebsite() {
   return (
@@ -25,7 +26,7 @@ export default function ServiceWebsite() {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Smart Website Platform",
-            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: "https://mybiseo.com" },
+            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: APP_BASE_URL },
             description: "AI 검색에 최적화된 병원 전용 웹사이트 구축 서비스. 전환율 최적화, 다국어 지원, 모바일 앱 포함.",
             serviceType: "Website Development",
             areaServed: { "@type": "Country", name: "KR" },
@@ -34,9 +35,9 @@ export default function ServiceWebsite() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "홈", item: "https://mybiseo.com" },
-              { "@type": "ListItem", position: 2, name: "서비스", item: "https://mybiseo.com/#services" },
-              { "@type": "ListItem", position: 3, name: "Smart Website", item: "https://mybiseo.com/services/website" },
+              { "@type": "ListItem", position: 1, name: "홈", item: APP_BASE_URL },
+              { "@type": "ListItem", position: 2, name: "서비스", item: `${APP_BASE_URL}/#services` },
+              { "@type": "ListItem", position: 3, name: "Smart Website", item: `${APP_BASE_URL}/services/website` },
             ],
           },
         ],

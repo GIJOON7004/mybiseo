@@ -7,6 +7,7 @@ import { LightMarkdown } from "@/components/LightMarkdown";
 import NewsletterSubscribe from "@/components/NewsletterSubscribe";
 import { useMemo } from "react";
 import { useEventLogger } from "@/hooks/useEventLogger";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function BlogPost() {
   const params = useParams<{ slug: string }>();
@@ -37,16 +38,16 @@ export default function BlogPost() {
       author: {
         "@type": "Organization",
         name: "MY비서",
-        url: "https://mybiseo.com",
+        url: APP_BASE_URL,
       },
       publisher: {
         "@type": "Organization",
         name: "MY비서",
-        url: "https://mybiseo.com",
+        url: APP_BASE_URL,
       },
       mainEntityOfPage: {
         "@type": "WebPage",
-        "@id": `https://mybiseo.com/blog/${post.slug}`,
+        "@id": `${APP_BASE_URL}/blog/${post.slug}`,
       },
       ...(post.tags
         ? { keywords: post.tags.split(",").map((t: string) => t.trim()).join(", ") }
@@ -63,25 +64,25 @@ export default function BlogPost() {
           "@type": "ListItem",
           position: 1,
           name: "홈",
-          item: "https://mybiseo.com",
+          item: APP_BASE_URL,
         },
         {
           "@type": "ListItem",
           position: 2,
           name: "블로그",
-          item: "https://mybiseo.com/blog",
+          item: `${APP_BASE_URL}/blog`,
         },
         ...(post.category ? [{
           "@type": "ListItem",
           position: 3,
           name: post.category.name,
-          item: `https://mybiseo.com/blog/category/${post.category.slug}`,
+          item: `${APP_BASE_URL}/blog/category/${post.category.slug}`,
         }] : []),
         {
           "@type": "ListItem",
           position: post.category ? 4 : 3,
           name: post.title,
-          item: `https://mybiseo.com/blog/${post.slug}`,
+          item: `${APP_BASE_URL}/blog/${post.slug}`,
         },
       ],
     };
@@ -91,7 +92,7 @@ export default function BlogPost() {
   useSEO({
     title: post?.metaTitle || post?.title || "블로그 | MY비서",
     description: post?.metaDescription || post?.excerpt,
-    canonical: post ? `https://mybiseo.com/blog/${post.slug}` : undefined,
+    canonical: post ? `${APP_BASE_URL}/blog/${post.slug}` : undefined,
     ogType: "article",
     jsonLd,
   });

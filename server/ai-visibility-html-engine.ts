@@ -13,6 +13,7 @@ import * as QRCode from "qrcode";
 import type { RealityDiagnosis } from "./reality-diagnosis";
 import { translateResultToEnglish } from "./ai-visibility-translate";
 import { getMonthlyTrendByUrl } from "./db";
+import { APP_BASE_URL, APP_DOMAIN } from "../shared/const";
 import {
   buildCoverPage, buildExecutiveSummaryPage,
   CSS, i18n, esc, stripMarkdown, getGradeColor,
@@ -79,7 +80,7 @@ export async function generateHtmlPdfReport(
   const grade = auditResult.grade;
 
   // QR code
-  const qrUrl = `https://mybiseo.com?utm_source=report&utm_medium=qr&utm_campaign=${encodeURIComponent(hospitalName)}`;
+  const qrUrl = `${APP_BASE_URL}?utm_source=report&utm_medium=qr&utm_campaign=${encodeURIComponent(hospitalName)}`;
   let qrDataUrl = "";
   try { qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 200, margin: 2 }); } catch { qrDataUrl = ""; }
 

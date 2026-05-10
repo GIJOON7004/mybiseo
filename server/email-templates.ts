@@ -22,6 +22,8 @@ const SCORE_GREEN = "#059669";
 const SCORE_YELLOW = "#d97706";
 const SCORE_RED = "#dc2626";
 
+import { APP_BASE_URL, APP_DOMAIN } from "../shared/const";
+
 function getScoreColor(score: number, threshold = { high: 80, mid: 60 }): string {
   if (score >= threshold.high) return SCORE_GREEN;
   if (score >= threshold.mid) return SCORE_YELLOW;
@@ -58,7 +60,7 @@ function emailWrapper(body: string): string {
           <tr>
             <td style="padding: 24px 32px; text-align: center;">
               <p style="margin: 0 0 4px; font-size: 12px; color: ${TEXT_MUTED};">MY비서 | 글로벌 의료 마케팅 플랫폼</p>
-              <p style="margin: 0; font-size: 11px; color: #a0aec0;">mybiseo.com | 010-7321-7004</p>
+              <p style="margin: 0; font-size: 11px; color: #a0aec0;">${APP_DOMAIN} | 010-7321-7004</p>
             </td>
           </tr>
         </table>
@@ -222,7 +224,7 @@ export function buildDiagnosisEmail(params: {
                   <td style="padding: 24px; text-align: center;">
                     <p style="margin: 0 0 4px; font-size: 16px; font-weight: 700; color: ${TEXT_PRIMARY};">AI 인용 개선이 필요하신가요?</p>
                     <p style="margin: 0 0 16px; font-size: 13px; color: ${TEXT_SECONDARY};">11년 경력 대표가 직접 무료 컨설팅을 진행합니다.</p>
-                    <a href="https://mybiseo.com/#contact" style="display: inline-block; background-color: ${BRAND_COLOR}; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">무료 상담 신청</a>
+                    <a href="${APP_BASE_URL}/#contact" style="display: inline-block; background-color: ${BRAND_COLOR}; color: #ffffff; padding: 12px 32px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">무료 상담 신청</a>
                   </td>
                 </tr>
               </table>
@@ -350,7 +352,7 @@ export function buildRediagnosisEmail(params: {
             <td style="padding: 0 40px 32px;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  ${ctaButton("지금 다시 진단하기", `https://mybiseo.com/ai-check?url=${encodeURIComponent(url)}`)}
+                  ${ctaButton("지금 다시 진단하기", `${APP_BASE_URL}/ai-check?url=${encodeURIComponent(url)}`)}
                 </tr>
               </table>
             </td>
@@ -400,7 +402,7 @@ export function buildFollowup3dEmailNew(params: {
             <td style="padding: 0 40px 32px;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  ${ctaButton("무료 상담 신청하기", "https://mybiseo.com/#contact")}
+                  ${ctaButton("무료 상담 신청하기", `${APP_BASE_URL}/#contact`)}
                 </tr>
               </table>
             </td>
@@ -462,7 +464,7 @@ export function buildFollowup7dEmailNew(params: {
             <td style="padding: 0 40px 8px;">
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
-                  ${ctaButton("지금 무료 상담 받기", "https://mybiseo.com/#contact", SCORE_RED)}
+                  ${ctaButton("지금 무료 상담 받기", `${APP_BASE_URL}/#contact`, SCORE_RED)}
                 </tr>
               </table>
             </td>

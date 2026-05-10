@@ -8,6 +8,7 @@ import {
   Activity, ArrowDown, ArrowUp, BarChart3, Building2, Calendar,
   FileText, Loader2, Minus, ShieldAlert, TrendingUp,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 function ScoreBadge({ score }: { score: number }) {
   const color =
@@ -171,7 +172,7 @@ export default function SharedReport() {
         {/* 푸터 */}
         <div className="text-center text-xs text-muted-foreground pt-8 border-t border-border/20">
           <p>이 리포트는 <strong className="text-brand">MY비서</strong>에서 자동 생성되었습니다.</p>
-          <p className="mt-1">mybiseo.com | AI 기반 의료 마케팅 플랫폼</p>
+          <p className="mt-1">${APP_DOMAIN} | AI 기반 의료 마케팅 플랫폼</p>
         </div>
       </div>
     </div>

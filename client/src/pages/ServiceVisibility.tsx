@@ -15,6 +15,7 @@ import {
   Target,
   LineChart,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function ServiceVisibility() {
   return (
@@ -28,7 +29,7 @@ export default function ServiceVisibility() {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "AI Visibility Engine",
-            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: "https://mybiseo.com" },
+            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: APP_BASE_URL },
             description: "5대 AI 플랫폼과 네이버·구글에서 병원의 검색 노출을 최적화하는 AI 기반 마케팅 서비스",
             serviceType: "AI Search Optimization",
             areaServed: { "@type": "Country", name: "KR" },
@@ -37,9 +38,9 @@ export default function ServiceVisibility() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "홈", item: "https://mybiseo.com" },
-              { "@type": "ListItem", position: 2, name: "서비스", item: "https://mybiseo.com/#services" },
-              { "@type": "ListItem", position: 3, name: "AI Visibility Engine", item: "https://mybiseo.com/services/visibility" },
+              { "@type": "ListItem", position: 1, name: "홈", item: APP_BASE_URL },
+              { "@type": "ListItem", position: 2, name: "서비스", item: `${APP_BASE_URL}/#services` },
+              { "@type": "ListItem", position: 3, name: "AI Visibility Engine", item: `${APP_BASE_URL}/services/visibility` },
             ],
           },
         ],

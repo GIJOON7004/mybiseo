@@ -557,3 +557,15 @@
 - [x] G-5: Lighthouse CI workflow 추가 (treosh/lighthouse-ci-action@v12 + budget.json)
 - [x] G-7: ASVS V7+V8+V14 선별 audit + ADR-007 작성 (13/17 통과, 미통과 4개 재검토 트리거 설정)
 - [x] G-6: Slow Query Log — TiDB SUPER 권한 부족으로 설정 불가, 플랫폼 제약으로 제외
+
+## 카테고리 H: 리포트 품질/콘텐츠 (마누스종합_v2 기반)
+- [x] H-1 재검증: "월 월" 중복 방지 로직 정상 동작 확인 (PDF includes("월") 가드 + HTML estimatedRevenueLoss 이미 "월 약" 형식)
+- [x] H-2 재검증: "흥들리는지" 오타 잔존 여부 확인 (전체 grep 0건)
+- [x] H-3 재검증: "연간 1억 4,400만원" 하드코딩 → 동적 계산 정상 확인 (월액×12 + replace 패턴 2개)
+- [x] H-5 재검증: A등급 이상 "추가 성장 기회" 프레이밍 — PDF 정상, HTML 미적용 → H-4와 함께 수정
+- [x] H-9 재검증: 달성률 100% 초과 cap 정상 확인 (seo-analyzer Math.min 클램핑 + PDF Math.min(100,...))
+- [x] H-10: 하드코딩 URL → APP_BASE_URL/APP_DOMAIN 상수화 (server 7개 + client 15개 파일, CORS+site-config 정의만 잔여)
+- [x] H-8: AI 시뮬레이터 disclaimer 3개 언어 추가 (i18n.ts + html-report + pdf-report 양쪽)
+- [x] H-6: 통계 "76%" → "약 70~80% (Gartner, 2024)" 출처 각주 명시 (HTML 3개 언어, PDF는 이미 적용됨)
+- [x] H-4+H-5: "유입 누락 환자" → "미유입 잠재 환자" 표현 통일 + A등급 이상 isHighScore 분기 HTML 리포트 적용 (card-pass-top/info-box-pass CSS 추가)
+- [x] H-7: 경쟁사 정보 부족 시 섹션 숨김 처리 (HTML: allLackInfo 가드 추가, PDF: 이미 적용됨)

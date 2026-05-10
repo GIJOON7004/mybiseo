@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useEventLogger } from "@/hooks/useEventLogger";
+import { APP_DOMAIN } from "@/lib/site-config";
 import {
   type SeoCheckStatus, type SeoCheckItem, type CategoryResult, type SeoResult,
   type ReportLang, type CountryCode,
@@ -374,7 +375,7 @@ export function ShareToolbar({ result, country = "kr" }: { result: SeoResult; co
                 <div className="bg-amber-400/10 rounded-lg p-2 text-center"><p className="text-lg font-bold text-amber-400">{result.summary.warnings}</p><p className="text-[10px] text-gray-400">주의</p></div>
                 <div className="bg-red-400/10 rounded-lg p-2 text-center"><p className="text-lg font-bold text-red-400">{result.summary.failed}</p><p className="text-[10px] text-gray-400">실패</p></div>
               </div>
-              <div className="text-center pt-3 border-t border-white/10"><p className="text-xs text-gray-400">나도 진단해보기 → mybiseo.com/seo-check</p></div>
+              <div className="text-center pt-3 border-t border-white/10"><p className="text-xs text-gray-400">나도 진단해보기 → {APP_DOMAIN}/seo-check</p></div>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">스크린샷을 찍어 SNS에 공유해 보세요!</p>

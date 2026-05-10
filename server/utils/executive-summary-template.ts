@@ -39,7 +39,7 @@ export function generateTemplatedSummary(ctx: SummaryContext): string {
 
   // 3문장: 비즈니스 영향
   const impactSentence = missedPatientsMonthly > 0
-    ? `이로 인해 월 약 ${missedPatientsMonthly}명의 웹사이트 유입 누락 환자가 발생하고 있으며, ${revenueLossFormatted} 상당의 잠재 매출 기회가 존재합니다.`
+    ? `이로 인해 월 약 ${missedPatientsMonthly}명의 미유입 잠재 환자가 발생하고 있으며, ${revenueLossFormatted} 상당의 잠재 매출 기회가 존재합니다.`
     : `현재 검색 노출 부족으로 인한 잠재 환자 유입 기회가 상당 부분 누락되고 있습니다.`;
 
   // 4문장: 개선 방향

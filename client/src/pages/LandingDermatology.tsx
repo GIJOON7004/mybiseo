@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { ArrowLeft, CheckCircle2, TrendingUp, Users, Search, Star, Camera, Sparkles, ArrowRight, Shield, Zap, Eye, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSEO } from "@/hooks/useSEO";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 const painPoints = [
   { icon: <Camera className="w-5 h-5" />, title: "전후사진 광고 규제 강화", desc: "의료광고 심의 기준 강화로 기존 마케팅 방식이 막힘" },
@@ -42,13 +43,13 @@ export default function LandingDermatology() {
   useSEO({
     title: "피부과 마케팅 전문 | MY비서 - AI로 시술 문의 늘리기",
     description: "레이저·보톡스·여드름 피부과를 위한 AI 마케팅. 의료광고 규제 안전한 방식으로 ChatGPT 노출 최적화. 광고비 55% 절감, 신환 75% 증가 사례.",
-    canonical: "https://mybiseo.com/dermatology",
+    canonical: `${APP_BASE_URL}/dermatology`,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "Service",
       name: "MY비서 피부과 마케팅",
       description: "피부과 전용 AI 마케팅 솔루션 — 시술별 검색 최적화, 컴플라이언스, 콘텐츠 자동화",
-      provider: { "@type": "Organization", name: "MY비서", url: "https://mybiseo.com" },
+      provider: { "@type": "Organization", name: "MY비서", url: APP_BASE_URL },
       areaServed: "KR",
       serviceType: "피부과 디지털 마케팅",
     },

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Globe, TrendingUp, Users, Eye, Clock, ArrowUpRight, ArrowDownRight, Minus, Copy, BarChart3, MousePointerClick, Smartphone, Monitor, Tablet, Zap, Code, Plus, ChevronRight, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 function TrafficAnalysisTab({ hospitalId }: { hospitalId: number }) {
   const [dateRange] = useState(() => {
@@ -68,7 +69,7 @@ function TrafficAnalysisTab({ hospitalId }: { hospitalId: number }) {
   }, [deviceStats]);
 
   // 추적 코드 스니펫
-  const trackingCode = `<script src="https://mybiseo.com/track.js" data-hospital-id="${hospitalId}"></script>`;
+  const trackingCode = `<script src=${APP_BASE_URL}/track.js data-hospital-id="${hospitalId}"></script>`;
 
   if (statsLoading) {
     return (

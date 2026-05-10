@@ -26,6 +26,7 @@ import { i18n } from "./report/i18n";
 import { sanitizeHospitalName as _sanitizeHospitalName, stripMarkdown, getGradeColor, drawSectionTitle, drawSubTitle, drawParagraph, drawInfoBox, drawProgressBar, drawHorizontalLine, drawPageHeader, ensureSpace, CAT_NAMES_KO, ITEM_NAMES_KO } from "./report/pdf-utils";
 // Re-export for backward compatibility
 export const sanitizeHospitalName = _sanitizeHospitalName;
+import { APP_BASE_URL, APP_DOMAIN } from "../shared/const";
 
 
 // QR 코드 캐시
@@ -82,7 +83,7 @@ export async function generateAiVisibilityReport(
   // ── QR code ──
   if (!cachedQrBuffer) {
     try {
-      const qrDataUrl = await QRCode.toDataURL("https://mybiseo.com", { width: 120, margin: 1 });
+      const qrDataUrl = await QRCode.toDataURL(APP_BASE_URL, { width: 120, margin: 1 });
       cachedQrBuffer = Buffer.from(qrDataUrl.split(",")[1], "base64");
     } catch { cachedQrBuffer = null; }
   }
@@ -97,7 +98,7 @@ export async function generateAiVisibilityReport(
   doc.registerFont("KrBold", fontBuffers.krBold);
 
   // ═══════════════════════════════════════════════
-  // PAGE 1: COVER — v4 화이트 프리미엄 디자인 (mybiseo.com 브랜딩)
+  // PAGE 1: COVER — v4 화이트 프리미엄 디자인 (APP_DOMAIN 브랜딩)
   // ═══════════════════════════════════════════════
   // v6: 화이트 배경 + 딥블루 액센트 (페이지 중앙 기준 배치)
   doc.rect(0, 0, PW, PH).fill(C.white);
@@ -250,9 +251,9 @@ export async function generateAiVisibilityReport(
   const dateLW = doc.widthOfString(dateLabel);
   doc.text(dateLabel, scCx - dateLW / 2, PH - 105);
 
-  // mybiseo.com
+  // APP_DOMAIN
   doc.font("KrBold").fontSize(9).fillColor(C.teal);
-  const siteStr = "mybiseo.com";
+  const siteStr = APP_DOMAIN;
   const siteW = doc.widthOfString(siteStr);
   doc.text(siteStr, scCx - siteW / 2, PH - 88);
 
@@ -770,7 +771,7 @@ export async function generateAiVisibilityReport(
       const revenueDisplay = (language === "ko" && revenueText && !revenueText.includes("월"))
         ? `월 ${revenueText}` : revenueText;
       const mpText = language === "ko"
-        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}회의 트래픽이 웹사이트로 유입되지 못하고 있습니다. 예상 잠재 매출 기회: ${revenueDisplay}`
+        ? `매월 약 ${rd.missedPatients.estimatedMonthly.toLocaleString()}회의 트래픽이 미유입 상태입니다. 예상 잠재 매출 기회: ${revenueDisplay}`
         : `Approximately ${rd.missedPatients.estimatedMonthly.toLocaleString()} monthly website visits are not being captured. Estimated revenue opportunity: ${revenueDisplay}`;
       y = drawInfoBox(doc, y, mpText, { accentColor: C.fail, bgColor: C.redTint, icon: "!" });
 
@@ -1133,6 +1134,11 @@ export async function generateAiVisibilityReport(
     const simVerdictColor = mentionedCount >= rd.aiSimulator.results.length / 2 ? C.pass : C.fail;
     const simVerdictBg = mentionedCount >= rd.aiSimulator.results.length / 2 ? C.greenTint : C.redTint;
     y = drawInfoBox(doc, y, stripMarkdown(rd.aiSimulator.verdict), { accentColor: simVerdictColor, bgColor: simVerdictBg, icon: mentionedCount >= rd.aiSimulator.results.length / 2 ? "\u2713" : "!" });
+    // H-8: AI 시뮬레이터 disclaimer
+    y += 4;
+    doc.font("KrRegular").fontSize(6.5).fillColor(C.textMid)
+      .text(t.aiSimDisclaimer, ML + 10, y, { width: CW - 20, lineGap: 2, align: "center" });
+    y += 16;
   }
 
     // SECTION: 네이버 Cue: 대응 진단
@@ -1675,7 +1681,7 @@ export async function generateAiVisibilityReport(
       y += qrTotalW + 16;
       // QR 안내 텍스트
       doc.font("KrRegular").fontSize(7.5).fillColor(C.textLight)
-        .text("mybiseo.com", ML, y, { width: CW, align: "center" });
+        .text(APP_DOMAIN, ML, y, { width: CW, align: "center" });
       y += 20;
     } catch { /* QR 실패 시 무시 */ }
   }

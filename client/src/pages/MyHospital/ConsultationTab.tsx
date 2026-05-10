@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { MessageSquare, Phone, Mail, Calendar, Clock, User, Plus, Eye, Trash2, CheckCircle2, Target, BarChart3, Code } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 function ConsultationTab() {
   const { data: consultations, isLoading } = trpc.analytics.consultations.useQuery();
@@ -266,7 +267,7 @@ function ConsultationTab() {
         <CardContent>
           <div className="bg-background rounded-lg p-4 font-mono text-xs text-foreground border border-border">
             <pre className="whitespace-pre-wrap">{`// 상담 폼 제출 시 호출
-fetch('https://mybiseo.com/api/trpc/tracking.inquiry', {
+fetch('${APP_BASE_URL}/api/trpc/tracking.inquiry', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({

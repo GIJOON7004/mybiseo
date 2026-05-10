@@ -12,6 +12,7 @@ import {
   Heart,
   BarChart3,
 } from "lucide-react";
+import { APP_BASE_URL, APP_DOMAIN } from "@/lib/site-config";
 
 export default function ServiceCommunication() {
   return (
@@ -25,7 +26,7 @@ export default function ServiceCommunication() {
             "@context": "https://schema.org",
             "@type": "Service",
             name: "Patient Communication Hub",
-            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: "https://mybiseo.com" },
+            provider: { "@type": "Organization", name: "마이비서(MY비서)", url: APP_BASE_URL },
             description: "AI 챗봇, 스마트 예약, 환자 CRM을 통합한 병원 환자 소통 자동화 서비스",
             serviceType: "Patient Communication Automation",
             areaServed: { "@type": "Country", name: "KR" },
@@ -34,9 +35,9 @@ export default function ServiceCommunication() {
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "홈", item: "https://mybiseo.com" },
-              { "@type": "ListItem", position: 2, name: "서비스", item: "https://mybiseo.com/#services" },
-              { "@type": "ListItem", position: 3, name: "Communication Hub", item: "https://mybiseo.com/services/communication" },
+              { "@type": "ListItem", position: 1, name: "홈", item: APP_BASE_URL },
+              { "@type": "ListItem", position: 2, name: "서비스", item: `${APP_BASE_URL}/#services` },
+              { "@type": "ListItem", position: 3, name: "Communication Hub", item: `${APP_BASE_URL}/services/communication` },
             ],
           },
         ],
