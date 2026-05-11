@@ -49,7 +49,7 @@
     "@trpc/server": "^11.17.0",
     "@types/archiver": "^7.0.0",
     "@types/cors": "^2.8.19",
-    "archiver": "^8.0.0",
+    "archiver": "^7.0.1",
     "axios": "^1.16.0",
     "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",

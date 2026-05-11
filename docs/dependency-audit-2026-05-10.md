@@ -16,7 +16,7 @@
 | vite | 7.1.9 | 7.3.2 | 2 high (server.fs.deny bypass) |
 | @tailwindcss/vite | 4.1.14 | 4.1.14 (tar override) | 6 high (node-tar 전체) |
 | pnpm (devDep) | 10.18.0 | 10.27.0 | 3 high (lockfile bypass, lifecycle scripts, command injection) |
-| archiver | 7.0.1 | 8.0.0 | 1 high (lodash via archiver-utils 제거) |
+| archiver | 7.0.1 | 8.0.0 → 7.0.1 롤백 | archiver 8.0.0은 ESM default export 제거로 배포 시 SyntaxError 발생. 7.0.1로 롤백 (lodash high 재발생하나 recharts와 동일 경로로 suppress) |
 | rollup | 4.52.4 | ≥4.59.0 (override) | 1 high (path traversal) |
 | @vitejs/plugin-react | 5.0.4 | 5.0.4 (유지) | — |
 | picomatch | 4.0.3 | ≥4.0.4 (vite 7.3.2 내장) | 1 high (ReDoS) |
@@ -40,7 +40,7 @@
 | 패키지 | 심각도 | 경로 | 사유 | 위험도 평가 |
 |--------|--------|------|------|------------|
 | path-to-regexp 0.1.12 | high (ReDoS) | express@4.21.2 내부 | Express 4.x 코어 의존. Express 5.x 전환 시 해결 가능하나 breaking change 다수 | **낮음** — 서버 라우트 패턴이 고정값이므로 사용자 입력이 path-to-regexp에 도달하지 않음 |
-| lodash 4.17.21 | high (Code Injection via _.template) | recharts@2.15.4 내부 | recharts가 lodash 전체를 번들. recharts 업스트림 수정 대기 | **낮음** — 서버에서 lodash.template 미사용. 클라이언트 전용 차트 라이브러리 |
+| lodash 4.17.21 | high (Code Injection via _.template) | recharts@2.15.4 + archiver@7.0.1 내부 | recharts가 lodash 전체를 번들. archiver 7.x도 archiver-utils 경유 lodash 포함. recharts 3.x + archiver 8.x stable 대기 | **낮음** — 서버에서 lodash.template 미사용. 클라이언트 전용 차트 + ZIP 생성 전용 |
 
 ### Moderate — 모니터링
 
